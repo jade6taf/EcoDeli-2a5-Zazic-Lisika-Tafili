@@ -1,0 +1,5 @@
+{
+    "editor.formatOnSave": false,
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
+    "java.compile.nullAnalysis.mode": "disabled"
+}
