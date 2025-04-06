@@ -16,24 +16,71 @@ public class UtilisateurService {
         this.utilisateurRepository = utilisateurRepository;
     }
 
-    public List<Utilisateur> findAllUtilisateurs() {
+    public List<Utilisateur> getAllUtilisateurs() {
         return utilisateurRepository.findAll();
     }
 
-    public Optional<Utilisateur> findUtilisateurById(Long id) {
+    public Optional<Utilisateur> getUtilisateurById(Integer id) {
         return utilisateurRepository.findById(id);
     }
 
-    public Optional<Utilisateur> findUtilisateurByEmail(String email) {
+    public Optional<Utilisateur> getUtilisateurByEmail(String email) {
         return utilisateurRepository.findByEmail(email);
     }
 
-    public Utilisateur saveUtilisateur(Utilisateur utilisateur) {
+    public Utilisateur createUtilisateur(Utilisateur utilisateur) {
+        if (utilisateurRepository.existsByEmail(utilisateur.getEmail())) {
+            throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
+        }
         return utilisateurRepository.save(utilisateur);
     }
 
-    public void deleteUtilisateur(Long id) {
+    public Utilisateur updateUtilisateur(Integer id, Utilisateur utilisateurDetails) {
+        Optional<Utilisateur> optionalUtilisateur = utilisateurRepository.findById(id);
+
+        if (!optionalUtilisateur.isPresent()) {
+            throw new IllegalArgumentException("Utilisateur non trouvé avec l'id: " + id);
+        }
+
+        Utilisateur utilisateur = optionalUtilisateur.get();
+
+        utilisateur.setNom(utilisateurDetails.getNom());
+        utilisateur.setPrenom(utilisateurDetails.getPrenom());
+        utilisateur.setGenre(utilisateurDetails.getGenre());
+        utilisateur.setDateDeNaissance(utilisateurDetails.getDateDeNaissance());
+
+        if (!utilisateur.getEmail().equals(utilisateurDetails.getEmail())) {
+            if (utilisateurRepository.existsByEmail(utilisateurDetails.getEmail())) {
+                throw new IllegalArgumentException("Cet email est déjà utilisé par un autre utilisateur");
+            }
+            utilisateur.setEmail(utilisateurDetails.getEmail());
+        }
+
+        if (utilisateurDetails.getMotDePasse() != null && !utilisateurDetails.getMotDePasse().isEmpty()) {
+            utilisateur.setMotDePasse(utilisateurDetails.getMotDePasse());
+        }
+
+        utilisateur.setTelephone(utilisateurDetails.getTelephone());
+        utilisateur.setAdresse(utilisateurDetails.getAdresse());
+        utilisateur.setVille(utilisateurDetails.getVille());
+        utilisateur.setCodePostal(utilisateurDetails.getCodePostal());
+        utilisateur.setPays(utilisateurDetails.getPays());
+        utilisateur.setType(utilisateurDetails.getType());
+        utilisateur.setAbonnement(utilisateurDetails.getAbonnement());
+        utilisateur.setEntreprise(utilisateurDetails.getEntreprise());
+
+        return utilisateurRepository.save(utilisateur);
+    }
+
+    public void deleteUtilisateur(Integer id) {
         utilisateurRepository.deleteById(id);
     }
 
+    public List<Utilisateur> getUtilisateursByType(String type) {
+        return utilisateurRepository.findByType(type);
+    }
+
+    public List<Utilisateur> getUtilisateursByEntreprise(Integer idEntreprise) {
+        return utilisateurRepository.findByEntrepriseIdEntreprise(idEntreprise);
+    }
 }
