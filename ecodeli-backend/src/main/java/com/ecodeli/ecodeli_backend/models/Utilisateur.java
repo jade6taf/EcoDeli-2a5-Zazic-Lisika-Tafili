@@ -1,78 +1,86 @@
 package com.ecodeli.ecodeli_backend.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.time.LocalDate;
 
 @Entity
-@Table(name = "utilisateurs")
-@Inheritance(strategy = InheritanceType.JOINED) // Pour l'héritage
+@Table(name = "UTILISATEUR")
 public class Utilisateur {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_utilisateur")
+    private Integer idUtilisateur;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String motDePasse;
-
-    @Column(nullable = false)
+    @NotBlank(message = "Le nom est obligatoire")
+    @Size(min = 2, max = 100, message = "Le nom doit contenir entre 2 et 100 caractères")
+    @Column(name = "nom", length = 100, nullable = false)
     private String nom;
 
-    @Column(nullable = false)
+    @NotBlank(message = "Le prénom est obligatoire")
+    @Size(min = 2, max = 100, message = "Le prénom doit contenir entre 2 et 100 caractères")
+    @Column(name = "prenom", length = 100, nullable = false)
     private String prenom;
 
-    @Column
+    @Column(name = "genre")
+    private Boolean genre;
+
+    @Past(message = "La date de naissance doit être dans le passé")
+    @Column(name = "date_de_naissance")
+    private LocalDate dateDeNaissance;
+
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "L'email doit être valide")
+    @Size(max = 150, message = "L'email ne peut pas dépasser 150 caractères")
+    @Column(name = "email", length = 150, nullable = false, unique = true)
+    private String email;
+
+    @NotBlank(message = "Le mot de passe est obligatoire")
+    @Size(min = 8, max = 255, message = "Le mot de passe doit contenir au moins 8 caractères")
+    @Column(name = "mot_de_passe", length = 255, nullable = false)
+    private String motDePasse;
+
+    @Pattern(regexp = "^[+]?[(]?[0-9]{1,4}[)]?[-\\s.]?[0-9]{1,10}$", message = "Le numéro de téléphone n'est pas valide")
+    @Column(name = "telephone", length = 30)
     private String telephone;
 
-    @Column
+    @Column(name = "adresse", columnDefinition = "TEXT")
     private String adresse;
 
-    @Column
+    @Size(max = 100, message = "La ville ne peut pas dépasser 100 caractères")
+    @Column(name = "ville", length = 100)
     private String ville;
 
-    @Column
+    @Pattern(regexp = "^[0-9]{5}$", message = "Le code postal doit contenir 5 chiffres")
+    @Column(name = "code_postal", length = 10)
     private String codePostal;
 
-    @Column
+    @Size(max = 50, message = "Le pays ne peut pas dépasser 50 caractères")
+    @Column(name = "pays", length = 50)
     private String pays;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name = "type", length = 50)
+    private String type;
 
-    // Enumération pour les rôles
-    public enum Role {
-        CLIENT, LIVREUR, COMMERCANT, PRESTATAIRE, ADMIN
+    @Column(name = "abonnement", length = 10)
+    private String abonnement;
+
+    @Column(name = "validation_par_ad")
+    private Boolean validationParAd = false;
+
+    @ManyToOne
+    @JoinColumn(name = "id_entreprise")
+    private Entreprise entreprise;
+
+    public Utilisateur() {
     }
 
-    @Column(nullable = false)
-    private boolean actif = true;
-
-    // Getters et Setters
-    public Long getId() {
-        return id;
+    public Integer getIdUtilisateur() {
+        return idUtilisateur;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getMotDePasse() {
-        return motDePasse;
-    }
-
-    public void setMotDePasse(String motDePasse) {
-        this.motDePasse = motDePasse;
+    public void setIdUtilisateur(Integer idUtilisateur) {
+        this.idUtilisateur = idUtilisateur;
     }
 
     public String getNom() {
@@ -89,6 +97,38 @@ public class Utilisateur {
 
     public void setPrenom(String prenom) {
         this.prenom = prenom;
+    }
+
+    public Boolean getGenre() {
+        return genre;
+    }
+
+    public void setGenre(Boolean genre) {
+        this.genre = genre;
+    }
+
+    public LocalDate getDateDeNaissance() {
+        return dateDeNaissance;
+    }
+
+    public void setDateDeNaissance(LocalDate dateDeNaissance) {
+        this.dateDeNaissance = dateDeNaissance;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMotDePasse() {
+        return motDePasse;
+    }
+
+    public void setMotDePasse(String motDePasse) {
+        this.motDePasse = motDePasse;
     }
 
     public String getTelephone() {
@@ -131,19 +171,35 @@ public class Utilisateur {
         this.pays = pays;
     }
 
-    public Role getRole() {
-        return role;
+    public String getType() {
+        return type;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public boolean isActif() {
-        return actif;
+    public String getAbonnement() {
+        return abonnement;
     }
 
-    public void setActif(boolean actif) {
-        this.actif = actif;
+    public void setAbonnement(String abonnement) {
+        this.abonnement = abonnement;
+    }
+
+    public Boolean getValidationParAd() {
+        return validationParAd;
+    }
+
+    public void setValidationParAd(Boolean validationParAd) {
+        this.validationParAd = validationParAd;
+    }
+
+    public Entreprise getEntreprise() {
+        return entreprise;
+    }
+
+    public void setEntreprise(Entreprise entreprise) {
+        this.entreprise = entreprise;
     }
 }
