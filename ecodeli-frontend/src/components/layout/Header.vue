@@ -22,7 +22,10 @@
             <router-link to="/about" class="header-button">A propos</router-link>
         </div>
 
-        <div class="spacer"></div>
+        <div class="auth-buttons">
+            <router-link to="/login" class="auth-button">Connexion</router-link>
+            <router-link to="/register" class="auth-button">Inscription</router-link>
+        </div>
     </header>
 </template>
 
@@ -61,6 +64,25 @@
 
   .header-button:hover {
     background-color: #e0e0e0;
+  }
+
+  .auth-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+  .auth-button {
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      background-color: #205B01;
+      color: white;
+      text-decoration: none;
+      transition: background-color 0.3s;
+  }
+
+  .auth-button:hover {
+      background-color: #205B01;
   }
 
 </style>
