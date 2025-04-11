@@ -30,12 +30,13 @@
 </template>
 
 <style scoped>
+
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background-color: #ffffff;
+    background-color: #F1F5F4;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
@@ -56,14 +57,20 @@
 
   .header-button {
     padding: 0.5rem 1rem;
-    border-radius: 5px;
-    background-color: #f0f0f0;
-    color: #333;
+    border-radius: 20px;
+    background-color: #f1f1f1;
+    color: #205B01;
     text-decoration: none;
   }
 
+  .header-button.router-link-active {
+    background-color: #9cbf2a;
+    color: #F1F5F4;
+  }
+
   .header-button:hover {
-    background-color: #e0e0e0;
+    background-color: #e2f5a0;
+    color: #205B01;
   }
 
   .auth-buttons {
@@ -74,10 +81,9 @@
 
   .auth-button {
       padding: 0.5rem 1rem;
-      border-radius: 5px;
+      border-radius: 20px;
       background-color: #205B01;
-      color: white;
-      text-decoration: none;
+      color: #F1F5F4;
       transition: background-color 0.3s;
   }
 
