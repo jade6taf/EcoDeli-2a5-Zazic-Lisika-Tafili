@@ -29,6 +29,7 @@ body {
   font-family: 'Montserrat', sans-serif;
   line-height: 1.6;
   color: #333;
+  background-color: #F1F5F4;
 }
 
 .app-container {
