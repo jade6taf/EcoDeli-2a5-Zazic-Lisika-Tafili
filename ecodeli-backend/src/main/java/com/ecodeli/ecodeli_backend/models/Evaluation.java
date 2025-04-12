@@ -1,18 +1,28 @@
 package com.ecodeli.ecodeli_backend.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "EVALUATION")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Evaluation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_evaluation")
     private Integer idEvaluation;
 
+    @Min(value = 1, message = "La note minimum est 1")
+    @Max(value = 5, message = "La note maximum est 5")
     @Column(name = "note")
     private Integer note;
 
+    @Size(max = 500, message = "Le commentaire ne peut pas dépasser 500 caractères")
     @Column(name = "commentaire", columnDefinition = "TEXT")
     private String commentaire;
 
@@ -27,55 +37,4 @@ public class Evaluation {
     @ManyToOne
     @JoinColumn(name = "id_produit")
     private Produit produit;
-
-    public Evaluation() {
-    }
-
-    public Integer getIdEvaluation() {
-        return idEvaluation;
-    }
-
-    public void setIdEvaluation(Integer idEvaluation) {
-        this.idEvaluation = idEvaluation;
-    }
-
-    public Integer getNote() {
-        return note;
-    }
-
-    public void setNote(Integer note) {
-        this.note = note;
-    }
-
-    public String getCommentaire() {
-        return commentaire;
-    }
-
-    public void setCommentaire(String commentaire) {
-        this.commentaire = commentaire;
-    }
-
-    public Utilisateur getUtilisateur() {
-        return utilisateur;
-    }
-
-    public void setUtilisateur(Utilisateur utilisateur) {
-        this.utilisateur = utilisateur;
-    }
-
-    public Utilisateur getPrestataire() {
-        return prestataire;
-    }
-
-    public void setPrestataire(Utilisateur prestataire) {
-        this.prestataire = prestataire;
-    }
-
-    public Produit getProduit() {
-        return produit;
-    }
-
-    public void setProduit(Produit produit) {
-        this.produit = produit;
-    }
 }

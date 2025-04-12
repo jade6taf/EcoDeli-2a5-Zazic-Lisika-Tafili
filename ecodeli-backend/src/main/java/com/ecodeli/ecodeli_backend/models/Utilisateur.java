@@ -2,10 +2,16 @@ package com.ecodeli.ecodeli_backend.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "UTILISATEUR")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Utilisateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,8 +65,9 @@ public class Utilisateur {
     @Column(name = "pays", length = 50)
     private String pays;
 
-    @Column(name = "type", length = 50)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private TypeUtilisateur type;
 
     @Column(name = "abonnement", length = 10)
     private String abonnement;
@@ -72,134 +79,10 @@ public class Utilisateur {
     @JoinColumn(name = "id_entreprise")
     private Entreprise entreprise;
 
-    public Utilisateur() {
-    }
-
-    public Integer getIdUtilisateur() {
-        return idUtilisateur;
-    }
-
-    public void setIdUtilisateur(Integer idUtilisateur) {
-        this.idUtilisateur = idUtilisateur;
-    }
-
-    public String getNom() {
-        return nom;
-    }
-
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
-
-    public String getPrenom() {
-        return prenom;
-    }
-
-    public void setPrenom(String prenom) {
-        this.prenom = prenom;
-    }
-
-    public Boolean getGenre() {
-        return genre;
-    }
-
-    public void setGenre(Boolean genre) {
-        this.genre = genre;
-    }
-
-    public LocalDate getDateDeNaissance() {
-        return dateDeNaissance;
-    }
-
-    public void setDateDeNaissance(LocalDate dateDeNaissance) {
-        this.dateDeNaissance = dateDeNaissance;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getMotDePasse() {
-        return motDePasse;
-    }
-
-    public void setMotDePasse(String motDePasse) {
-        this.motDePasse = motDePasse;
-    }
-
-    public String getTelephone() {
-        return telephone;
-    }
-
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public String getAdresse() {
-        return adresse;
-    }
-
-    public void setAdresse(String adresse) {
-        this.adresse = adresse;
-    }
-
-    public String getVille() {
-        return ville;
-    }
-
-    public void setVille(String ville) {
-        this.ville = ville;
-    }
-
-    public String getCodePostal() {
-        return codePostal;
-    }
-
-    public void setCodePostal(String codePostal) {
-        this.codePostal = codePostal;
-    }
-
-    public String getPays() {
-        return pays;
-    }
-
-    public void setPays(String pays) {
-        this.pays = pays;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getAbonnement() {
-        return abonnement;
-    }
-
-    public void setAbonnement(String abonnement) {
-        this.abonnement = abonnement;
-    }
-
-    public Boolean getValidationParAd() {
-        return validationParAd;
-    }
-
-    public void setValidationParAd(Boolean validationParAd) {
-        this.validationParAd = validationParAd;
-    }
-
-    public Entreprise getEntreprise() {
-        return entreprise;
-    }
-
-    public void setEntreprise(Entreprise entreprise) {
-        this.entreprise = entreprise;
+    public enum TypeUtilisateur {  // De base une 'status' -> string, donc a modifier bdd
+        CLIENT,
+        LIVREUR,
+        PRESTATAIRE,
+        COMMERCANT
     }
 }

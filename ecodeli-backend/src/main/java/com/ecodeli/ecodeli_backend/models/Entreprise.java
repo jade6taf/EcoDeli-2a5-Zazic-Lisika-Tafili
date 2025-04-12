@@ -1,16 +1,24 @@
 package com.ecodeli.ecodeli_backend.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ENTREPRISE")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Entreprise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_entreprise")
     private Integer idEntreprise;
 
+    @Pattern(regexp = "^[0-9]{14}$", message = "Le SIRET doit contenir 14 chiffres")
     @Column(name = "SIRET", length = 50)
     private String siret;
 
@@ -20,9 +28,12 @@ public class Entreprise {
     @Column(name = "secteur_activite", length = 100)
     private String secteurActivite;
 
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "L'email doit être valide")
     @Column(name = "email", length = 150, nullable = false, unique = true)
     private String email;
 
+    @Pattern(regexp = "^[+]?[(]?[0-9]{1,4}[)]?[-\\s.]?[0-9]{1,10}$", message = "Le numéro de téléphone n'est pas valide")
     @Column(name = "telephone", length = 30)
     private String telephone;
 
@@ -46,111 +57,4 @@ public class Entreprise {
 
     @Column(name = "validation_par_ad")
     private Boolean validationParAd = false;
-
-    public Entreprise() {
-    }
-
-    public Integer getIdEntreprise() {
-        return idEntreprise;
-    }
-
-    public void setIdEntreprise(Integer idEntreprise) {
-        this.idEntreprise = idEntreprise;
-    }
-
-    public String getSiret() {
-        return siret;
-    }
-
-    public void setSiret(String siret) {
-        this.siret = siret;
-    }
-
-    public Integer getStatutJuridique() {
-        return statutJuridique;
-    }
-
-    public void setStatutJuridique(Integer statutJuridique) {
-        this.statutJuridique = statutJuridique;
-    }
-
-    public String getSecteurActivite() {
-        return secteurActivite;
-    }
-
-    public void setSecteurActivite(String secteurActivite) {
-        this.secteurActivite = secteurActivite;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getTelephone() {
-        return telephone;
-    }
-
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public String getAdresse() {
-        return adresse;
-    }
-
-    public void setAdresse(String adresse) {
-        this.adresse = adresse;
-    }
-
-    public String getVille() {
-        return ville;
-    }
-
-    public void setVille(String ville) {
-        this.ville = ville;
-    }
-
-    public String getCodePostal() {
-        return codePostal;
-    }
-
-    public void setCodePostal(String codePostal) {
-        this.codePostal = codePostal;
-    }
-
-    public String getPays() {
-        return pays;
-    }
-
-    public void setPays(String pays) {
-        this.pays = pays;
-    }
-
-    public String getSiteWeb() {
-        return siteWeb;
-    }
-
-    public void setSiteWeb(String siteWeb) {
-        this.siteWeb = siteWeb;
-    }
-
-    public LocalDateTime getDateAjout() {
-        return dateAjout;
-    }
-
-    public void setDateAjout(LocalDateTime dateAjout) {
-        this.dateAjout = dateAjout;
-    }
-
-    public Boolean getValidationParAd() {
-        return validationParAd;
-    }
-
-    public void setValidationParAd(Boolean validationParAd) {
-        this.validationParAd = validationParAd;
-    }
 }

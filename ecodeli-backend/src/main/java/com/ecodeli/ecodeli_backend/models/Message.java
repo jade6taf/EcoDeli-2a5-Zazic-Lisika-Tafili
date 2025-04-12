@@ -1,16 +1,24 @@
 package com.ecodeli.ecodeli_backend.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "MESSAGE")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_message")
     private Integer idMessage;
 
+    @NotBlank(message = "Le message ne peut pas être vide")
     @Column(name = "message", columnDefinition = "TEXT", nullable = false)
     private String message;
 
@@ -27,55 +35,4 @@ public class Message {
 
     @Column(name = "lu")
     private Boolean lu = false;
-
-    public Message() {
-    }
-
-    public Integer getIdMessage() {
-        return idMessage;
-    }
-
-    public void setIdMessage(Integer idMessage) {
-        this.idMessage = idMessage;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
-
-    public Utilisateur getExpediteur() {
-        return expediteur;
-    }
-
-    public void setExpediteur(Utilisateur expediteur) {
-        this.expediteur = expediteur;
-    }
-
-    public Utilisateur getDestinataire() {
-        return destinataire;
-    }
-
-    public void setDestinataire(Utilisateur destinataire) {
-        this.destinataire = destinataire;
-    }
-
-    public Boolean getLu() {
-        return lu;
-    }
-
-    public void setLu(Boolean lu) {
-        this.lu = lu;
-    }
 }

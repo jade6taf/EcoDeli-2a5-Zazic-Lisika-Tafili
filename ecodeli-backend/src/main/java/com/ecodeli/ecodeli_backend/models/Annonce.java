@@ -1,17 +1,25 @@
 package com.ecodeli.ecodeli_backend.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ANNONCE")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Annonce {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_annonce")
     private Integer idAnnonce;
 
+    @Size(max = 100, message = "Le titre ne peut pas dépasser 100 caractères")
     @Column(name = "titre", length = 100)
     private String titre;
 
@@ -24,6 +32,8 @@ public class Annonce {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @NotNull(message = "Le prix unitaire est obligatoire")
+    @Positive(message = "Le prix doit être positif")
     @Column(name = "prix_unitaire", precision = 10, scale = 2)
     private BigDecimal prixUnitaire;
 
@@ -45,103 +55,11 @@ public class Annonce {
     @JoinColumn(name = "id_expediteur", nullable = false)
     private Utilisateur expediteur;
 
-    // Enums
     public enum TypeAnnonce {
         unique, multiple
     }
 
     public enum StatutAnnonce {
         active, expirée, annulée
-    }
-
-    public Annonce() {
-    }
-
-    public Integer getIdAnnonce() {
-        return idAnnonce;
-    }
-
-    public void setIdAnnonce(Integer idAnnonce) {
-        this.idAnnonce = idAnnonce;
-    }
-
-    public String getTitre() {
-        return titre;
-    }
-
-    public void setTitre(String titre) {
-        this.titre = titre;
-    }
-
-    public LocalDateTime getDateDebut() {
-        return dateDebut;
-    }
-
-    public void setDateDebut(LocalDateTime dateDebut) {
-        this.dateDebut = dateDebut;
-    }
-
-    public LocalDateTime getDateFin() {
-        return dateFin;
-    }
-
-    public void setDateFin(LocalDateTime dateFin) {
-        this.dateFin = dateFin;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public BigDecimal getPrixUnitaire() {
-        return prixUnitaire;
-    }
-
-    public void setPrixUnitaire(BigDecimal prixUnitaire) {
-        this.prixUnitaire = prixUnitaire;
-    }
-
-    public TypeAnnonce getTypeAnnonce() {
-        return typeAnnonce;
-    }
-
-    public void setTypeAnnonce(TypeAnnonce typeAnnonce) {
-        this.typeAnnonce = typeAnnonce;
-    }
-
-    public StatutAnnonce getStatut() {
-        return statut;
-    }
-
-    public void setStatut(StatutAnnonce statut) {
-        this.statut = statut;
-    }
-
-    public String getAdresseDepart() {
-        return adresseDepart;
-    }
-
-    public void setAdresseDepart(String adresseDepart) {
-        this.adresseDepart = adresseDepart;
-    }
-
-    public String getAdresseFin() {
-        return adresseFin;
-    }
-
-    public void setAdresseFin(String adresseFin) {
-        this.adresseFin = adresseFin;
-    }
-
-    public Utilisateur getExpediteur() {
-        return expediteur;
-    }
-
-    public void setExpediteur(Utilisateur expediteur) {
-        this.expediteur = expediteur;
     }
 }
