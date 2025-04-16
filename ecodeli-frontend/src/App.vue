@@ -42,7 +42,7 @@ body {
 }
 
 .hero {
-  background-color: #f9f9f9;
+  background-color: #f1f5f4;
   padding: 4rem 2rem;
   text-align: center;
 }

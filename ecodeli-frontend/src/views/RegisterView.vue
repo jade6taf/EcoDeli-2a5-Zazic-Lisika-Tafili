@@ -7,7 +7,7 @@ export default {
         prenom: '',
         email: '',
         motDePasse: '',
-        type: ''
+        type: 'CLIENT'
       }
     }
   },
