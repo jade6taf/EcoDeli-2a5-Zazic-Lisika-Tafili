@@ -1,20 +1,21 @@
 const API_URL = 'http://localhost:8080/api/auth/';
 
-export default {
+export const authService = {
     async login(email, password) {
         const response = await fetch(API_URL + 'login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            email,
-            password
-        })
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email,
+                password
+            })
         });
 
         if (!response.ok) {
-            throw new Error('Email ou mot de passe incorrect');
+            const errorText = await response.text();
+            throw new Error(errorText || 'Email ou mot de passe incorrect');
         }
 
         const data = await response.json();
@@ -25,18 +26,20 @@ export default {
 
     async register(user) {
         const response = await fetch(API_URL + 'register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(user)
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(user)
         });
 
         if (!response.ok) {
-            throw new Error('Erreur lors de l\'inscription');
+            const errorText = await response.text();
+            throw new Error(errorText || 'Erreur lors de l\'inscription');
         }
 
         const data = await response.json();
+
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         return data;
@@ -48,7 +51,8 @@ export default {
     },
 
     getCurrentUser() {
-        return JSON.parse(localStorage.getItem('user'));
+        const userStr = localStorage.getItem('user');
+        return userStr ? JSON.parse(userStr) : null;
     },
 
     getToken() {

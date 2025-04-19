@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "PRESTATAIRE")
+@DiscriminatorValue("PRESTATAIRE")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
