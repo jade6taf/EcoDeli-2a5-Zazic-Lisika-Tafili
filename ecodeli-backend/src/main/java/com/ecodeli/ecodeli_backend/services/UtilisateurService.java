@@ -65,10 +65,6 @@ public class UtilisateurService {
         utilisateur.setVille(utilisateurDetails.getVille());
         utilisateur.setCodePostal(utilisateurDetails.getCodePostal());
         utilisateur.setPays(utilisateurDetails.getPays());
-        utilisateur.setType(utilisateurDetails.getType());
-        utilisateur.setAbonnement(utilisateurDetails.getAbonnement());
-        utilisateur.setEntreprise(utilisateurDetails.getEntreprise());
-
         return utilisateurRepository.save(utilisateur);
     }
 
@@ -80,7 +76,4 @@ public class UtilisateurService {
         return utilisateurRepository.findByType(type);
     }
 
-    public List<Utilisateur> getUtilisateursByEntreprise(Integer idEntreprise) {
-        return utilisateurRepository.findByEntrepriseIdEntreprise(idEntreprise);
-    }
 }

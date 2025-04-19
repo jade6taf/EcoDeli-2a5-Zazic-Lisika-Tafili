@@ -66,9 +66,4 @@ public class UtilisateurController {
         return new ResponseEntity<>(utilisateurs, HttpStatus.OK);
     }
 
-    @GetMapping("/entreprise/{idEntreprise}")
-    public ResponseEntity<List<Utilisateur>> getUtilisateursByEntreprise(@PathVariable Integer idEntreprise) {
-        List<Utilisateur> utilisateurs = utilisateurService.getUtilisateursByEntreprise(idEntreprise);
-        return new ResponseEntity<>(utilisateurs, HttpStatus.OK);
-    }
 }

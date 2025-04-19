@@ -8,8 +8,6 @@ import java.util.function.Function;
 
 import org.springframework.stereotype.Component;
 
-import com.ecodeli.ecodeli_backend.models.Utilisateur.TypeUtilisateur;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,7 +20,7 @@ public class JwtUtil {
 
     private final long validityInMilliseconds = 1 * 60 * 60 * 1000;
 
-    public String generateToken(String email, Integer userId, TypeUtilisateur userType) {
+    public String generateToken(String email, Integer userId, String userType) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("userType", userType);

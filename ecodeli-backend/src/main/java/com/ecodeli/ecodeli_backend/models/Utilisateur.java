@@ -7,12 +7,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+
 @Entity
 @Table(name = "UTILISATEUR")
+@Inheritance(strategy = InheritanceType.JOINED)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = Client.class, name = "Client"),
+    @JsonSubTypes.Type(value = Livreur.class, name = "Livreur"),
+    @JsonSubTypes.Type(value = Commercant.class, name = "Commercant"),
+    @JsonSubTypes.Type(value = Prestataire.class, name = "Prestataire")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Utilisateur {
+public abstract class Utilisateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_utilisateur")
@@ -65,24 +77,17 @@ public class Utilisateur {
     @Column(name = "pays", length = 50)
     private String pays;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type")
-    private TypeUtilisateur type;
-
-    @Column(name = "abonnement", length = 10)
-    private String abonnement;
-
-    @Column(name = "validation_par_ad")
-    private Boolean validationParAd = false;
-
-    @ManyToOne
-    @JoinColumn(name = "id_entreprise")
-    private Entreprise entreprise;
-
-    public enum TypeUtilisateur {  // De base une 'status' -> string, donc a modifier bdd
-        CLIENT,
-        LIVREUR,
-        PRESTATAIRE,
-        COMMERCANT
+    @JsonIgnore
+    public String getType() {
+        if (this instanceof Client)
+            return "CLIENT";
+        if (this instanceof Livreur)
+            return "LIVREUR";
+        if (this instanceof Commercant)
+            return "COMMERCANT";
+        if (this instanceof Prestataire)
+            return "PRESTATAIRE";
+        return null;
     }
+
 }

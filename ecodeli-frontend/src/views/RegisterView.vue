@@ -7,8 +7,14 @@ export default {
         prenom: '',
         email: '',
         motDePasse: '',
-        type: 'CLIENT'
-      }
+        type: ''
+      },
+      typeOptions: [
+        'CLIENT',
+        'LIVREUR',
+        'PRESTATAIRE',
+        'COMMERCANT'
+      ]
     }
   },
   methods: {
@@ -16,12 +22,9 @@ export default {
       try {
         const response = await fetch('http://localhost:8080/api/auth/register', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(this.user)
         });
-
         if (response.ok) {
           alert('Inscription réussie!');
           this.$router.push('/login');
@@ -29,8 +32,8 @@ export default {
           const error = await response.text();
           alert(error);
         }
-      } catch (error) {
-        console.error('Erreur:', error);
+      } catch (e) {
+        console.error(e);
         alert('Erreur lors de l\'inscription');
       }
     }
@@ -80,12 +83,13 @@ export default {
       </div>
       <div class="form-group">
         <label for="type">Type d'utilisateur</label>
-        <input
-          type="type"
-          id="type"
-          v-model="user.type"
-          required
-        >
+        <select id="type" v-model="user.type" required>
+          <option
+            v-for="t in typeOptions"
+            :key="t"
+            :value="t"
+          >{{ t }}</option>
+        </select>
       </div>
       <button type="submit" class="submit-btn">S'inscrire</button>
       <p class="login-link">

@@ -24,7 +24,7 @@ export default {
           const data = await response.json();
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
-          this.$router.push('/');
+          window.location.href = '/';
         } else {
           alert('Email ou mot de passe incorrect');
         }
