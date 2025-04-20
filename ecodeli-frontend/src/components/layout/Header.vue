@@ -99,6 +99,14 @@
 
       <div v-if="showUserDropdown" class="user-dropdown">
         <router-link :to="userProfilePath" class="dropdown-item">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </router-link>
+        
+        <router-link v-if="user && user.type === 'CLIENT'" to="/client/annonces" class="dropdown-item">
+          <i class="fas fa-bullhorn"></i> Mes annonces
+        </router-link>
+        
+        <router-link :to="userProfilePath" class="dropdown-item">
           <i class="fas fa-id-card"></i> Mon profil
         </router-link>
         <a href="#" @click.prevent="logout" class="dropdown-item logout">
@@ -220,5 +228,33 @@
 
 .dropdown-item.logout i {
   color: #ff6b6b;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-item i {
+  margin-right: 0.8rem;
+  width: 1.2rem;
+  text-align: center;
+}
+
+.dropdown-item.logout {
+  border-top: 1px solid #eee;
+  color: #e53935;
+}
+
+.dropdown-item.logout:hover {
+  background-color: #ffebee;
 }
 </style>
