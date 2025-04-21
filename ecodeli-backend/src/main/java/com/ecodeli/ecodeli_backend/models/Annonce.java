@@ -43,7 +43,7 @@ public class Annonce {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "statut")
-    private StatutAnnonce statut = StatutAnnonce.active;
+    private StatutAnnonce statut = StatutAnnonce.PUBLIEE;
 
     @Column(name = "adresse_depart", columnDefinition = "TEXT")
     private String adresseDepart;
@@ -55,11 +55,19 @@ public class Annonce {
     @JoinColumn(name = "id_expediteur", nullable = false)
     private Utilisateur expediteur;
 
+    @ManyToOne
+    @JoinColumn(name = "id_livreur", nullable = true)
+    private Livreur livreur;
+
     public enum TypeAnnonce {
         unique, multiple
     }
 
     public enum StatutAnnonce {
-        active, expirée, annulée
+        PUBLIEE,              // Annonce publiée par un client, visible par les livreurs
+        VALIDEE,              // Un livreur a pris en charge l'annonce
+        EN_COURS,             // La livraison associée est en cours
+        TERMINEE,             // L'annonce est complétée, la livraison est terminée
+        ANNULEE               // L'annonce a été annulée par le client
     }
 }

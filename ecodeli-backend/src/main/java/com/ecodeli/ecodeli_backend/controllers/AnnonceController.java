@@ -115,4 +115,14 @@ public class AnnonceController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PutMapping("/{id}/demande-validation")
+    public ResponseEntity<?> demanderValidation(@PathVariable Integer id, @RequestParam Integer idLivreur) {
+        try {
+            Annonce annonce = annonceService.demanderValidation(id, idLivreur);
+            return ResponseEntity.ok(annonce);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
