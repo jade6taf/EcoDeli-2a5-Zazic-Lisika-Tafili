@@ -1,9 +1,10 @@
 <script>
 export default {
-  name: 'AnnonceCreateView',
+  name: 'AnnonceEditView',
   data() {
     return {
       annonce: {
+        idAnnonce: null,
         titre: '',
         description: '',
         prixUnitaire: null,
@@ -11,27 +12,106 @@ export default {
         adresseFin: '',
         dateDebut: '',
         dateFin: '',
-        typeAnnonce: 'unique'
+        typeAnnonce: 'unique',
+        statut: ''
       },
+      originalAnnonce: null,
       typeOptions: [
         { value: 'unique', label: 'Unique (livraison ponctuelle)' },
-        { value: 'récurrente', label: 'Récurrente (service régulier)' }
+        { value: 'multiple', label: 'Récurrente (service régulier)' }
       ],
       minDate: '',
       user: null,
-      isSubmitting: false,
+      isLoading: true,
+      isSaving: false,
       error: null,
       success: false
     }
   },
+  computed: {
+    canModify() {
+        return this.annonce.statut === 'PUBLIEE';
+    },
+    isModified() {
+      if (!this.originalAnnonce)
+        return false;
+      return this.annonce.titre !== this.originalAnnonce.titre ||
+        this.annonce.description !== this.originalAnnonce.description ||
+        parseFloat(this.annonce.prixUnitaire) !== parseFloat(this.originalAnnonce.prixUnitaire) ||
+        this.annonce.adresseDepart !== this.originalAnnonce.adresseDepart ||
+        this.annonce.adresseFin !== this.originalAnnonce.adresseFin ||
+        this.annonce.dateDebut !== this.originalAnnonce.dateDebut ||
+        this.annonce.dateFin !== this.originalAnnonce.dateFin ||
+        this.annonce.typeAnnonce !== this.originalAnnonce.typeAnnonce;
+    }
+  },
   methods: {
-    formatDateForInput(date) {
+    formatDateForInput(dateString) {
+      if (!dateString)
+        return '';
+      if (dateString.includes('T')) {
+        return dateString.slice(0, 16);
+      }
+      const date = new Date(dateString);
       return date.toISOString().slice(0, 16);
     },
+
+    async fetchAnnonce() {
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const annonceId = this.$route.params.id;
+
+        if (!annonceId) {
+          throw new Error('ID d\'annonce non spécifié');
+        }
+        const token = localStorage.getItem('token');
+        if (!token) {
+          this.$router.push('/login');
+          return;
+        }
+        const response = await fetch(`/api/annonces/${annonceId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Erreur lors de la récupération de l\'annonce');
+        }
+        const annonceData = await response.json();
+        if (annonceData.expediteur && this.user &&
+            annonceData.expediteur.idUtilisateur !== this.user.idUtilisateur) {
+          this.$router.push('/client/annonces');
+          throw new Error('Vous n\'êtes pas autorisé à modifier cette annonce');
+        }
+        if (annonceData.dateDebut) {
+          annonceData.dateDebut = this.formatDateForInput(annonceData.dateDebut);
+        }
+        if (annonceData.dateFin) {
+          annonceData.dateFin = this.formatDateForInput(annonceData.dateFin);
+        }
+
+        // Mettre à jour l'annonce
+        this.annonce = { ...annonceData };
+        this.originalAnnonce = { ...annonceData };
+      } catch (err) {
+        this.error = err.message || 'Une erreur est survenue';
+        console.error('Erreur:', err);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     async handleSubmit() {
-      this.isSubmitting = true;
+      if (!this.isModified) {
+        this.$router.push('/client/annonces');
+        return;
+      }
+      this.isSaving = true;
       this.error = null;
       this.success = false;
+
       try {
         if (!this.annonce.titre || !this.annonce.description ||
             !this.annonce.prixUnitaire || !this.annonce.adresseDepart ||
@@ -44,17 +124,14 @@ export default {
         if (dateDebut >= dateFin) {
           throw new Error('La date de début doit être antérieure à la date de fin');
         }
-        if (dateDebut < new Date()) {
-          throw new Error('La date de début ne peut pas être dans le passé');
-        }
         this.annonce.prixUnitaire = parseFloat(this.annonce.prixUnitaire);
         const token = localStorage.getItem('token');
         if (!token) {
           this.$router.push('/login');
           return;
         }
-        const response = await fetch(`/api/annonces?idExpediteur=${this.user.idUtilisateur}`, {
-          method: 'POST',
+        const response = await fetch(`/api/annonces/${this.annonce.idAnnonce}`, {
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -63,7 +140,7 @@ export default {
         });
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
-          throw new Error(errorData || 'Erreur lors de la création de l\'annonce');
+          throw new Error(errorData || 'Erreur lors de la mise à jour de l\'annonce');
         }
         const result = await response.json();
         this.success = true;
@@ -74,17 +151,18 @@ export default {
         this.error = err.message || 'Une erreur est survenue';
         console.error('Erreur:', err);
       } finally {
-        this.isSubmitting = false;
+        this.isSaving = false;
       }
     }
   },
   mounted() {
     const now = new Date();
-    this.minDate = this.formatDateForInput(now);
-    // Récupération de l'utilisateur connecté
+    this.minDate = this.formatDateForInput(now.toISOString());
+
     const userStr = localStorage.getItem('user');
     if (userStr) {
       this.user = JSON.parse(userStr);
+      this.fetchAnnonce();
     } else {
       this.$router.push('/login');
     }
@@ -93,22 +171,38 @@ export default {
 </script>
 
 <template>
-  <div class="create-annonce-container">
-    <div class="create-annonce-header">
-      <h1>Créer une nouvelle annonce</h1>
+  <div class="edit-annonce-container">
+    <div class="edit-annonce-header">
+      <h1>Modifier l'annonce</h1>
       <router-link to="/client/annonces" class="btn-back">
         <i class="fas fa-arrow-left"></i> Retour aux annonces
       </router-link>
     </div>
-    <div v-if="success" class="success-message">
-      <i class="fas fa-check-circle"></i>
-      <p>Votre annonce a été créée avec succès!</p>
+
+    <div v-if="isLoading" class="loading">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Chargement de l'annonce...</p>
     </div>
+
+    <div v-else-if="success" class="success-message">
+      <i class="fas fa-check-circle"></i>
+      <p>Votre annonce a été mise à jour avec succès!</p>
+    </div>
+
+    <div v-else-if="!canModify" class="error-message">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>Cette annonce ne peut plus être modifiée car son statut est "{{ annonce.statut }}".</p>
+      <router-link to="/client/annonces" class="btn-primary mt-3">
+        Retour à la liste
+      </router-link>
+    </div>
+
     <div v-else class="annonce-form-container">
       <div v-if="error" class="error-message">
         <i class="fas fa-exclamation-circle"></i>
         <p>{{ error }}</p>
       </div>
+
       <form @submit.prevent="handleSubmit" class="annonce-form">
         <div class="form-section">
           <h3>Informations générales</h3>
@@ -153,6 +247,7 @@ export default {
             >
           </div>
         </div>
+
         <div class="form-section">
           <h3>Adresses</h3>
           <div class="form-group">
@@ -176,6 +271,7 @@ export default {
             >
           </div>
         </div>
+
         <div class="form-section">
           <h3>Dates</h3>
           <div class="form-group date-group">
@@ -185,7 +281,6 @@ export default {
                 id="dateDebut"
                 v-model="annonce.dateDebut"
                 type="datetime-local"
-                :min="minDate"
                 required
               >
             </div>
@@ -201,22 +296,23 @@ export default {
             </div>
           </div>
         </div>
+
         <div class="form-actions">
           <button
             type="button"
             @click="$router.push('/client/annonces')"
             class="btn-cancel"
-            :disabled="isSubmitting"
+            :disabled="isSaving"
           >
             Annuler
           </button>
           <button
             type="submit"
             class="btn-submit"
-            :disabled="isSubmitting"
+            :disabled="isSaving || !isModified"
           >
-            <i v-if="isSubmitting" class="fas fa-spinner fa-spin"></i>
-            <span v-else>Créer l'annonce</span>
+            <i v-if="isSaving" class="fas fa-spinner fa-spin"></i>
+            <span v-else>Enregistrer les modifications</span>
           </button>
         </div>
       </form>
@@ -225,13 +321,13 @@ export default {
 </template>
 
 <style scoped>
-.create-annonce-container {
+.edit-annonce-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
 }
 
-.create-annonce-header {
+.edit-annonce-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -255,6 +351,21 @@ export default {
 
 .btn-back i {
   margin-right: 0.5rem;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.loading i {
+  font-size: 2rem;
+  color: #4CAF50;
+  margin-bottom: 1rem;
 }
 
 .annonce-form-container {
@@ -377,12 +488,35 @@ export default {
   cursor: not-allowed;
 }
 
+.btn-submit:disabled {
+  background-color: #a5d6a7;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.btn-primary {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: #45a049;
+}
+
 @media (max-width: 768px) {
   .date-group {
     grid-template-columns: 1fr;
   }
-  
-  .create-annonce-header {
+
+  .edit-annonce-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;

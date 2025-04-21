@@ -12,43 +12,45 @@ export default {
   computed: {
     statutLabels() {
       return {
-        'active': { text: 'Active', class: 'status-active' },
-        'en_cours': { text: 'En cours', class: 'status-in-progress' },
-        'terminée': { text: 'Terminée', class: 'status-completed' },
-        'annulée': { text: 'Annulée', class: 'status-cancelled' }
+        'PUBLIEE': { text: 'Publiée', class: 'status-published' },
+        'EN_ATTENTE_VALIDATION': { text: 'En attente', class: 'status-pending' },
+        'VALIDEE': { text: 'Validée', class: 'status-validated' },
+        'EN_COURS': { text: 'En cours', class: 'status-in-progress' },
+        'TERMINEE': { text: 'Terminée', class: 'status-completed' },
+        'ANNULEE': { text: 'Annulée', class: 'status-cancelled' }
+      }
+    },
+    canModifyAnnonce() {
+      return (annonce) => {
+        return annonce.statut === 'PUBLIEE';
       }
     }
   },
   methods: {
+
     async fetchAnnonces() {
       this.isLoading = true;
       this.error = null;
-      
       try {
         const userStr = localStorage.getItem('user');
         if (!userStr) {
           this.$router.push('/login');
           return;
         }
-        
         this.user = JSON.parse(userStr);
         const token = localStorage.getItem('token');
-        
         if (!token) {
           this.$router.push('/login');
           return;
         }
-        
         const response = await fetch(`/api/annonces/expediteur/${this.user.idUtilisateur}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        
         if (!response.ok) {
           throw new Error('Erreur lors de la récupération des annonces');
         }
-        
         this.annonces = await response.json();
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
@@ -57,12 +59,11 @@ export default {
         this.isLoading = false;
       }
     },
-    
+
     async cancelAnnonce(id) {
       if (!confirm('Êtes-vous sûr de vouloir annuler cette annonce ?')) {
         return;
       }
-      
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/annonces/${id}/annuler`, {
@@ -71,11 +72,9 @@ export default {
             'Authorization': `Bearer ${token}`
           }
         });
-        
         if (!response.ok) {
           throw new Error('Erreur lors de l\'annulation de l\'annonce');
         }
-        
         // Actualiser la liste des annonces
         this.fetchAnnonces();
       } catch (err) {
@@ -83,7 +82,7 @@ export default {
         console.error('Erreur:', err);
       }
     },
-    
+
     formatDate(dateString) {
       if (!dateString) return '';
       const date = new Date(dateString);
@@ -103,80 +102,77 @@ export default {
 </script>
 
 <template>
-  <div class="annonces-container">
-    <div class="annonces-header">
-      <h1>Mes Annonces</h1>
-      <router-link to="/client/annonces/new" class="btn-create">
-        <i class="fas fa-plus"></i> Créer une annonce
-      </router-link>
-    </div>
-    
-    <div v-if="isLoading" class="loading">
-      Chargement des annonces...
-    </div>
-    
-    <div v-else-if="error" class="error-message">
-      {{ error }}
-    </div>
-    
-    <div v-else-if="annonces.length === 0" class="empty-state">
-      <i class="fas fa-bullhorn empty-icon"></i>
-      <h3>Vous n'avez pas encore d'annonces</h3>
-      <p>Créez votre première annonce pour proposer des services ou des livraisons</p>
-      <router-link to="/client/annonces/new" class="btn-primary">
-        Créer une annonce
-      </router-link>
-    </div>
-    
-    <div v-else class="annonces-list">
-      <div v-for="annonce in annonces" :key="annonce.idAnnonce" class="annonce-card">
-        <div class="annonce-header">
-          <h3>{{ annonce.titre }}</h3>
-          <span class="status-badge" :class="statutLabels[annonce.statut]?.class">
-            {{ statutLabels[annonce.statut]?.text || annonce.statut }}
-          </span>
+    <div class="annonces-container">
+        <div class="annonces-header">
+            <h1>Mes Annonces</h1>
+            <router-link to="/client/annonces/new" class="btn-create">
+                <i class="fas fa-plus"></i> Créer une annonce
+            </router-link>
         </div>
-        
-        <div class="annonce-details">
-          <p>{{ annonce.description }}</p>
-          <div class="annonce-info">
-            <div class="info-item">
-              <i class="fas fa-map-marker-alt"></i>
-              <span>De: {{ annonce.adresseDepart }}</span>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-map-marker"></i>
-              <span>À: {{ annonce.adresseFin }}</span>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-calendar"></i>
-              <span>Du {{ formatDate(annonce.dateDebut) }} au {{ formatDate(annonce.dateFin) }}</span>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-euro-sign"></i>
-              <span>{{ annonce.prixUnitaire }} €</span>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-tag"></i>
-              <span>{{ annonce.typeAnnonce }}</span>
-            </div>
-          </div>
+        <div v-if="isLoading" class="loading">
+            Chargement des annonces...
         </div>
-        
-        <div class="annonce-actions">
-          <router-link :to="`/client/annonces/${annonce.idAnnonce}/edit`" class="btn-edit">
-            <i class="fas fa-edit"></i> Modifier
-          </router-link>
-          <button 
-            v-if="annonce.statut === 'active'" 
-            @click="cancelAnnonce(annonce.idAnnonce)" 
-            class="btn-cancel">
-            <i class="fas fa-times"></i> Annuler
-          </button>
+        <div v-else-if="error" class="error-message">
+            {{ error }}
         </div>
-      </div>
+        <div v-else-if="annonces.length === 0" class="empty-state">
+            <i class="fas fa-bullhorn empty-icon"></i>
+            <h3>Vous n'avez pas encore d'annonces</h3>
+            <p>Créez votre première annonce pour proposer des services ou des livraisons</p>
+            <router-link to="/client/annonces/new" class="btn-primary">
+                Créer une annonce
+            </router-link>
+        </div>
+
+        <div v-else class="annonces-list">
+            <div v-for="annonce in annonces" :key="annonce.idAnnonce" class="annonce-card">
+                <div class="annonce-header">
+                    <h3>{{ annonce.titre }}</h3>
+                    <span class="status-badge" :class="statutLabels[annonce.statut]?.class">
+                        {{ statutLabels[annonce.statut]?.text || annonce.statut }}
+                    </span>
+                </div>
+
+                <div class="annonce-details">
+                    <p>{{ annonce.description }}</p>
+                    <div class="annonce-info">
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>De: {{ annonce.adresseDepart }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker"></i>
+                            <span>À: {{ annonce.adresseFin }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Du {{ formatDate(annonce.dateDebut) }} au {{ formatDate(annonce.dateFin) }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-euro-sign"></i>
+                            <span>{{ annonce.prixUnitaire }} €</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-tag"></i>
+                            <span>{{ annonce.typeAnnonce }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="annonce-actions">
+                <router-link :to="`/client/annonces/${annonce.idAnnonce}/edit`" class="btn-edit">
+                    <i class="fas fa-edit"></i> Modifier
+                </router-link>
+                <button
+                    v-if="annonce.statut === 'active'"
+                    @click="cancelAnnonce(annonce.idAnnonce)"
+                    class="btn-cancel">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
@@ -241,24 +237,34 @@ export default {
   font-weight: 500;
 }
 
-.status-active {
-  background-color: #e8f5e9;
-  color: #388e3c;
-}
-
-.status-in-progress {
+.status-published {
   background-color: #e3f2fd;
   color: #1976d2;
 }
 
-.status-completed {
+.status-pending {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.status-validated {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-in-progress {
   background-color: #e8eaf6;
   color: #3f51b5;
 }
 
+.status-completed {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
 .status-cancelled {
   background-color: #ffebee;
-  color: #d32f2f;
+  color: #c62828;
 }
 
 .annonce-details {

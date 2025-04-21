@@ -8,12 +8,10 @@ export default {
     }
   },
   mounted() {
-    // Récupérer les informations de l'utilisateur depuis le localStorage
     const userStr = localStorage.getItem('user');
     if (userStr) {
       this.user = JSON.parse(userStr);
     } else {
-      // Rediriger vers la page de connexion si non authentifié
       this.$router.push('/login');
     }
   }
@@ -22,25 +20,23 @@ export default {
 
 <template>
   <div class="dashboard-container">
+
     <h1>Dashboard Client</h1>
-    
     <div v-if="isLoading" class="loading">
       Chargement...
     </div>
-    
+
     <div v-else-if="user" class="dashboard-content">
       <div class="welcome-message">
         <h2>Bienvenue, {{ user.prenom }} {{ user.nom }}</h2>
         <p>Voici votre espace personnel pour gérer vos annonces et suivre vos activités.</p>
       </div>
-
       <div class="dashboard-actions">
         <router-link to="/client/annonces" class="dashboard-card">
           <i class="fas fa-bullhorn"></i>
           <h3>Mes Annonces</h3>
           <p>Consultez et gérez vos annonces existantes</p>
         </router-link>
-        
         <router-link to="/client/annonces/new" class="dashboard-card">
           <i class="fas fa-plus-circle"></i>
           <h3>Créer une annonce</h3>
@@ -48,10 +44,11 @@ export default {
         </router-link>
       </div>
     </div>
-    
+
     <div v-else class="error-message">
       Vous devez être connecté pour accéder à cette page.
     </div>
+
   </div>
 </template>
 
