@@ -36,7 +36,6 @@ const routes = [
     name: 'register',
     component: () => import('./views/RegisterView.vue')
   },
-  // Nouvelles routes pour le dashboard client
   {
     path: '/client',
     name: 'client-dashboard',
