@@ -23,13 +23,12 @@ public interface AnnonceRepository extends JpaRepository<Annonce, Integer> {
 
     List<Annonce> findByExpediteurIdUtilisateur(Integer idExpediteur);
 
-    @Query("SELECT a FROM Annonce a WHERE a.statut = 'active' AND a.adresseDepart LIKE %:ville%")
+    @Query("SELECT a FROM Annonce a WHERE a.statut = 'PUBLIEE' AND a.adresseDepart LIKE %:ville%")
     List<Annonce> findActiveAnnoncesByDepartureCity(@Param("ville") String ville);
 
-    @Query("SELECT a FROM Annonce a WHERE a.statut = 'active' AND a.adresseFin LIKE %:ville%")
+    @Query("SELECT a FROM Annonce a WHERE a.statut = 'PUBLIEE' AND a.adresseFin LIKE %:ville%")
     List<Annonce> findActiveAnnoncesByArrivalCity(@Param("ville") String ville);
 
-    @Query("SELECT a FROM Annonce a WHERE a.statut = 'active' AND a.prixUnitaire BETWEEN :min AND :max")
+    @Query("SELECT a FROM Annonce a WHERE a.statut = 'PUBLIEE' AND a.prixUnitaire BETWEEN :min AND :max")
     List<Annonce> findActiveAnnoncesByPriceRange(@Param("min") BigDecimal min, @Param("max") BigDecimal max);
-
 }

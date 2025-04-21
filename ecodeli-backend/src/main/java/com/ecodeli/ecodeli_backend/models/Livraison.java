@@ -18,6 +18,10 @@ public class Livraison {
     @Column(name = "id_livraison")
     private Integer idLivraison;
 
+    @ManyToOne
+    @JoinColumn(name = "id_annonce")
+    private Annonce annonce;
+
     @Column(name = "date_debut")
     private LocalDateTime dateDebut;
 
@@ -67,13 +71,10 @@ public class Livraison {
     @JoinColumn(name = "id_colis")
     private Colis colis;
 
-    public enum StatutLivraison { // De base une 'status' -> string, donc a modifier bdd
-        EN_ATTENTE,
-        EN_PREPARATION,
-        EN_COURS,
-        LIVRER,
-        RETARDER,
-        ANNULER,
-        ECHEC
+    public enum StatutLivraison {
+        VALIDEE,              // Livraison directement validée suite à la postulation du livreur
+        EN_COURS,             // La livraison est en cours
+        TERMINEE,             // La livraison est terminée
+        ANNULEE               // La livraison a été annulée
     }
 }
