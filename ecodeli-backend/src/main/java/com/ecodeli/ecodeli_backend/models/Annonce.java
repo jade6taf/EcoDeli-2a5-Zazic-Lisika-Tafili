@@ -59,6 +59,14 @@ public class Annonce {
     @JoinColumn(name = "id_livreur", nullable = true)
     private Livreur livreur;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_colis", referencedColumnName = "id_colis")
+    private Colis colis;
+
+    @ManyToOne
+    @JoinColumn(name = "id_destinataire", nullable = true)
+    private Utilisateur destinataire;
+
     public enum TypeAnnonce {
         unique, multiple
     }
