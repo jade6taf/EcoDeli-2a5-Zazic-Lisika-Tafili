@@ -7,69 +7,27 @@ export default {
       user: null,
       isLoading: true,
       error: null,
-      searchVilleDepart: '',
-      searchVilleArrivee: '',
-      searchPrixMin: '',
-      searchPrixMax: '',
-      currentPage: 1,
-      itemsPerPage: 6,
-      sortBy: 'dateDebut',
-      sortOrder: 'asc'
+      filtres: {
+        adresse: '',
+        minPrix: '',
+        maxPrix: ''
+      }
     }
   },
   computed: {
+    annoncesFiltrees() {
+      return this.annonces;
+    },
     statutLabels() {
       return {
-        'PUBLIEE': { text: 'Publiée', class: 'status-published' }
+        'PUBLIEE': { text: 'Disponible', class: 'status-published' }
       }
-    },
-    filteredAnnonces() {
-      let result = [...this.annonces];
-      if (this.searchVilleDepart) {
-        const search = this.searchVilleDepart.toLowerCase();
-        result = result.filter(annonce => annonce.adresseDepart && annonce.adresseDepart.toLowerCase().includes(search)
-        );
-      }
-      if (this.searchVilleArrivee) {
-        const search = this.searchVilleArrivee.toLowerCase();
-        result = result.filter(annonce => annonce.adresseFin && annonce.adresseFin.toLowerCase().includes(search)
-        );
-      }
-
-      if (this.searchPrixMin) {
-        const min = parseFloat(this.searchPrixMin);
-        result = result.filter(annonce => annonce.prixUnitaire >= min);
-      }
-      if (this.searchPrixMax) {
-        const max = parseFloat(this.searchPrixMax);
-        result = result.filter(annonce => annonce.prixUnitaire <= max);
-      }
-
-      result.sort((a, b) => {
-        let comparison = 0;
-        if (this.sortBy === 'dateDebut') {
-          comparison = new Date(a.dateDebut) - new Date(b.dateDebut);
-        } else if (this.sortBy === 'prixUnitaire') {
-          comparison = a.prixUnitaire - b.prixUnitaire;
-        }
-        return this.sortOrder === 'asc' ? comparison : -comparison;
-      });
-      return result;
-    },
-    paginatedAnnonces() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.filteredAnnonces.slice(start, end);
-    },
-    totalPages() {
-      return Math.ceil(this.filteredAnnonces.length / this.itemsPerPage);
     }
   },
   methods: {
     async fetchAnnonces() {
       this.isLoading = true;
       this.error = null;
-
       try {
         const userStr = localStorage.getItem('user');
         if (!userStr) {
@@ -82,7 +40,7 @@ export default {
           this.$router.push('/login');
           return;
         }
-        const response = await fetch(`/api/annonces/statut/PUBLIEE`, {
+        const response = await fetch('/api/annonces/statut/PUBLIEE', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -91,19 +49,6 @@ export default {
           throw new Error('Erreur lors de la récupération des annonces');
         }
         this.annonces = await response.json();
-        try {
-          const responsePubliee = await fetch(`/api/annonces/statut/PUBLIÉE`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          if (responsePubliee.ok) {
-            const annoncesPubliees = await responsePubliee.json();
-            this.annonces = [...this.annonces, ...annoncesPubliees];
-          }
-        } catch (err) {
-          console.warn('Impossible de récupérer les annonces avec statut PUBLIÉE:', err);
-        }
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
         console.error('Erreur:', err);
@@ -111,7 +56,11 @@ export default {
         this.isLoading = false;
       }
     },
-    async postuleAnnonce(idAnnonce) {
+
+    async demanderValidation(idAnnonce) {
+      if (!confirm('Êtes-vous sûr de vouloir prendre en charge cette livraison?')) {
+        return;
+      }
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/annonces/${idAnnonce}/demande-validation?idLivreur=${this.user.idUtilisateur}`, {
@@ -124,13 +73,23 @@ export default {
           const errorData = await response.json().catch(() => null);
           throw new Error(errorData || 'Erreur lors de la prise en charge de l\'annonce');
         }
+        alert('Vous avez pris en charge cette livraison avec succès!');
         this.fetchAnnonces();
-        alert('Vous avez été assigné à cette annonce avec succès! Vous pouvez maintenant la voir dans "Mes livraisons".');
-        this.$router.push('/livreur/mes-livraisons');
       } catch (err) {
         alert(err.message || 'Une erreur est survenue');
         console.error('Erreur:', err);
       }
+    },
+    appliquerFiltres() {
+      this.fetchAnnonces();
+    },
+    resetFiltres() {
+      this.filtres = {
+        adresse: '',
+        minPrix: '',
+        maxPrix: ''
+      };
+      this.fetchAnnonces();
     },
     formatDate(dateString) {
       if (!dateString) return '';
@@ -142,27 +101,6 @@ export default {
         hour: '2-digit',
         minute: '2-digit'
       }).format(date);
-    },
-
-    changePage(page) {
-      if (page >= 1 && page <= this.totalPages) {
-        this.currentPage = page;
-      }
-    },
-    changeSort(field) {
-      if (this.sortBy === field) {
-        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-      } else {
-        this.sortBy = field;
-        this.sortOrder = 'asc';
-      }
-    },
-    resetFilters() {
-      this.searchVilleDepart = '';
-      this.searchVilleArrivee = '';
-      this.searchPrixMin = '';
-      this.searchPrixMax = '';
-      this.currentPage = 1;
     }
   },
   mounted() {
@@ -181,43 +119,45 @@ export default {
     </div>
 
     <div class="filters-container">
-      <div class="filter-group">
-        <label for="villeDepart">Ville de départ</label>
-        <input type="text" id="villeDepart" v-model="searchVilleDepart" placeholder="Ex: Paris">
+      <div class="filters-form">
+        <div class="form-group">
+          <label for="adresse">Adresse</label>
+          <input
+            id="adresse"
+            v-model="filtres.adresse"
+            type="text"
+            placeholder="Ville ou code postal"
+          >
+        </div>
+        <div class="form-group price-range">
+          <label>Prix (€)</label>
+          <div class="price-inputs">
+            <input
+              v-model="filtres.minPrix"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Min"
+            >
+            <span class="separator">-</span>
+            <input
+              v-model="filtres.maxPrix"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Max"
+            >
+          </div>
+        </div>
+        <div class="filters-actions">
+          <button @click="appliquerFiltres" class="btn-filter">
+            <i class="fas fa-search"></i> Filtrer
+          </button>
+          <button @click="resetFiltres" class="btn-reset">
+            <i class="fas fa-times"></i> Réinitialiser
+          </button>
+        </div>
       </div>
-      <div class="filter-group">
-        <label for="villeArrivee">Ville d'arrivée</label>
-        <input type="text" id="villeArrivee" v-model="searchVilleArrivee" placeholder="Ex: Lyon">
-      </div>
-      <div class="filter-group">
-        <label for="prixMin">Prix min.</label>
-        <input type="number" id="prixMin" v-model="searchPrixMin" placeholder="Min €">
-      </div>
-      <div class="filter-group">
-        <label for="prixMax">Prix max.</label>
-        <input type="number" id="prixMax" v-model="searchPrixMax" placeholder="Max €">
-      </div>
-      <button @click="resetFilters" class="btn-reset">
-        <i class="fas fa-times"></i> Réinitialiser
-      </button>
-    </div>
-
-    <div class="sort-container">
-      <span>Trier par:</span>
-      <button
-        @click="changeSort('dateDebut')"
-        class="btn-sort"
-        :class="{ active: sortBy === 'dateDebut' }">
-        Date
-        <i v-if="sortBy === 'dateDebut'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
-      </button>
-      <button
-        @click="changeSort('prixUnitaire')"
-        class="btn-sort"
-        :class="{ active: sortBy === 'prixUnitaire' }">
-        Prix
-        <i v-if="sortBy === 'prixUnitaire'" :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
-      </button>
     </div>
 
     <div v-if="isLoading" class="loading">
@@ -229,22 +169,14 @@ export default {
       {{ error }}
     </div>
 
-    <div v-else-if="filteredAnnonces.length === 0" class="empty-state">
+    <div v-else-if="annoncesFiltrees.length === 0" class="empty-state">
       <i class="fas fa-search empty-icon"></i>
       <h3>Aucune annonce disponible</h3>
-      <p v-if="annonces.length === 0">
-        Il n'y a actuellement aucune annonce active dans le système.
-      </p>
-      <p v-else>
-        Aucune annonce ne correspond à vos critères de recherche.
-      </p>
-      <button @click="resetFilters" class="btn-primary">
-        Réinitialiser les filtres
-      </button>
+      <p>Il n'y a actuellement aucune annonce correspondant à vos critères.</p>
     </div>
 
     <div v-else class="annonces-list">
-      <div v-for="annonce in paginatedAnnonces" :key="annonce.idAnnonce" class="annonce-card">
+      <div v-for="annonce in annoncesFiltrees" :key="annonce.idAnnonce" class="annonce-card">
         <div class="annonce-header">
           <h3>{{ annonce.titre }}</h3>
           <span class="status-badge" :class="statutLabels[annonce.statut]?.class">
@@ -254,6 +186,7 @@ export default {
 
         <div class="annonce-details">
           <p>{{ annonce.description }}</p>
+
           <div class="annonce-info">
             <div class="info-item">
               <i class="fas fa-map-marker-alt"></i>
@@ -271,50 +204,42 @@ export default {
               <i class="fas fa-euro-sign"></i>
               <span>{{ annonce.prixUnitaire }} €</span>
             </div>
-            <div class="info-item">
-              <i class="fas fa-tag"></i>
-              <span>{{ annonce.typeAnnonce }}</span>
+            <div class="info-item" v-if="annonce.colis">
+              <i class="fas fa-box"></i>
+              <span>{{ annonce.colis.poids }} kg - {{ annonce.colis.longueur }}×{{ annonce.colis.largeur }}×{{ annonce.colis.hauteur }} cm</span>
+            </div>
+            <div class="info-item" v-if="annonce.colis && annonce.colis.fragile">
+              <i class="fas fa-glass-whiskey"></i>
+              <span>Colis fragile</span>
+            </div>
+          </div>
+
+          <div class="contact-info">
+            <div class="contact-item">
+              <i class="fas fa-user"></i>
+              <div>
+                <h4>Expéditeur</h4>
+                <p>{{ annonce.expediteur.prenom }} {{ annonce.expediteur.nom }}</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <i class="fas fa-user-friends"></i>
+              <div>
+                <h4>Destinataire</h4>
+                <p>{{ annonce.destinataire.prenom }} {{ annonce.destinataire.nom }}</p>
+              </div>
             </div>
           </div>
         </div>
 
         <div class="annonce-actions">
-          <button @click="postuleAnnonce(annonce.idAnnonce)" class="btn-postule">
-            <i class="fas fa-check-circle"></i> Postuler
-          </button>
-          <button class="btn-details">
-            <i class="fas fa-info-circle"></i> Détails
+          <button
+            @click="demanderValidation(annonce.idAnnonce)"
+            class="btn-action btn-primary">
+            <i class="fas fa-check"></i> Prendre en charge
           </button>
         </div>
       </div>
-    </div>
-
-    <div v-if="totalPages > 1" class="pagination">
-      <button
-        @click="changePage(currentPage - 1)"
-        :disabled="currentPage === 1"
-        class="pagination-btn"
-      >
-        <i class="fas fa-chevron-left"></i>
-      </button>
-
-      <button
-        v-for="page in totalPages"
-        :key="page"
-        @click="changePage(page)"
-        class="pagination-btn"
-        :class="{ active: currentPage === page }"
-      >
-        {{ page }}
-      </button>
-
-      <button
-        @click="changePage(currentPage + 1)"
-        :disabled="currentPage === totalPages"
-        class="pagination-btn"
-      >
-        <i class="fas fa-chevron-right"></i>
-      </button>
     </div>
   </div>
 </template>
@@ -353,97 +278,95 @@ export default {
   margin-right: 0.5rem;
 }
 
-/* Filtres */
 .filters-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.filters-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  gap: 1.5rem;
+  align-items: flex-end;
 }
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
+.form-group {
   flex: 1;
-  min-width: 150px;
+  min-width: 200px;
 }
 
-.filter-group label {
+.form-group label {
+  display: block;
   margin-bottom: 0.5rem;
-  font-size: 0.9rem;
   font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.price-range {
+  flex: 1;
+  min-width: 200px;
+}
+
+.price-inputs {
+  display: flex;
+  align-items: center;
+}
+
+.price-inputs input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.separator {
+  margin: 0 0.5rem;
   color: #666;
 }
 
-.filter-group input {
-  padding: 0.7rem;
-  border: 1px solid #ddd;
+.filters-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-filter, .btn-reset {
+  padding: 0.8rem 1.2rem;
+  border: none;
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-filter {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-filter:hover {
+  background-color: #45a049;
 }
 
 .btn-reset {
-  align-self: flex-end;
-  display: inline-flex;
-  align-items: center;
   background-color: #f1f1f1;
   color: #666;
-  border: none;
-  padding: 0.7rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.2s;
 }
 
 .btn-reset:hover {
   background-color: #e0e0e0;
 }
 
-.btn-reset i {
-  margin-right: 0.5rem;
-}
-
-/* Tri */
-.sort-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.sort-container span {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.btn-sort {
-  background: none;
-  border: 1px solid #ddd;
-  padding: 0.5rem 0.8rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-sort:hover {
-  background-color: #f5f5f5;
-}
-
-.btn-sort.active {
-  background-color: #3F51B5;
-  color: white;
-  border-color: #3F51B5;
-}
-
-/* Liste des annonces */
 .annonces-list {
   display: grid;
   gap: 1.5rem;
@@ -472,9 +395,9 @@ export default {
   font-weight: 500;
 }
 
-.status-active, .status-published {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+.status-published {
+  background-color: #e3f2fd;
+  color: #1976d2;
 }
 
 .annonce-details {
@@ -486,9 +409,9 @@ export default {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
 }
 
 .info-item {
@@ -503,6 +426,30 @@ export default {
   text-align: center;
 }
 
+.contact-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.contact-item i {
+  font-size: 1.2rem;
+  color: #3F51B5;
+}
+
+.contact-item h4 {
+  margin-bottom: 0.5rem;
+  color: #666;
+  font-weight: 500;
+}
+
 .annonce-actions {
   display: flex;
   gap: 1rem;
@@ -511,42 +458,31 @@ export default {
   border-top: 1px solid #eee;
 }
 
-.btn-postule, .btn-details {
-  padding: 0.7rem 1.2rem;
+.btn-action {
+  padding: 0.8rem 1.5rem;
   border-radius: 4px;
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s;
   border: none;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
 }
 
-.btn-postule {
+.btn-primary {
   background-color: #3F51B5;
   color: white;
-  flex: 1;
-  justify-content: center;
 }
 
-.btn-postule:hover {
+.btn-primary:hover {
   background-color: #303f9f;
 }
 
-.btn-details {
-  background-color: #f0f0f0;
-  color: #333;
-}
-
-.btn-details:hover {
-  background-color: #e0e0e0;
-}
-
-.btn-postule i, .btn-details i {
+.btn-primary i {
   margin-right: 0.5rem;
 }
 
-/* États vides et chargement */
 .loading, .error-message, .empty-state {
   text-align: center;
   padding: 3rem;
@@ -583,62 +519,6 @@ export default {
 .empty-state p {
   margin-bottom: 1.5rem;
   color: #757575;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.btn-primary {
-  display: inline-block;
-  background-color: #3F51B5;
-  color: white;
-  padding: 0.8rem 1.5rem;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: background-color 0.3s;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  background-color: #303f9f;
-}
-
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 2rem;
-}
-
-.pagination-btn {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #ddd;
-  background-color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background-color: #f5f5f5;
-}
-
-.pagination-btn.active {
-  background-color: #3F51B5;
-  color: white;
-  border-color: #3F51B5;
-}
-
-.pagination-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
@@ -647,13 +527,13 @@ export default {
     align-items: flex-start;
     gap: 1rem;
   }
-  
-  .filters-container {
+
+  .filters-form {
     flex-direction: column;
   }
-  
-  .sort-container {
-    flex-wrap: wrap;
+
+  .contact-info {
+    grid-template-columns: 1fr;
   }
 }
 </style>

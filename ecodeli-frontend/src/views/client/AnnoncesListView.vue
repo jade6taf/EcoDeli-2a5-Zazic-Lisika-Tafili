@@ -27,7 +27,6 @@ export default {
     }
   },
   methods: {
-
     async fetchAnnonces() {
       this.isLoading = true;
       this.error = null;
@@ -75,7 +74,6 @@ export default {
         if (!response.ok) {
           throw new Error('Erreur lors de l\'annulation de l\'annonce');
         }
-        // Actualiser la liste des annonces
         this.fetchAnnonces();
       } catch (err) {
         alert(err.message || 'Une erreur est survenue');
@@ -93,6 +91,15 @@ export default {
         hour: '2-digit',
         minute: '2-digit'
       }).format(date);
+    },
+    getColisDetails(annonce) {
+      if (!annonce.colis)
+        return 'Non spécifié';
+
+      const dimensions = `${annonce.colis.longueur || 0}×${annonce.colis.largeur || 0}×${annonce.colis.hauteur || 0} cm`;
+      const poids = `${annonce.colis.poids || 0} kg`;
+
+      return `${dimensions}, ${poids}${annonce.colis.fragile ? ', Fragile' : ''}`;
     }
   },
   mounted() {
@@ -127,7 +134,11 @@ export default {
         <div v-else class="annonces-list">
             <div v-for="annonce in annonces" :key="annonce.idAnnonce" class="annonce-card">
                 <div class="annonce-header">
-                    <h3>{{ annonce.titre }}</h3>
+                    <h3>
+                        <router-link :to="`/client/annonces/${annonce.idAnnonce}`" class="annonce-title-link">
+                            {{ annonce.titre }}
+                        </router-link>
+                    </h3>
                     <span class="status-badge" :class="statutLabels[annonce.statut]?.class">
                         {{ statutLabels[annonce.statut]?.text || annonce.statut }}
                     </span>
@@ -156,19 +167,29 @@ export default {
                             <i class="fas fa-tag"></i>
                             <span>{{ annonce.typeAnnonce }}</span>
                         </div>
+                        <div class="info-item" v-if="annonce.colis">
+                            <i class="fas fa-box"></i>
+                            <span>{{ getColisDetails(annonce) }}</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="annonce-actions">
-                <router-link :to="`/client/annonces/${annonce.idAnnonce}/edit`" class="btn-edit">
-                    <i class="fas fa-edit"></i> Modifier
-                </router-link>
-                <button
-                    v-if="annonce.statut === 'active'"
-                    @click="cancelAnnonce(annonce.idAnnonce)"
-                    class="btn-cancel">
-                    <i class="fas fa-times"></i> Annuler
-                </button>
+                    <router-link :to="`/client/annonces/${annonce.idAnnonce}`" class="btn-view">
+                        <i class="fas fa-eye"></i> Voir détails
+                    </router-link>
+                    <router-link
+                        v-if="canModifyAnnonce(annonce)"
+                        :to="`/client/annonces/${annonce.idAnnonce}/edit`"
+                        class="btn-edit">
+                        <i class="fas fa-edit"></i> Modifier
+                    </router-link>
+                    <button
+                        v-if="canModifyAnnonce(annonce)"
+                        @click="cancelAnnonce(annonce.idAnnonce)"
+                        class="btn-cancel">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
                 </div>
             </div>
         </div>
@@ -230,6 +251,16 @@ export default {
   border-bottom: 1px solid #eee;
 }
 
+.annonce-title-link {
+  color: #333;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.annonce-title-link:hover {
+  color: #4CAF50;
+}
+
 .status-badge {
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
@@ -286,6 +317,8 @@ export default {
 .info-item i {
   margin-right: 0.5rem;
   color: #666;
+  width: 18px;
+  text-align: center;
 }
 
 .annonce-actions {
@@ -296,7 +329,7 @@ export default {
   border-top: 1px solid #eee;
 }
 
-.btn-edit, .btn-cancel {
+.btn-view, .btn-edit, .btn-cancel {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   display: inline-flex;
@@ -304,6 +337,17 @@ export default {
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s;
+}
+
+.btn-view {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  text-decoration: none;
+  border: none;
+}
+
+.btn-view:hover {
+  background-color: #bbdefb;
 }
 
 .btn-edit {
@@ -327,7 +371,7 @@ export default {
   background-color: #ffcdd2;
 }
 
-.btn-edit i, .btn-cancel i {
+.btn-view i, .btn-edit i, .btn-cancel i {
   margin-right: 0.5rem;
 }
 
@@ -376,5 +420,17 @@ export default {
 
 .error-message {
   color: #e53935;
+}
+
+@media (max-width: 768px) {
+  .annonce-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .btn-view, .btn-edit, .btn-cancel {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>
