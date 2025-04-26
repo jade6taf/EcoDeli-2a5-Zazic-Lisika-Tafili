@@ -3,10 +3,12 @@ package com.ecodeli.ecodeli_backend.services;
 import com.ecodeli.ecodeli_backend.models.Annonce;
 import com.ecodeli.ecodeli_backend.models.Annonce.StatutAnnonce;
 import com.ecodeli.ecodeli_backend.models.Annonce.TypeAnnonce;
+import com.ecodeli.ecodeli_backend.models.Colis;
 import com.ecodeli.ecodeli_backend.models.Livraison;
 import com.ecodeli.ecodeli_backend.models.Livreur;
 import com.ecodeli.ecodeli_backend.models.Utilisateur;
 import com.ecodeli.ecodeli_backend.repositories.AnnonceRepository;
+import com.ecodeli.ecodeli_backend.repositories.ColisRepository;
 import com.ecodeli.ecodeli_backend.repositories.LivraisonRepository;
 import com.ecodeli.ecodeli_backend.repositories.UtilisateurRepository;
 import org.springframework.stereotype.Service;
@@ -23,14 +25,16 @@ public class AnnonceService {
     private final AnnonceRepository annonceRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final LivraisonRepository livraisonRepository;
-
+    private final ColisRepository colisRepository;
 
     public AnnonceService(AnnonceRepository annonceRepository,
-        UtilisateurRepository utilisateurRepository, LivraisonRepository livraisonRepository) {
+                         UtilisateurRepository utilisateurRepository,
+                         LivraisonRepository livraisonRepository,
+                         ColisRepository colisRepository) {
         this.annonceRepository = annonceRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.livraisonRepository = livraisonRepository;
-
+        this.colisRepository = colisRepository;
     }
 
     public List<Annonce> getAllAnnonces() {
@@ -67,7 +71,6 @@ public class AnnonceService {
 
     @Transactional
     public Annonce createAnnonce(Annonce annonce, Integer idExpediteur) {
-
         Utilisateur expediteur = utilisateurRepository.findById(idExpediteur)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur 'Expéditeur' non trouvé avec l'ID: " + idExpediteur));
 
@@ -79,6 +82,23 @@ public class AnnonceService {
                 throw new IllegalArgumentException("La date de début ne peut pas être dans le passé");
             }
         }
+
+        if (annonce.getColis() != null) {
+            Colis colis = annonce.getColis();
+            colis = colisRepository.save(colis);
+            annonce.setColis(colis);
+        }
+
+        if (annonce.getDestinataire() != null) {
+            Utilisateur destinataire = annonce.getDestinataire();
+            Optional<Utilisateur> existingUser = utilisateurRepository.findByEmail(destinataire.getEmail());
+            if (existingUser.isPresent()) {
+                destinataire = existingUser.get();
+            } else {
+                destinataire = utilisateurRepository.save(destinataire);
+            }
+            annonce.setDestinataire(destinataire);
+        }
         annonce.setExpediteur(expediteur);
         if (annonce.getStatut() == null)
             annonce.setStatut(StatutAnnonce.PUBLIEE);
@@ -89,7 +109,6 @@ public class AnnonceService {
 
     @Transactional
     public Annonce updateAnnonce(Integer id, Annonce annonceDetails) {
-
         Annonce annonce = annonceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Annonce non trouvée avec l'ID: " + id));
 
@@ -139,17 +158,67 @@ public class AnnonceService {
         if (annonceDetails.getAdresseFin() != null) {
             annonce.setAdresseFin(annonceDetails.getAdresseFin());
         }
+
+        if (annonceDetails.getColis() != null) {
+            Colis existingColis = annonce.getColis();
+            Colis updatedColis = annonceDetails.getColis();
+
+            if (existingColis != null) {
+                if (updatedColis.getPoids() != null)
+                    existingColis.setPoids(updatedColis.getPoids());
+                if (updatedColis.getLongueur() != null)
+                    existingColis.setLongueur(updatedColis.getLongueur());
+                if (updatedColis.getLargeur() != null)
+                    existingColis.setLargeur(updatedColis.getLargeur());
+                if (updatedColis.getHauteur() != null)
+                    existingColis.setHauteur(updatedColis.getHauteur());
+                if (updatedColis.getFragile() != null)
+                    existingColis.setFragile(updatedColis.getFragile());
+                if (updatedColis.getDescription() != null)
+                    existingColis.setDescription(updatedColis.getDescription());
+                colisRepository.save(existingColis);
+            } else {
+                updatedColis = colisRepository.save(updatedColis);
+                annonce.setColis(updatedColis);
+            }
+        }
+
+        if (annonceDetails.getDestinataire() != null) {
+            Utilisateur existingDestinataire = annonce.getDestinataire();
+            Utilisateur updatedDestinataire = annonceDetails.getDestinataire();
+            if (existingDestinataire != null) {
+                if (updatedDestinataire.getNom() != null)
+                    existingDestinataire.setNom(updatedDestinataire.getNom());
+                if (updatedDestinataire.getPrenom() != null)
+                    existingDestinataire.setPrenom(updatedDestinataire.getPrenom());
+                if (updatedDestinataire.getEmail() != null)
+                    existingDestinataire.setEmail(updatedDestinataire.getEmail());
+                if (updatedDestinataire.getTelephone() != null)
+                    existingDestinataire.setTelephone(updatedDestinataire.getTelephone());
+                utilisateurRepository.save(existingDestinataire);
+            } else {
+                Optional<Utilisateur> existingUser = Optional.empty();
+                if (updatedDestinataire.getEmail() != null) {
+                    existingUser = utilisateurRepository.findByEmail(updatedDestinataire.getEmail());
+                }
+                if (existingUser.isPresent()) {
+                    annonce.setDestinataire(existingUser.get());
+                } else {
+                    updatedDestinataire = utilisateurRepository.save(updatedDestinataire);
+                    annonce.setDestinataire(updatedDestinataire);
+                }
+            }
+        }
         return annonceRepository.save(annonce);
     }
 
     @Transactional
     public Annonce cancelAnnonce(Integer id) {
-
         Annonce annonce = annonceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Annonce non trouvée avec l'ID: " + id));
 
         if (annonce.getStatut() != StatutAnnonce.PUBLIEE)
-            throw new IllegalArgumentException("Seule une annonce publiée");
+            throw new IllegalArgumentException("Seule une annonce publiée peut être annulée");
 
         annonce.setStatut(StatutAnnonce.ANNULEE);
         return annonceRepository.save(annonce);
@@ -157,7 +226,6 @@ public class AnnonceService {
 
     @Transactional
     public void deleteAnnonce(Integer id) {
-
         Annonce annonce = annonceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Annonce non trouvée avec l'ID: " + id));
 
@@ -169,7 +237,6 @@ public class AnnonceService {
 
     @Transactional
     public Annonce demanderValidation(Integer id, Integer idLivreur) {
-
         Annonce annonce = annonceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Annonce non trouvée avec l'ID: " + id));
         Utilisateur utilisateur = utilisateurRepository.findById(idLivreur)
@@ -182,6 +249,7 @@ public class AnnonceService {
         if (annonce.getStatut() != StatutAnnonce.PUBLIEE) {
             throw new IllegalArgumentException("Cette annonce n'est pas disponible pour une demande de validation");
         }
+
         annonce.setLivreur(livreur);
         annonce.setStatut(StatutAnnonce.VALIDEE);
         Annonce savedAnnonce = annonceRepository.save(annonce);
@@ -195,15 +263,19 @@ public class AnnonceService {
             livraison.setAdresseEnvoi(savedAnnonce.getAdresseDepart());
             livraison.setAdresseDeLivraison(savedAnnonce.getAdresseFin());
             livraison.setExpediteur(savedAnnonce.getExpediteur());
+            livraison.setDestinataire(savedAnnonce.getDestinataire());
+            livraison.setColis(savedAnnonce.getColis());
+
+            if (savedAnnonce.getPrixUnitaire() != null) {
+                livraison.setPrix(savedAnnonce.getPrixUnitaire().intValue());
+            }
             if (livraison.getCodePostalEnvoi() == null || livraison.getCodePostalEnvoi().isEmpty()) {
                 livraison.setCodePostalEnvoi("00000");
             }
             if (livraison.getCodePostalLivraison() == null || livraison.getCodePostalLivraison().isEmpty()) {
                 livraison.setCodePostalLivraison("00000");
             }
-            if (livraison.getDestinataire() == null) {
-                livraison.setDestinataire(savedAnnonce.getExpediteur());
-            }
+
             livraisonRepository.save(livraison);
         } catch (Exception e) {
             System.err.println("Erreur lors de la création de la livraison: " + e.getMessage());

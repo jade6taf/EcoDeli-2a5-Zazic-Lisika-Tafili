@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "COLIS")
@@ -19,29 +18,25 @@ public class Colis {
     @Column(name = "id_colis")
     private Integer idColis;
 
-    @Column(name = "date_debut")
-    private LocalDateTime dateDebut;
-
-    @Column(name = "date_fin")
-    private LocalDateTime dateFin;
-
-    @NotNull(message = "Le poids est obligatoire")
     @Positive(message = "Le poids doit être positif")
-    @Column(name = "poid", precision = 10, scale = 2)
-    private BigDecimal poid;
+    @Column(name = "poids")
+    private BigDecimal poids;
 
-    @Positive(message = "La taille doit être positive")
-    @Column(name = "taille")
-    private Integer taille;
+    @Positive(message = "La longueur doit être positive")
+    @Column(name = "longueur")
+    private BigDecimal longueur;
 
-    @Column(name = "type", length = 255)
-    private String type;
+    @Positive(message = "La largeur doit être positive")
+    @Column(name = "largeur")
+    private BigDecimal largeur;
 
-    @ManyToOne
-    @JoinColumn(name = "id_expediteur", nullable = false)
-    private Utilisateur expediteur;
+    @Positive(message = "La hauteur doit être positive")
+    @Column(name = "hauteur")
+    private BigDecimal hauteur;
 
-    @ManyToOne
-    @JoinColumn(name = "id_destinataire", nullable = false)
-    private Utilisateur destinataire;
+    @Column(name = "fragile")
+    private Boolean fragile = false;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 }

@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,53 +33,10 @@ public class ColisController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/expediteur/{idExpediteur}")
-    public ResponseEntity<List<Colis>> getColisByExpediteur(@PathVariable Integer idExpediteur) {
-        List<Colis> colis = colisService.getColisByExpediteur(idExpediteur);
-        return ResponseEntity.ok(colis);
-    }
-
-    @GetMapping("/destinataire/{idDestinataire}")
-    public ResponseEntity<List<Colis>> getColisByDestinataire(@PathVariable Integer idDestinataire) {
-        List<Colis> colis = colisService.getColisByDestinataire(idDestinataire);
-        return ResponseEntity.ok(colis);
-    }
-
-    @GetMapping("/type/{type}")
-    public ResponseEntity<List<Colis>> getColisByType(@PathVariable String type) {
-        List<Colis> colis = colisService.getColisByType(type);
-        return ResponseEntity.ok(colis);
-    }
-
-    @GetMapping("/recherche/poids")
-    public ResponseEntity<List<Colis>> searchColisByPoidRange(
-            @RequestParam BigDecimal poidMin,
-            @RequestParam BigDecimal poidMax) {
-        List<Colis> colis = colisService.searchColisByPoidRange(poidMin, poidMax);
-        return ResponseEntity.ok(colis);
-    }
-
-    @GetMapping("/recherche/taille")
-    public ResponseEntity<List<Colis>> searchColisByTailleRange(
-            @RequestParam Integer tailleMin,
-            @RequestParam Integer tailleMax) {
-        List<Colis> colis = colisService.searchColisByTailleRange(tailleMin, tailleMax);
-        return ResponseEntity.ok(colis);
-    }
-
-    @GetMapping("/actifs")
-    public ResponseEntity<List<Colis>> getActivePackages() {
-        List<Colis> colis = colisService.getActivePackages();
-        return ResponseEntity.ok(colis);
-    }
-
     @PostMapping
-    public ResponseEntity<?> createColis(
-            @RequestBody Colis colis,
-            @RequestParam Integer idExpediteur,
-            @RequestParam Integer idDestinataire) {
+    public ResponseEntity<?> createColis(@RequestBody Colis colis) {
         try {
-            Colis newColis = colisService.createColis(colis, idExpediteur, idDestinataire);
+            Colis newColis = colisService.createColis(colis);
             return new ResponseEntity<>(newColis, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -91,18 +47,6 @@ public class ColisController {
     public ResponseEntity<?> updateColis(@PathVariable Integer id, @RequestBody Colis colis) {
         try {
             Colis updatedColis = colisService.updateColis(id, colis);
-            return ResponseEntity.ok(updatedColis);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PutMapping("/{id}/destinataire/{idNouveauDestinataire}")
-    public ResponseEntity<?> changeDestinataire(
-            @PathVariable Integer id,
-            @PathVariable Integer idNouveauDestinataire) {
-        try {
-            Colis updatedColis = colisService.changeDestinataire(id, idNouveauDestinataire);
             return ResponseEntity.ok(updatedColis);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

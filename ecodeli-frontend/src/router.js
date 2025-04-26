@@ -61,6 +61,12 @@ const routes = [
     meta: { requiresAuth: true, role: 'CLIENT' }
   },
   {
+    path: '/client/annonces/:id',
+    name: 'client-annonce-detail',
+    component: () => import('./views/client/AnnonceDetailView.vue'),
+    meta: { requiresAuth: true, role: 'CLIENT' }
+  },
+  {
     path: '/livreur',
     name: 'livreur-dashboard',
     component: () => import('./views/livreur/DashboardView.vue'),

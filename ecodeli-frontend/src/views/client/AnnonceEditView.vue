@@ -13,7 +13,27 @@ export default {
         dateDebut: '',
         dateFin: '',
         typeAnnonce: 'unique',
-        statut: ''
+        statut: '',
+        colis: {
+          poids: null,
+          longueur: null,
+          largeur: null,
+          hauteur: null,
+          fragile: false,
+          description: ''
+        },
+        expediteur: {
+          nom: '',
+          prenom: '',
+          telephone: '',
+          email: ''
+        },
+        destinataire: {
+          nom: '',
+          prenom: '',
+          telephone: '',
+          email: ''
+        }
       },
       originalAnnonce: null,
       typeOptions: [
@@ -30,12 +50,13 @@ export default {
   },
   computed: {
     canModify() {
-        return this.annonce.statut === 'PUBLIEE';
+      return this.annonce.statut === 'PUBLIEE';
     },
     isModified() {
       if (!this.originalAnnonce)
         return false;
-      return this.annonce.titre !== this.originalAnnonce.titre ||
+
+      const basicFieldsChanged = this.annonce.titre !== this.originalAnnonce.titre ||
         this.annonce.description !== this.originalAnnonce.description ||
         parseFloat(this.annonce.prixUnitaire) !== parseFloat(this.originalAnnonce.prixUnitaire) ||
         this.annonce.adresseDepart !== this.originalAnnonce.adresseDepart ||
@@ -43,9 +64,24 @@ export default {
         this.annonce.dateDebut !== this.originalAnnonce.dateDebut ||
         this.annonce.dateFin !== this.originalAnnonce.dateFin ||
         this.annonce.typeAnnonce !== this.originalAnnonce.typeAnnonce;
+
+      const colisChanged = this.haveDifferentValues(this.annonce.colis, this.originalAnnonce.colis);
+      const destinataireChanged = this.haveDifferentValues(this.annonce.destinataire, this.originalAnnonce.destinataire);
+
+      return basicFieldsChanged || colisChanged || destinataireChanged;
     }
   },
   methods: {
+    haveDifferentValues(obj1, obj2) {
+      if (!obj1 || !obj2)
+        return obj1 !== obj2;
+      for (const key in obj1) {
+        if (obj1[key] !== obj2[key]) {
+          return true;
+        }
+      }
+      return false;
+    },
     formatDateForInput(dateString) {
       if (!dateString)
         return '';
@@ -91,10 +127,35 @@ export default {
         if (annonceData.dateFin) {
           annonceData.dateFin = this.formatDateForInput(annonceData.dateFin);
         }
+        if (!annonceData.colis) {
+          annonceData.colis = {
+            poids: null,
+            longueur: null,
+            largeur: null,
+            hauteur: null,
+            fragile: false,
+            description: ''
+          };
+        }
+        if (!annonceData.expediteur) {
+          annonceData.expediteur = {
+            nom: this.user?.nom || '',
+            prenom: this.user?.prenom || '',
+            telephone: '',
+            email: this.user?.email || ''
+          };
+        }
+        if (!annonceData.destinataire) {
+          annonceData.destinataire = {
+            nom: '',
+            prenom: '',
+            telephone: '',
+            email: ''
+          };
+        }
 
-        // Mettre à jour l'annonce
-        this.annonce = { ...annonceData };
-        this.originalAnnonce = { ...annonceData };
+        this.annonce = JSON.parse(JSON.stringify(annonceData));
+        this.originalAnnonce = JSON.parse(JSON.stringify(annonceData));
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
         console.error('Erreur:', err);
@@ -111,7 +172,6 @@ export default {
       this.isSaving = true;
       this.error = null;
       this.success = false;
-
       try {
         if (!this.annonce.titre || !this.annonce.description ||
             !this.annonce.prixUnitaire || !this.annonce.adresseDepart ||
@@ -119,6 +179,7 @@ export default {
             !this.annonce.dateFin) {
           throw new Error('Veuillez remplir tous les champs obligatoires');
         }
+
         const dateDebut = new Date(this.annonce.dateDebut);
         const dateFin = new Date(this.annonce.dateFin);
         if (dateDebut >= dateFin) {
@@ -249,6 +310,77 @@ export default {
         </div>
 
         <div class="form-section">
+          <h3>Détails du colis</h3>
+          <div class="dimensions-container">
+            <div class="form-group">
+              <label for="poids">Poids (kg) *</label>
+              <input
+                id="poids"
+                v-model="annonce.colis.poids"
+                type="number"
+                min="0.1"
+                step="0.1"
+                placeholder="Ex: 5.5"
+                required
+              >
+            </div>
+            <div class="dimensions-group">
+              <div class="form-group">
+                <label for="longueur">Longueur (cm) *</label>
+                <input
+                  id="longueur"
+                  v-model="annonce.colis.longueur"
+                  type="number"
+                  min="1"
+                  step="1"
+                  placeholder="Ex: 30"
+                  required
+                >
+              </div>
+              <div class="form-group">
+                <label for="largeur">Largeur (cm) *</label>
+                <input
+                  id="largeur"
+                  v-model="annonce.colis.largeur"
+                  type="number"
+                  min="1"
+                  step="1"
+                  placeholder="Ex: 20"
+                  required
+                >
+              </div>
+              <div class="form-group">
+                <label for="hauteur">Hauteur (cm) *</label>
+                <input
+                  id="hauteur"
+                  v-model="annonce.colis.hauteur"
+                  type="number"
+                  min="1"
+                  step="1"
+                  placeholder="Ex: 15"
+                  required
+                >
+              </div>
+            </div>
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="annonce.colis.fragile">
+                Colis fragile
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="colis-description">Description du contenu</label>
+              <textarea
+                id="colis-description"
+                v-model="annonce.colis.description"
+                placeholder="Décrivez le contenu du colis"
+                rows="2"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
           <h3>Adresses</h3>
           <div class="form-group">
             <label for="adresseDepart">Adresse de départ *</label>
@@ -269,6 +401,49 @@ export default {
               placeholder="Adresse complète"
               required
             >
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Destinataire</h3>
+          <div class="contact-form">
+            <div class="form-group">
+              <label for="dest-nom">Nom *</label>
+              <input
+                id="dest-nom"
+                v-model="annonce.destinataire.nom"
+                type="text"
+                required
+              >
+            </div>
+            <div class="form-group">
+              <label for="dest-prenom">Prénom *</label>
+              <input
+                id="dest-prenom"
+                v-model="annonce.destinataire.prenom"
+                type="text"
+                required
+              >
+            </div>
+            <div class="form-group">
+              <label for="dest-telephone">Téléphone *</label>
+              <input
+                id="dest-telephone"
+                v-model="annonce.destinataire.telephone"
+                type="tel"
+                placeholder="Ex: 0601020304"
+                required
+              >
+            </div>
+            <div class="form-group">
+              <label for="dest-email">Email</label>
+              <input
+                id="dest-email"
+                v-model="annonce.destinataire.email"
+                type="email"
+                placeholder="Ex: nom@example.com"
+              >
+            </div>
           </div>
         </div>
 
@@ -442,6 +617,42 @@ export default {
   outline: none;
 }
 
+.dimensions-container {
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.dimensions-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.checkbox-group {
+  margin-top: 1rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  width: auto;
+  margin-right: 0.5rem;
+}
+
+.contact-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .date-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -512,7 +723,9 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .date-group {
+  .date-group,
+  .contact-form,
+  .dimensions-group {
     grid-template-columns: 1fr;
   }
 

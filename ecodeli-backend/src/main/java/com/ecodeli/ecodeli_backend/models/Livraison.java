@@ -64,7 +64,7 @@ public class Livraison {
     private Utilisateur expediteur;
 
     @ManyToOne
-    @JoinColumn(name = "id_destinataire", nullable = false)
+    @JoinColumn(name = "id_destinataire")
     private Utilisateur destinataire;
 
     @ManyToOne
