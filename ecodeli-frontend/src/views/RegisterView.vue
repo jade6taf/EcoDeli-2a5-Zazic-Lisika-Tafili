@@ -38,7 +38,13 @@ export default {
       if (this.step === 1) {
         return !!this.user.type;
       } else if (this.step === 2) {
-        return this.user.nom && this.user.prenom && this.user.email && this.user.motDePasse;
+        const baseValidation = this.user.nom && this.user.prenom && this.user.email && this.user.motDePasse;
+
+        if (this.user.type === 'PRESTATAIRE') {
+          return baseValidation && this.user.nomEntreprise && this.user.siret && /^[0-9]{14}$/.test(this.user.siret);
+        }
+
+        return baseValidation;
       }
       return true;
     }
@@ -197,6 +203,35 @@ export default {
                 v-model="user.motDePasse"
                 required
                 placeholder="8 caractères minimum"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Section spécifique pour les prestataires -->
+        <div v-if="user.type === 'PRESTATAIRE'" class="form-section">
+          <h4>Informations de l'entreprise</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nomEntreprise">Nom de l'entreprise *</label>
+              <input
+                type="text"
+                id="nomEntreprise"
+                v-model="user.nomEntreprise"
+                required
+                placeholder="Nom de votre entreprise"
+              >
+            </div>
+            <div class="form-group">
+              <label for="siret">Numéro SIRET *</label>
+              <input
+                type="text"
+                id="siret"
+                v-model="user.siret"
+                required
+                pattern="[0-9]{14}"
+                placeholder="14 chiffres"
+                title="Le numéro SIRET doit contenir exactement 14 chiffres"
               >
             </div>
           </div>

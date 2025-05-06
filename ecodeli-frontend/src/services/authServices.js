@@ -1,6 +1,9 @@
 const API_URL = 'http://localhost:8080/api/auth/';
 
-export const authService = {
+const authService = {
+    setNewToken(token) {
+        localStorage.setItem('token', token);
+    },
     async login(email, password) {
         const response = await fetch(API_URL + 'login', {
             method: 'POST',
@@ -63,3 +66,5 @@ export const authService = {
         return !!this.getToken();
     }
 };
+
+export default authService;

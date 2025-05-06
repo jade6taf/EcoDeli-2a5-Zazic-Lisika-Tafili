@@ -97,6 +97,44 @@ const routes = [
     meta: { requiresAuth: true, role: 'LIVREUR' }
   },
   {
+    path: '/prestataire',
+    meta: { requiresAuth: true, role: 'PRESTATAIRE' },
+    children: [
+  {
+    path: '/prestataire',
+    component: () => import('./views/prestataire/PrestataireLayout.vue'),
+    meta: { requiresAuth: true, role: 'PRESTATAIRE' },
+    children: [
+      {
+        path: '',
+        name: 'prestataire-dashboard',
+        component: () => import('./views/prestataire/DashboardView.vue')
+      },
+      {
+        path: 'informations',
+        name: 'prestataire-informations',
+        component: () => import('./views/prestataire/InformationsPersonnelles.vue')
+      },
+      {
+        path: 'profil',
+        name: 'prestataire-profil',
+        component: () => import('./views/prestataire/ProfilPublicView.vue')
+      }
+    ]
+  },
+  {
+    path: '/prestataires/:id',
+    name: 'prestataire-voir-profil',
+    component: () => import('./views/prestataire/VoirProfilPublicView.vue')
+  }
+    ]
+  },
+  {
+    path: '/prestataire/:id/public',
+    name: 'prestataire-profil-public',
+    component: () => import('./views/prestataire/ProfilPublicView.vue')
+  },
+  {
     path: '/admin/dashboard',
     name: 'admin-dashboard',
     component: AdminDashboard,

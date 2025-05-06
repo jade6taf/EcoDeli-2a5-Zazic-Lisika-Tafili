@@ -1,71 +1,3 @@
-<script>
-import { authStore } from '@/store/auth'
-
-export default {
-    name: 'Header',
-    data() {
-      return {
-        menuItems: {
-          'Nos services': {
-            hasDropdown: false,
-            path: '/services'
-          },
-          'Profiles': {
-            hasDropdown: true,
-            items: [
-              { name: 'Client', path: '/client' },
-              { name: 'Livreur', path: '/livreur' },
-              { name: 'Commerçant', path: '/commerçant' },
-              { name: 'Prestataire', path: '/prestataire' }
-            ]
-          },
-          'À propos': {
-            hasDropdown: false,
-            path: '/contact'
-          },
-          'Nous contacter': {
-            hasDropdown: false,
-            path: '/about'
-          }
-        },
-        showUserDropdown: false
-      }
-    },
-    computed: {
-      isAuthenticated() {
-        return authStore.isAuthenticated
-      },
-      user() {
-        return authStore.user
-      },
-      userProfilePath() {
-        if (!this.user || !this.user.type)
-          return '/';
-        const typeToPath = {
-          'CLIENT': '/client',
-          'LIVREUR': '/livreur',
-          'COMMERCANT': '/commerçant',
-          'PRESTATAIRE': '/prestataire'
-        };
-        return typeToPath[this.user.type] || '/';
-      }
-    },
-    methods: {
-      logout() {
-        authStore.clearAuth();
-        this.showUserDropdown = false;
-        this.$router.push('/');
-      },
-      toggleUserDropdown() {
-        this.showUserDropdown = !this.showUserDropdown;
-      }
-    },
-    mounted() {
-      authStore.initialize();
-    }
-  }
-</script>
-
 <template>
   <header class="header">
     <div>
@@ -91,13 +23,21 @@ export default {
           <i class="fas fa-tachometer-alt"></i> Dashboard
         </router-link>
 
-        <router-link v-if="user && user.type === 'CLIENT'" to="/client/annonces" class="dropdown-item">
-          <i class="fas fa-bullhorn"></i> Mes annonces
-        </router-link>
+        <template v-if="user && user.type === 'CLIENT'">
+          <router-link to="/client/annonces" class="dropdown-item">
+            <i class="fas fa-bullhorn"></i> Mes annonces
+          </router-link>
+        </template>
 
-        <router-link :to="userProfilePath" class="dropdown-item">
-          <i class="fas fa-id-card"></i> Mon profil
-        </router-link>
+        <template v-if="user && user.type === 'PRESTATAIRE'">
+          <router-link to="/prestataire/informations" class="dropdown-item">
+            <i class="fas fa-id-card"></i> Informations personnelles
+          </router-link>
+          <router-link to="/prestataire/profil" class="dropdown-item">
+            <i class="fas fa-user-edit"></i> Profil public
+          </router-link>
+        </template>
+
         <a href="#" @click.prevent="logout" class="dropdown-item logout">
           <i class="fas fa-sign-out-alt"></i> Déconnexion
         </a>
@@ -105,6 +45,74 @@ export default {
     </div>
   </header>
 </template>
+
+<script>
+import { authStore } from '@/store/auth'
+
+export default {
+  name: 'Header',
+  data() {
+    return {
+      menuItems: {
+        'Nos services': {
+          hasDropdown: false,
+          path: '/services'
+        },
+        'Profiles': {
+          hasDropdown: true,
+          items: [
+            { name: 'Client', path: '/client' },
+            { name: 'Livreur', path: '/livreur' },
+            { name: 'Commerçant', path: '/commerçant' },
+            { name: 'Prestataire', path: '/prestataire' }
+          ]
+        },
+        'À propos': {
+          hasDropdown: false,
+          path: '/contact'
+        },
+        'Nous contacter': {
+          hasDropdown: false,
+          path: '/about'
+        }
+      },
+      showUserDropdown: false
+    }
+  },
+  computed: {
+    isAuthenticated() {
+      return authStore.isAuthenticated
+    },
+    user() {
+      return authStore.user
+    },
+    userProfilePath() {
+      if (!this.user || !this.user.type)
+        return '/';
+      const typeToPath = {
+        'CLIENT': '/client',
+        'LIVREUR': '/livreur',
+        'COMMERCANT': '/commerçant',
+        'PRESTATAIRE': '/prestataire'
+      };
+      return typeToPath[this.user.type] || '/';
+    }
+  },
+  methods: {
+    logout() {
+      authStore.clearAuth();
+      this.showUserDropdown = false;
+      this.$router.push('/');
+    },
+    toggleUserDropdown() {
+      this.showUserDropdown = !this.showUserDropdown;
+    }
+  },
+  mounted() {
+    authStore.initialize();
+  }
+}
+</script>
 
 <style scoped>
 .header {
@@ -213,37 +221,16 @@ export default {
 
 .dropdown-item.logout {
   border-top: 1px solid #eee;
+  color: #e53935;
 }
 
-.dropdown-item.logout i {
-  color: #ff6b6b;
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  padding: 0.8rem 1rem;
-  color: #333;
-  text-decoration: none;
-  transition: background-color 0.3s;
-}
-
-.dropdown-item:hover {
-  background-color: #f5f5f5;
+.dropdown-item.logout:hover {
+  background-color: #ffebee;
 }
 
 .dropdown-item i {
   margin-right: 0.8rem;
   width: 1.2rem;
   text-align: center;
-}
-
-.dropdown-item.logout {
-  border-top: 1px solid #eee;
-  color: #e53935;
-}
-
-.dropdown-item.logout:hover {
-  background-color: #ffebee;
 }
 </style>
