@@ -19,6 +19,7 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Intege
            "WHEN :type = 'LIVREUR' THEN Livreur " +
            "WHEN :type = 'COMMERCANT' THEN Commercant " +
            "WHEN :type = 'PRESTATAIRE' THEN Prestataire " +
+           "WHEN :type = 'ADMIN' THEN Admin " +
            "END")
     List<Utilisateur> findByType(@Param("type") String type);
 

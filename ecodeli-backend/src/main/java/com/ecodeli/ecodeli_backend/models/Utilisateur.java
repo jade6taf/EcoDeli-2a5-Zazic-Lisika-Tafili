@@ -22,7 +22,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
     @JsonSubTypes.Type(value = Client.class, name = "CLIENT"),
     @JsonSubTypes.Type(value = Livreur.class, name = "LIVREUR"),
     @JsonSubTypes.Type(value = Commercant.class, name = "COMMERCANT"),
-    @JsonSubTypes.Type(value = Prestataire.class, name = "PRESTATAIRE")
+    @JsonSubTypes.Type(value = Prestataire.class, name = "PRESTATAIRE"),
+    @JsonSubTypes.Type(value = Admin.class, name = "ADMIN")
 })
 @Data
 @NoArgsConstructor
@@ -90,6 +91,8 @@ public abstract class Utilisateur {
             return "COMMERCANT";
         if (this instanceof Prestataire)
             return "PRESTATAIRE";
+        if (this instanceof Admin)
+            return "ADMIN";
         return null;
     }
 

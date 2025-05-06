@@ -21,6 +21,10 @@ public class LivraisonService {
         this.annonceRepository = annonceRepository;
     }
 
+    public List<Livraison> getAllLivraisons() {
+        return livraisonRepository.findAll();
+    }
+
     public List<Livraison> getLivraisonsByLivreur(Integer idLivreur) {
         return livraisonRepository.findByAnnonce_Livreur_IdUtilisateur(idLivreur);
     }

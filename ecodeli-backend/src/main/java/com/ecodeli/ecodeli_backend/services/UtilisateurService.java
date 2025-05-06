@@ -32,6 +32,22 @@ public class UtilisateurService {
         if (utilisateurRepository.existsByEmail(utilisateur.getEmail())) {
             throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
         }
+        String type = utilisateur.getType();
+        if ("ADMIN".equals(type) && !(utilisateur instanceof com.ecodeli.ecodeli_backend.models.Admin)) {
+            com.ecodeli.ecodeli_backend.models.Admin admin = new com.ecodeli.ecodeli_backend.models.Admin();
+            admin.setNom(utilisateur.getNom());
+            admin.setPrenom(utilisateur.getPrenom());
+            admin.setGenre(utilisateur.getGenre());
+            admin.setDateDeNaissance(utilisateur.getDateDeNaissance());
+            admin.setEmail(utilisateur.getEmail());
+            admin.setMotDePasse(utilisateur.getMotDePasse());
+            admin.setTelephone(utilisateur.getTelephone());
+            admin.setAdresse(utilisateur.getAdresse());
+            admin.setVille(utilisateur.getVille());
+            admin.setCodePostal(utilisateur.getCodePostal());
+            admin.setPays(utilisateur.getPays());
+            return utilisateurRepository.save(admin);
+        }
         return utilisateurRepository.save(utilisateur);
     }
 

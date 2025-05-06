@@ -49,7 +49,6 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
             if (passwordEncoder.matches(request.getPassword(), user.getMotDePasse())) {
-                // Générer un token JWT pour l'utilisateur authentifié
                 String token = jwtUtil.generateToken(user.getEmail(), user.getIdUtilisateur(), user.getType());
                 return ResponseEntity.ok(new JwtResponse(token, user));
             } else {
