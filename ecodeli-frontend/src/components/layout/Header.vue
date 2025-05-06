@@ -1,5 +1,7 @@
 <script>
-  export default {
+import { authStore } from '@/store/auth'
+
+export default {
     name: 'Header',
     data() {
       return {
@@ -26,12 +28,16 @@
             path: '/about'
           }
         },
-        isAuthenticated: false,
-        user: null,
         showUserDropdown: false
       }
     },
     computed: {
+      isAuthenticated() {
+        return authStore.isAuthenticated
+      },
+      user() {
+        return authStore.user
+      },
       userProfilePath() {
         if (!this.user || !this.user.type)
           return '/';
@@ -46,10 +52,7 @@
     },
     methods: {
       logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        this.isAuthenticated = false;
-        this.user = null;
+        authStore.clearAuth();
         this.showUserDropdown = false;
         this.$router.push('/');
       },
@@ -58,21 +61,7 @@
       }
     },
     mounted() {
-      const token = localStorage.getItem('token');
-      const user = localStorage.getItem('user');
-
-      if (token && user) {
-        this.isAuthenticated = true;
-        this.user = JSON.parse(user);
-      }
-      window.addEventListener('storage', (event) => {
-        if (event.key === 'token' || event.key === 'user') {
-          const token = localStorage.getItem('token');
-          const user = localStorage.getItem('user');
-          this.isAuthenticated = !!(token && user);
-          this.user = user ? JSON.parse(user) : null;
-        }
-      });
+      authStore.initialize();
     }
   }
 </script>
@@ -101,11 +90,11 @@
         <router-link :to="userProfilePath" class="dropdown-item">
           <i class="fas fa-tachometer-alt"></i> Dashboard
         </router-link>
-        
+
         <router-link v-if="user && user.type === 'CLIENT'" to="/client/annonces" class="dropdown-item">
           <i class="fas fa-bullhorn"></i> Mes annonces
         </router-link>
-        
+
         <router-link :to="userProfilePath" class="dropdown-item">
           <i class="fas fa-id-card"></i> Mon profil
         </router-link>

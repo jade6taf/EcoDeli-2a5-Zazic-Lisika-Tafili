@@ -67,6 +67,12 @@ const routes = [
     meta: { requiresAuth: true, role: 'CLIENT' }
   },
   {
+    path: '/client/services-types',
+    name: 'services-types',
+    component: () => import('./views/client/ServicesTypesView.vue'),
+    meta: { requiresAuth: true, role: 'CLIENT' }
+  },
+  {
     path: '/livreur',
     name: 'livreur-dashboard',
     component: () => import('./views/livreur/DashboardView.vue'),

@@ -1,4 +1,5 @@
 <script>
+
 export default {
   name: 'ClientDashboard',
   data() {
@@ -8,11 +9,20 @@ export default {
     }
   },
   mounted() {
+    this.isLoading = true;
     const userStr = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+
     if (userStr) {
       this.user = JSON.parse(userStr);
     } else {
       this.$router.push('/login');
+    }
+    this.isLoading = false;
+  },
+  methods: {
+    navigateTo(path) {
+      this.$router.push(path);
     }
   }
 }
@@ -31,6 +41,8 @@ export default {
         <h2>Bienvenue, {{ user.prenom }} {{ user.nom }}</h2>
         <p>Voici votre espace personnel pour gérer vos annonces et suivre vos activités.</p>
       </div>
+
+      <h3 class="section-title">Annonces de colis</h3>
       <div class="dashboard-actions">
         <router-link to="/client/annonces" class="dashboard-card">
           <i class="fas fa-bullhorn"></i>
@@ -42,6 +54,20 @@ export default {
           <h3>Créer une annonce</h3>
           <p>Publiez une nouvelle annonce</p>
         </router-link>
+      </div>
+
+      <h3 class="section-title">Services prestataires</h3>
+      <div class="dashboard-actions">
+        <div @click="navigateTo('/client/services-types')" class="dashboard-card">
+          <i class="fas fa-concierge-bell"></i>
+          <h3>Découvrir les services</h3>
+          <p>Explorez les services proposés par nos prestataires</p>
+        </div>
+        <div @click="navigateTo('/client/mes-services')" class="dashboard-card">
+          <i class="fas fa-tasks"></i>
+          <h3>Mes demandes de service</h3>
+          <p>Suivez l'état de vos demandes de services</p>
+        </div>
       </div>
     </div>
 
@@ -67,11 +93,19 @@ export default {
   border-left: 4px solid #4CAF50;
 }
 
+.section-title {
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
 .dashboard-actions {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
-  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .dashboard-card {
