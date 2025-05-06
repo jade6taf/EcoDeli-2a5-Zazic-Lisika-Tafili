@@ -1,4 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import AdminDashboard from './views/admin/DashboardView.vue'
+import AdminUserList from './views/admin/UserListView.vue'
+import AdminUserCreate from './views/admin/UserCreateView.vue'
+import AdminUserEdit from './views/admin/UserEditView.vue'
+import AdminAnnonceList from './views/admin/AnnonceListView.vue'
+import AdminLivraisonsList from './views/admin/LivraisonsListView.vue'
 
 const routes = [
   {
@@ -89,6 +95,42 @@ const routes = [
     name: 'livreur-livraisons',
     component: () => import('./views/livreur/MesLivraisonsView.vue'),
     meta: { requiresAuth: true, role: 'LIVREUR' }
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'admin-dashboard',
+    component: AdminDashboard,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/utilisateurs',
+    name: 'admin-users',
+    component: AdminUserList,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/utilisateurs/new',
+    name: 'admin-user-create',
+    component: AdminUserCreate,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/utilisateurs/:id/edit',
+    name: 'admin-user-edit',
+    component: AdminUserEdit,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/annonces',
+    name: 'admin-annonces',
+    component: AdminAnnonceList,
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/livraisons',
+    name: 'admin-livraisons',
+    component: AdminLivraisonsList,
+    meta: { requiresAuth: true, role: 'ADMIN' }
   }
 ]
 

@@ -18,13 +18,15 @@ export default {
         'CLIENT',
         'LIVREUR',
         'COMMERCANT',
-        'PRESTATAIRE'
+        'PRESTATAIRE',
+        'ADMIN'
       ],
       typeDisplay: {
         'CLIENT': 'Client',
         'LIVREUR': 'Livreur',
         'COMMERCANT': 'Commerçant',
-        'PRESTATAIRE': 'Prestataire'
+        'PRESTATAIRE': 'Prestataire',
+        'ADMIN': 'Administrateur'
       },
       error: null,
       loading: false,
@@ -79,7 +81,8 @@ export default {
           'CLIENT': '/client',
           'LIVREUR': '/livreur',
           'COMMERCANT': '/commercant',
-          'PRESTATAIRE': '/prestataire'
+          'PRESTATAIRE': '/prestataire',
+          'ADMIN': '/admin/dashboard'
         };
         const redirectPath = userTypeToPath[this.user.type] || '/';
         this.$router.push(redirectPath);
@@ -117,6 +120,7 @@ export default {
           <div class="profile-icon">
             <i :class="['fas',
               type === 'CLIENT' ? 'fa-user' :
+              type === 'ADMIN' ? 'fa-user' :
               type === 'LIVREUR' ? 'fa-bicycle' :
               type === 'COMMERCANT' ? 'fa-store' : 'fa-tools'
             ]"></i>
@@ -127,6 +131,7 @@ export default {
             <p v-else-if="type === 'LIVREUR'">Effectuez des livraisons et gagnez un revenu complémentaire</p>
             <p v-else-if="type === 'COMMERCANT'">Gérez votre commerce et vos produits en ligne</p>
             <p v-else-if="type === 'PRESTATAIRE'">Proposez vos services et compétences aux particuliers</p>
+            <p v-else-if="type === 'ADMIN'"> Devenez administrateur</p>
           </div>
         </div>
       </div>
