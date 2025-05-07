@@ -108,10 +108,6 @@ public class EntrepriseService {
         entrepriseRepository.deleteById(id);
     }
 
-    // public List<Entreprise> getEntreprisesByStatutJuridique(StatutJuridique statutJuridique) {
-    //     return entrepriseRepository.findByStatutJuridique(statutJuridique);
-    // }
-
     public List<Entreprise> getEntreprisesBySecteurActivite(String secteurActivite) {
         return entrepriseRepository.findBySecteurActivite(secteurActivite);
     }

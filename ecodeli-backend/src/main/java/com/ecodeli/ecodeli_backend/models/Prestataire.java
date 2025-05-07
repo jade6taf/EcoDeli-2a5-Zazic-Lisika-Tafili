@@ -5,6 +5,11 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @DiscriminatorValue("PRESTATAIRE")
@@ -20,8 +25,9 @@ public class Prestataire extends Utilisateur {
     @Pattern(regexp = "^[0-9]{14}$", message = "Le numéro SIRET doit contenir 14 chiffres")
     private String siret;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "domaine_expertise")
-    private String domaineExpertise;
+    private ServiceType domaineExpertise;
 
     @Column(name = "zone_intervention", columnDefinition = "TEXT")
     private String zoneIntervention;
@@ -31,4 +37,18 @@ public class Prestataire extends Utilisateur {
 
     @Column(name = "tarif_horaire")
     private Double tarifHoraire;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @ElementCollection
+    @CollectionTable(name = "disponibilites_prestataire",
+        joinColumns = @JoinColumn(name = "id_prestataire"))
+    private Set<LocalDateTime> disponibilites = new HashSet<>();
+
+    @OneToMany(mappedBy = "prestataire")
+    private List<Evaluation> evaluations = new ArrayList<>();
 }

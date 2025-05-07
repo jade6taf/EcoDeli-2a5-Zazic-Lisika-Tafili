@@ -29,7 +29,7 @@ public class Entrepot {
     @Column(name = "ville", length = 100)
     private String ville;
 
-    public enum StatutEntrepot {  // De base une 'status' -> string, donc a modifier bdd
+    public enum StatutEntrepot {
         ACTIF,
         INACTIF,
         EN_MAINTENANCE,

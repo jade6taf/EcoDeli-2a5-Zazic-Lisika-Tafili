@@ -18,8 +18,6 @@ public interface EntrepriseRepository extends JpaRepository<Entreprise, Integer>
 
     boolean existsByEmail(String email);
 
-    // List<Entreprise> findByStatutJuridique(StatutJuridique statutJuridique);
-
     List<Entreprise> findBySecteurActivite(String secteurActivite);
 
     List<Entreprise> findByVille(String ville);

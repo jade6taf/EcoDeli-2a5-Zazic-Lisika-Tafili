@@ -1,6 +1,4 @@
-import authService from './authService';
-
-const API_BASE_URL = 'http://localhost:8080/api/';
+import authService from './authServices';
 
 export default {
 
@@ -10,19 +8,22 @@ export default {
             'Content-Type': 'application/json',
             ...options.headers
         };
-
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            ...options,
-            headers
-        });
-        if (response.status === 401) {
-            authService.logout();
-            throw new Error('Session expirée, veuillez vous reconnecter');
+        try {
+            const response = await fetch(`${'http://localhost:8080/api/'}${endpoint}`, {
+                ...options,
+                headers
+            });
+            if (response.status === 401) {
+                authService.logout();
+                throw new Error('Session expirée, veuillez vous reconnecter');
+            }
+            return response;
+        } catch (error) {
+            throw error;
         }
-        return response;
     },
 
     async get(endpoint) {
@@ -47,5 +48,18 @@ export default {
         return this.fetch(endpoint, {
         method: 'DELETE'
         });
+    },
+
+    async getPrestatairesByServiceType(serviceType) {
+        try {
+            const response = await this.get(`prestataires/by-service/${serviceType}`);
+            if (!response.ok) {
+                throw new Error(`Erreur lors de la récupération des prestataires: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Erreur lors de la récupération des prestataires:', error);
+            throw error;
+        }
     }
 };
