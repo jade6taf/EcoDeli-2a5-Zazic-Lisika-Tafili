@@ -49,6 +49,35 @@ public class PrestataireController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody Prestataire prestataireDetails) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return utilisateurService.getUtilisateurByEmail(email)
+                .map(user -> {
+                    if (user instanceof Prestataire) {
+                        Prestataire prestataire = (Prestataire) user;
+                        // Mettre à jour uniquement les champs du profil public
+                        if (prestataireDetails.getDomaineExpertise() != null)
+                            prestataire.setDomaineExpertise(prestataireDetails.getDomaineExpertise());
+                        if (prestataireDetails.getZoneIntervention() != null)
+                            prestataire.setZoneIntervention(prestataireDetails.getZoneIntervention());
+                        if (prestataireDetails.getDisponible() != null)
+                            prestataire.setDisponible(prestataireDetails.getDisponible());
+                        if (prestataireDetails.getTarifHoraire() != null)
+                            prestataire.setTarifHoraire(prestataireDetails.getTarifHoraire());
+                        if (prestataireDetails.getDescription() != null)
+                            prestataire.setDescription(prestataireDetails.getDescription());
+                        if (prestataireDetails.getImageUrl() != null)
+                            prestataire.setImageUrl(prestataireDetails.getImageUrl());
+
+                        Prestataire updated = (Prestataire) utilisateurService.updateUtilisateur(prestataire.getIdUtilisateur(), prestataire);
+                        return new ResponseEntity<>(updated, HttpStatus.OK);
+                    }
+                    return new ResponseEntity<>("Utilisateur non autorisé", HttpStatus.FORBIDDEN);
+                })
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getPrestataire(@PathVariable Integer id) {
         return utilisateurService.getUtilisateurById(id)
