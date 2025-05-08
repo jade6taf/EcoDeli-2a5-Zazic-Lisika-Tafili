@@ -1,81 +1,68 @@
-# EcoDeli Frontend
+# Documentation Technique Frontend EcoDeli
 
-EcoDeli Frontend est une application web moderne développée avec Vue 3 et Vite, offrant une interface intuitive pour la plateforme de livraison durable EcoDeli. Elle permet aux clients, livreurs et commerçants d’interagir efficacement avec le système : gestion des annonces, suivi des livraisons, authentification sécurisée, et bien plus.
+## 1. Vue d'ensemble technique
 
----
+### Architecture Vue.js
+- Framework : Vue.js 3
+- Build tool : Vite
+- Structure modulaire avec séparation claire des responsabilités
+- Organisation en composants réutilisables
 
-## Table des matières
-
-- [Fonctionnalités principales](#fonctionnalités-principales)
-- [Structure du projet](#structure-du-projet)
-- [Démarrage rapide](#démarrage-rapide)
-- [Informations utiles](#informations-utiles)
-
----
-
-## Fonctionnalités principales
-
-- Authentification et gestion des profils utilisateurs (clients, livreurs, commerçants)
-- Création, édition et consultation d’annonces de livraison
-- Tableau de bord personnalisé selon le rôle
-- Suivi des livraisons en temps réel
-- Consultation des services et informations sur la plateforme
-- Interface responsive et ergonomique
-
----
-
-## Structure du projet
-
+### Structure des composants
 ```
-ecodeli-frontend/
-├── public/                     # Fichiers statiques (favicon, etc.)
-├── src/
-│   ├── assets/                 # Images et ressources statiques
-│   ├── components/             # Composants Vue réutilisables (ex : Header)
-│   │   └── layout/
-│   ├── services/               # Services d’accès à l’API (auth, données)
-│   ├── views/                  # Pages principales (Home, Login, Dashboard, etc.)
-│   │   ├── client/             # Vues spécifiques au client
-│   │   └── livreur/            # Vues spécifiques au livreur
-│   ├── App.vue                 # Composant racine
-│   ├── main.js                 # Point d’entrée de l’application
-│   └── router.js               # Configuration du routage
-├── package.json                # Dépendances et scripts npm
-├── vite.config.js              # Configuration Vite
-└── README.md                   # Documentation du projet
+src/
+├── components/         # Composants réutilisables
+│   ├── layout/        # Composants de mise en page
+│   └── DeliveryMap    # Composant de carte
+├── views/             # Pages de l'application
+│   ├── admin/         # Interface administrateur
+│   ├── client/        # Interface client
+│   ├── livreur/       # Interface livreur
+│   └── prestataire/   # Interface prestataire
+├── services/          # Services API et Auth
+├── store/             # Gestion d'état
+└── assets/            # Ressources statiques
 ```
 
----
+### Gestion d'état
+- Utilisation du store pour la gestion globale de l'état
+- Module auth.js pour la gestion de l'authentification
+- État local des composants pour les données spécifiques
 
-## Démarrage rapide
+### Routing et navigation
+- Configuration centralisée dans `router.js`
+- Routes protégées par rôle utilisateur
+- Gestion des layouts par type d'utilisateur
+- Navigation dynamique selon les permissions
 
-### Prérequis
+### Intégration backend
+- Services API centralisés dans `apiServices.js`
+- Intercepteurs pour gestion des tokens
+- Gestion des erreurs HTTP
+- Communication REST avec le backend Spring Boot
 
-- Node.js 18+ recommandé
-- npm 9+ ou yarn
+## 2. Sécurité côté client
 
-### Installation & Lancement
+### Gestion des tokens JWT
+- Stockage sécurisé des tokens dans le localStorage
+- Refresh automatique des tokens
+- Déconnexion automatique à expiration
+- Intercepteurs axios pour injection automatique
+
+### Gestion des sessions
+- Timeout automatique
+- Refresh token workflow
+- Stockage sécurisé des données de session
+- Nettoyage à la déconnexion
+
+
+### 3. Process de build
 
 ```bash
-# Cloner le dépôt
-git clone https://github.com/your-org/ecodeli-frontend.git
-cd ecodeli-frontend
-
-# Installer les dépendances
+# Installation
 npm install
 
-# Lancer l’application en développement
+# Développement
 npm run dev
+
 ```
-
-L’application sera accessible sur [http://localhost:5173](http://localhost:5173) (ou le port affiché en console).
-
----
-
-## Informations utiles
-
-- **Documentation Vue** : [https://vuejs.org/](https://vuejs.org/)
-- **Documentation Vite** : [https://vitejs.dev/](https://vitejs.dev/)
-- **Charte graphique et maquettes** : voir `/docs/UI:UX/`
-
-Pour toute question, contactez l’équipe projet !
