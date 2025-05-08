@@ -2,14 +2,11 @@ package com.ecodeli.ecodeli_backend.controllers;
 
 import com.ecodeli.ecodeli_backend.models.Prestataire;
 import com.ecodeli.ecodeli_backend.models.ServiceType;
-import com.ecodeli.ecodeli_backend.models.Utilisateur;
 import com.ecodeli.ecodeli_backend.services.UtilisateurService;
 import org.springframework.security.core.context.SecurityContextHolder;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
