@@ -1,6 +1,11 @@
 <script>
+import DeliveryMap from '@/components/DeliveryMap.vue';
+
 export default {
   name: 'AnnonceDetailView',
+  components: {
+    DeliveryMap
+  },
   data() {
     return {
       annonce: null,
@@ -22,9 +27,7 @@ export default {
       return this.annonce && this.annonce.statut ? labels[this.annonce.statut] : null;
     },
     canEdit() {
-      return this.user && this.annonce && 
-             this.user.idUtilisateur === this.annonce.expediteur.idUtilisateur &&
-             this.annonce.statut === 'PUBLIEE';
+      return this.user && this.annonce && this.user.idUtilisateur === this.annonce.expediteur.idUtilisateur && this.annonce.statut === 'PUBLIEE';
     }
   },
   methods: {
@@ -57,7 +60,6 @@ export default {
         this.annonce = await response.json();
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
-        console.error('Erreur:', err);
       } finally {
         this.isLoading = false;
       }
@@ -195,6 +197,17 @@ export default {
             <p>{{ annonce.adresseFin }}</p>
           </div>
         </div>
+      </div>
+
+      <!-- Section Carte -->
+      <div class="annonce-section">
+        <h3>Carte de la Livraison</h3>
+        <delivery-map
+          :start-latitude="Number(annonce.latitudeEnvoi)"
+          :start-longitude="Number(annonce.longitudeEnvoi)"
+          :end-latitude="Number(annonce.latitudeLivraison)"
+          :end-longitude="Number(annonce.longitudeLivraison)"
+        ></delivery-map>
       </div>
 
       <div class="annonce-section" v-if="annonce.colis">
