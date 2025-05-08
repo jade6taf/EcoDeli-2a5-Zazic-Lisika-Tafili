@@ -17,30 +17,6 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 public class Prestataire extends Utilisateur {
-    // Getters
-    public String getNomEntreprise() { return nomEntreprise; }
-    public String getSiret() { return siret; }
-    public ServiceType getDomaineExpertise() { return domaineExpertise; }
-    public String getZoneIntervention() { return zoneIntervention; }
-    public Boolean getDisponible() { return disponible; }
-    public Double getTarifHoraire() { return tarifHoraire; }
-    public String getImageUrl() { return imageUrl; }
-    public String getDescription() { return description; }
-    public Set<LocalDateTime> getDisponibilites() { return disponibilites; }
-    public List<Evaluation> getEvaluations() { return evaluations; }
-
-    // Setters
-    public void setNomEntreprise(String nomEntreprise) { this.nomEntreprise = nomEntreprise; }
-    public void setSiret(String siret) { this.siret = siret; }
-    public void setDomaineExpertise(ServiceType domaineExpertise) { this.domaineExpertise = domaineExpertise; }
-    public void setZoneIntervention(String zoneIntervention) { this.zoneIntervention = zoneIntervention; }
-    public void setDisponible(Boolean disponible) { this.disponible = disponible; }
-    public void setTarifHoraire(Double tarifHoraire) { this.tarifHoraire = tarifHoraire; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    public void setDescription(String description) { this.description = description; }
-    public void setDisponibilites(Set<LocalDateTime> disponibilites) { this.disponibilites = disponibilites; }
-    public void setEvaluations(List<Evaluation> evaluations) { this.evaluations = evaluations; }
-
     @NotBlank(message = "Le nom de l'entreprise est obligatoire")
     @Column(name = "nom_entreprise", nullable = false)
     private String nomEntreprise;

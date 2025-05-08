@@ -1,3 +1,109 @@
+<script>
+export default {
+  name: 'VoirProfilPublicView',
+  data() {
+    return {
+      servicesTypes: [],
+      prestataire: {
+        nomEntreprise: '',
+        domaineExpertise: '',
+        zoneIntervention: '',
+        tarifHoraire: 0,
+        disponible: false,
+        description: '',
+        evaluations: []
+      },
+      page: 1,
+      messageForm: {
+        contenu: ''
+      },
+      sending: false
+    }
+  },
+  computed: {
+    averageRating() {
+      if (!this.prestataire.evaluations.length) return 0;
+      const sum = this.prestataire.evaluations.reduce((acc, eval) => acc + eval.note, 0);
+      return (sum / this.prestataire.evaluations.length).toFixed(1);
+    },
+    evaluations() {
+      return this.prestataire.evaluations
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, this.page * 5);
+    },
+    hasMoreReviews() {
+      return this.prestataire.evaluations.length > this.page * 5;
+    }
+  },
+  methods: {
+    async loadPrestataireData() {
+      try {
+        const response = await fetch(`/api/prestataires/${this.$route.params.id}`);
+        const data = await response.json();
+        this.prestataire = data;
+      } catch (error) {
+        console.error('Erreur lors du chargement du profil:', error);
+      }
+    },
+    async loadServicesTypes() {
+      try {
+        const response = await fetch('/api/prestataires/services-types');
+        const data = await response.json();
+        this.servicesTypes = data;
+      } catch (error) {
+        console.error('Erreur lors du chargement des types de services:', error);
+      }
+    },
+    getServiceLibelle(code) {
+      const service = this.servicesTypes.find(s => s.code === code);
+      return service ? service.libelle : code;
+    },
+    formatDate(date) {
+      return new Date(date).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    },
+    loadMoreReviews() {
+      this.page++;
+    },
+    async sendMessage() {
+      if (!this.messageForm.contenu.trim()) return;
+
+      this.sending = true;
+      try {
+        const response = await fetch(`/api/messages/prestataire/${this.$route.params.id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(this.messageForm)
+        });
+
+        if (response.ok) {
+          this.messageForm.contenu = '';
+          alert('Message envoyé avec succès !');
+        } else {
+          throw new Error('Erreur lors de l\'envoi du message');
+        }
+      } catch (error) {
+        alert('Une erreur est survenue lors de l\'envoi du message');
+      } finally {
+        this.sending = false;
+      }
+    }
+  },
+  async created() {
+    await Promise.all([
+      this.loadPrestataireData(),
+      this.loadServicesTypes()
+    ]);
+  }
+}
+</script>
+
 <template>
   <div class="profile-container">
     <div class="profile-header">
@@ -107,113 +213,6 @@
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'VoirProfilPublicView',
-  data() {
-    return {
-      servicesTypes: [],
-      prestataire: {
-        nomEntreprise: '',
-        domaineExpertise: '',
-        zoneIntervention: '',
-        tarifHoraire: 0,
-        disponible: false,
-        description: '',
-        evaluations: []
-      },
-      page: 1,
-      messageForm: {
-        contenu: ''
-      },
-      sending: false
-    }
-  },
-  computed: {
-    averageRating() {
-      if (!this.prestataire.evaluations.length) return 0;
-      const sum = this.prestataire.evaluations.reduce((acc, eval) => acc + eval.note, 0);
-      return (sum / this.prestataire.evaluations.length).toFixed(1);
-    },
-    evaluations() {
-      return this.prestataire.evaluations
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, this.page * 5);
-    },
-    hasMoreReviews() {
-      return this.prestataire.evaluations.length > this.page * 5;
-    }
-  },
-  methods: {
-    async loadPrestataireData() {
-      try {
-        const response = await fetch(`/api/prestataires/${this.$route.params.id}`);
-        const data = await response.json();
-        this.prestataire = data;
-      } catch (error) {
-        console.error('Erreur lors du chargement du profil:', error);
-      }
-    },
-    async loadServicesTypes() {
-      try {
-        const response = await fetch('/api/prestataires/services-types');
-        const data = await response.json();
-        this.servicesTypes = data;
-      } catch (error) {
-        console.error('Erreur lors du chargement des types de services:', error);
-      }
-    },
-    getServiceLibelle(code) {
-      const service = this.servicesTypes.find(s => s.code === code);
-      return service ? service.libelle : code;
-    },
-    formatDate(date) {
-      return new Date(date).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-    },
-    loadMoreReviews() {
-      this.page++;
-    },
-    async sendMessage() {
-      if (!this.messageForm.contenu.trim()) return;
-      
-      this.sending = true;
-      try {
-        const response = await fetch(`/api/messages/prestataire/${this.$route.params.id}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify(this.messageForm)
-        });
-
-        if (response.ok) {
-          this.messageForm.contenu = '';
-          alert('Message envoyé avec succès !');
-        } else {
-          throw new Error('Erreur lors de l\'envoi du message');
-        }
-      } catch (error) {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors de l\'envoi du message');
-      } finally {
-        this.sending = false;
-      }
-    }
-  },
-  async created() {
-    await Promise.all([
-      this.loadPrestataireData(),
-      this.loadServicesTypes()
-    ]);
-  }
-}
-</script>
 
 <style scoped>
 .profile-container {

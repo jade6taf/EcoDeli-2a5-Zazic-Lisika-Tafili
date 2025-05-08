@@ -2,6 +2,7 @@ package com.ecodeli.ecodeli_backend.controllers;
 
 import com.ecodeli.ecodeli_backend.models.Prestataire;
 import com.ecodeli.ecodeli_backend.models.ServiceType;
+import com.ecodeli.ecodeli_backend.models.Utilisateur;
 import com.ecodeli.ecodeli_backend.services.UtilisateurService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.validation.Valid;
@@ -18,6 +19,12 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:5173")
 public class PrestataireController {
 
+    private final UtilisateurService utilisateurService;
+
+    public PrestataireController(UtilisateurService utilisateurService) {
+        this.utilisateurService = utilisateurService;
+    }
+
     @GetMapping("/services-types")
     public ResponseEntity<List<Map<String, String>>> getServicesTypes() {
         List<Map<String, String>> services = Arrays.stream(ServiceType.values())
@@ -27,13 +34,6 @@ public class PrestataireController {
             ))
             .collect(Collectors.toList());
         return new ResponseEntity<>(services, HttpStatus.OK);
-    }
-
-
-    private final UtilisateurService utilisateurService;
-
-    public PrestataireController(UtilisateurService utilisateurService) {
-        this.utilisateurService = utilisateurService;
     }
 
     @GetMapping("/profile")
@@ -56,7 +56,6 @@ public class PrestataireController {
                 .map(user -> {
                     if (user instanceof Prestataire) {
                         Prestataire prestataire = (Prestataire) user;
-                        // Mettre à jour uniquement les champs du profil public
                         if (prestataireDetails.getDomaineExpertise() != null)
                             prestataire.setDomaineExpertise(prestataireDetails.getDomaineExpertise());
                         if (prestataireDetails.getZoneIntervention() != null)
@@ -90,4 +89,19 @@ public class PrestataireController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping("/by-service/{serviceType}")
+    public ResponseEntity<?> getPrestatairesByServiceType(@PathVariable ServiceType serviceType) {
+        List<Prestataire> prestataires = utilisateurService.getAllUtilisateurs().stream()
+            .filter(user -> user instanceof Prestataire)
+            .map(user -> (Prestataire) user)
+            .filter(prestataire -> prestataire.getDomaineExpertise() == serviceType
+                && (prestataire.getDisponible() != null && prestataire.getDisponible()))
+            .collect(Collectors.toList());
+
+        if (prestataires.isEmpty()) {
+            return new ResponseEntity<>("Aucun prestataire trouvé pour ce type de service", HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(prestataires, HttpStatus.OK);
+    }
 }

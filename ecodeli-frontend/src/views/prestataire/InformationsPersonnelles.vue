@@ -1,3 +1,68 @@
+<script>
+import apiServices from '@/services/apiServices';
+import { authStore } from '@/store/auth';
+
+export default {
+  name: 'InformationsPersonnelles',
+  data() {
+    return {
+      userData: {
+        email: '',
+        nom: '',
+        prenom: '',
+        telephone: '',
+        nomEntreprise: '',
+        siret: ''
+      }
+    }
+  },
+  methods: {
+    async loadUserData() {
+      try {
+        if (!authStore.isAuthenticated) {
+          this.$router.push('/login');
+          return;
+        }
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Token non trouvé');
+        }
+        const response = await fetch('http://localhost:8080/api/prestataires/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Erreur ${response.status}: ${errorText || response.statusText}`);
+        }
+        const data = await response.json();
+        this.userData = {
+          email: data.email || '',
+          nom: data.nom || '',
+          prenom: data.prenom || '',
+          telephone: data.telephone || '',
+          nomEntreprise: data.nomEntreprise || '',
+          siret: data.siret || ''
+        };
+      } catch (error) {
+        if (error.message.includes('session') || error.message.includes('reconnecter')) {
+          authStore.clearAuth();
+          this.$router.push('/login');
+        }
+      }
+    }
+  },
+  created() {
+    if (!authStore.isAuthenticated) {
+      this.$router.push('/login');
+      return;
+    }
+    this.loadUserData();
+  }
+}
+</script>
 
 <template>
   <div class="informations-container">
@@ -40,89 +105,6 @@
     </div>
   </div>
 </template>
-
-<script>
-import apiServices from '@/services/apiServices';
-import { authStore } from '@/store/auth';
-
-export default {
-  name: 'InformationsPersonnelles',
-  data() {
-    return {
-      userData: {
-        email: '',
-        nom: '',
-        prenom: '',
-        telephone: '',
-        nomEntreprise: '',
-        siret: ''
-      }
-    }
-  },
-  methods: {
-    async loadUserData() {
-      try {
-        if (!authStore.isAuthenticated) {
-          this.$router.push('/login');
-          return;
-        }
-
-        // Récupérer le token de localStorage
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('Token non trouvé');
-        }
-
-        console.log('Token utilisé:', token);
-
-        const response = await fetch('http://localhost:8080/api/prestataires/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        // Log de la réponse pour le débogage
-        console.log('Status de la réponse:', response.status);
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Réponse du serveur:', {
-            status: response.status,
-            statusText: response.statusText,
-            headers: Object.fromEntries(response.headers.entries()),
-            body: errorText
-          });
-          throw new Error(`Erreur ${response.status}: ${errorText || response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log('Données reçues:', data);
-        this.userData = {
-          email: data.email || '',
-          nom: data.nom || '',
-          prenom: data.prenom || '',
-          telephone: data.telephone || '',
-          nomEntreprise: data.nomEntreprise || '',
-          siret: data.siret || ''
-        };
-      } catch (error) {
-        console.error('Erreur lors du chargement des informations:', error);
-        if (error.message.includes('session') || error.message.includes('reconnecter')) {
-          authStore.clearAuth();
-          this.$router.push('/login');
-        }
-      }
-    }
-  },
-  created() {
-    if (!authStore.isAuthenticated) {
-      this.$router.push('/login');
-      return;
-    }
-    this.loadUserData();
-  }
-}
-</script>
 
 <style scoped>
 .informations-container {
@@ -192,11 +174,11 @@ p {
   .informations-card {
     padding: 1rem;
   }
-  
+
   h1 {
     font-size: 1.5rem;
   }
-  
+
   h2 {
     font-size: 1.1rem;
   }

@@ -1,3 +1,67 @@
+<script>
+import apiServices from '@/services/apiServices';
+
+export default {
+  name: 'DashboardView',
+  data() {
+    return {
+      prestataire: {
+        nomEntreprise: '',
+        tarifHoraire: 0,
+        evaluations: []
+      },
+      disponible: false,
+      prestationsCompletees: 0
+    }
+  },
+  computed: {
+    averageRating() {
+      if (!this.prestataire.evaluations.length) return 0;
+      const sum = this.prestataire.evaluations.reduce((acc, evaluation) => acc + evaluation.note, 0);
+      return (sum / this.prestataire.evaluations.length).toFixed(1);
+    },
+    recentEvaluations() {
+      return this.prestataire.evaluations
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 3);
+    }
+  },
+  methods: {
+    async loadPrestataireData() {
+      try {
+        const response = await apiServices.get('prestataires/profile');
+        const data = await response.json();
+        this.prestataire = data;
+        this.disponible = data.disponible;
+      } catch (error) {
+        console.error('Erreur lors du chargement du profil:', error);
+      }
+    },
+    async updateDisponibilite() {
+      try {
+        const response = await apiServices.put('prestataires/disponibilite', { disponible: this.disponible });
+        if (!response.ok) {
+          throw new Error('Erreur lors de la mise à jour de la disponibilité');
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        this.disponible = !this.disponible;
+      }
+    },
+    formatDate(date) {
+      return new Date(date).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+  },
+  created() {
+    this.loadPrestataireData();
+  }
+}
+</script>
+
 <template>
   <div class="dashboard-container">
     <div class="dashboard-header">
@@ -68,70 +132,6 @@
     </div>
   </div>
 </template>
-
-<script>
-import apiServices from '@/services/apiServices';
-
-export default {
-  name: 'DashboardView',
-  data() {
-    return {
-      prestataire: {
-        nomEntreprise: '',
-        tarifHoraire: 0,
-        evaluations: []
-      },
-      disponible: false,
-      prestationsCompletees: 0
-    }
-  },
-  computed: {
-    averageRating() {
-      if (!this.prestataire.evaluations.length) return 0;
-      const sum = this.prestataire.evaluations.reduce((acc, evaluation) => acc + evaluation.note, 0);
-      return (sum / this.prestataire.evaluations.length).toFixed(1);
-    },
-    recentEvaluations() {
-      return this.prestataire.evaluations
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 3);
-    }
-  },
-  methods: {
-    async loadPrestataireData() {
-      try {
-        const response = await apiServices.get('prestataires/profile');
-        const data = await response.json();
-        this.prestataire = data;
-        this.disponible = data.disponible;
-      } catch (error) {
-        console.error('Erreur lors du chargement du profil:', error);
-      }
-    },
-    async updateDisponibilite() {
-      try {
-        const response = await apiServices.put('prestataires/disponibilite', { disponible: this.disponible });
-        if (!response.ok) {
-          throw new Error('Erreur lors de la mise à jour de la disponibilité');
-        }
-      } catch (error) {
-        console.error('Erreur:', error);
-        this.disponible = !this.disponible; // Revert change on error
-      }
-    },
-    formatDate(date) {
-      return new Date(date).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-    }
-  },
-  created() {
-    this.loadPrestataireData();
-  }
-}
-</script>
 
 <style scoped>
 .dashboard-container {

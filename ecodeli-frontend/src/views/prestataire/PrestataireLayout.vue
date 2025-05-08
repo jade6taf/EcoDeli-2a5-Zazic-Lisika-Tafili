@@ -1,24 +1,30 @@
+<script>
+export default {
+  name: 'PrestataireLayout'
+}
+</script>
+
 <template>
   <div class="prestataire-layout">
     <nav class="prestataire-nav">
-      <router-link 
-        to="/prestataire" 
+      <router-link
+        to="/prestataire"
         class="nav-item"
         :class="{ active: $route.name === 'prestataire-dashboard' }"
       >
         <i class="fas fa-tachometer-alt"></i>
         Tableau de bord
       </router-link>
-      <router-link 
-        to="/prestataire/informations" 
+      <router-link
+        to="/prestataire/informations"
         class="nav-item"
         :class="{ active: $route.name === 'prestataire-informations' }"
       >
         <i class="fas fa-id-card"></i>
         Informations personnelles
       </router-link>
-      <router-link 
-        to="/prestataire/profil" 
+      <router-link
+        to="/prestataire/profil"
         class="nav-item"
         :class="{ active: $route.name === 'prestataire-profil' }"
       >
@@ -31,12 +37,6 @@
     </main>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'PrestataireLayout'
-}
-</script>
 
 <style scoped>
 .prestataire-layout {

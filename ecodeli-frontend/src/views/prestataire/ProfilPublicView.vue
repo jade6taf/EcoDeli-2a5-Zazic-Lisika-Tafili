@@ -94,11 +94,11 @@ export default {
 <template>
   <div class="profile-container">
     <h1>Profil public</h1>
-    
+
     <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-error']">
       {{ message }}
     </div>
-    
+
     <div class="action-buttons">
       <button v-if="!editing" class="btn-edit" @click="toggleEdit">Modifier mon profil</button>
       <template v-else>
@@ -108,7 +108,7 @@ export default {
         <button class="btn-cancel" @click="cancelEdit">Annuler</button>
       </template>
     </div>
-    
+
     <div v-if="!editing" class="preview-card">
       <div class="preview-header">
         <h3>{{ prestataire.nomEntreprise }}</h3>
@@ -132,7 +132,7 @@ export default {
         <p>{{ prestataire.description || 'Aucune description' }}</p>
       </div>
     </div>
-    
+
     <div v-else class="edit-form">
       <div class="form-group">
         <label for="domaine">Domaine d'expertise</label>
@@ -142,27 +142,27 @@ export default {
           </option>
         </select>
       </div>
-      
+
       <div class="form-group">
         <label for="zone">Zone d'intervention</label>
         <input type="text" id="zone" v-model="prestataire.zoneIntervention" placeholder="Ex: Paris, Île-de-France">
       </div>
-      
+
       <div class="form-group">
         <label for="tarif">Tarif horaire (€)</label>
         <input type="number" id="tarif" v-model="prestataire.tarifHoraire" min="0" step="0.01">
       </div>
-      
+
       <div class="form-group">
         <label for="imageUrl">URL de votre image de profil</label>
         <input type="text" id="imageUrl" v-model="prestataire.imageUrl" placeholder="https://...">
       </div>
-      
+
       <div class="form-group">
         <label for="description">Description de vos services</label>
         <textarea id="description" v-model="prestataire.description" rows="5" placeholder="Décrivez vos services et votre expertise..."></textarea>
       </div>
-      
+
       <div class="form-group checkbox-group">
         <label>
           <input type="checkbox" v-model="prestataire.disponible">
