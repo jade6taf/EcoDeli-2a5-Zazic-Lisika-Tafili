@@ -7,7 +7,8 @@ export default {
       user: null,
       isLoading: true,
       error: null,
-      activeTab: 'en-cours'
+      activeTab: 'en-cours',
+      otpInputs: {}
     }
   },
     computed: {
@@ -16,6 +17,7 @@ export default {
             'EN_ATTENTE_VALIDATION': { text: 'En attente', class: 'status-pending' },
             'VALIDEE': { text: 'Validée', class: 'status-validated' },
             'EN_COURS': { text: 'En cours', class: 'status-in-progress' },
+            'ARRIVED': { text: 'Arrivé (attente OTP)', class: 'status-arrived' },
             'TERMINEE': { text: 'Terminée', class: 'status-completed' },
             'ANNULEE': { text: 'Annulée', class: 'status-cancelled' }
         }
@@ -25,7 +27,8 @@ export default {
             return this.livraisons.filter(livraison =>
             livraison.statut === 'EN_ATTENTE_VALIDATION' ||
             livraison.statut === 'VALIDEE' ||
-            livraison.statut === 'EN_COURS'
+            livraison.statut === 'EN_COURS' ||
+            livraison.statut === 'ARRIVED'
             );
         } else if (this.activeTab === 'terminées') {
             return this.livraisons.filter(livraison =>
@@ -103,6 +106,52 @@ export default {
         console.error('Erreur:', err);
       }
     },
+    async arriverALivraison(idLivraison) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/livraisons/${idLivraison}/arriver`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Erreur lors de la mise à jour du statut "Arrivé".' }));
+          throw new Error(errorData.message || 'Erreur lors de la mise à jour du statut "Arrivé".');
+        }
+        await this.fetchLivraisons();
+        alert('Statut mis à jour à "Arrivé". Un OTP a été envoyé au destinataire.');
+      } catch (err) {
+        alert(err.message || 'Une erreur est survenue.');
+        console.error('Erreur:', err);
+      }
+    },
+    async confirmerParOtp(idLivraison) {
+      const otp = this.otpInputs[idLivraison];
+      if (!otp || otp.length !== 6) {
+        alert('Veuillez saisir un code OTP à 6 chiffres.');
+        return;
+      }
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/livraisons/${idLivraison}/confirmer-otp`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ otp })
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'OTP incorrect ou expiré.' }));
+          throw new Error(errorData.message || 'OTP incorrect ou expiré.');
+        }
+        this.otpInputs[idLivraison] = '';
+        await this.fetchLivraisons();
+        alert('Livraison confirmée avec succès !');
+      } catch (err) {
+        alert(err.message || 'Une erreur est survenue.');
+        console.error('Erreur:', err);
+      }
+    },
     async terminerLivraison(idLivraison) {
       try {
         const token = localStorage.getItem('token');
@@ -117,7 +166,7 @@ export default {
           throw new Error(errorData || 'Erreur lors de la finalisation de la livraison');
         }
         this.fetchLivraisons();
-        alert('La livraison a été marquée comme terminée!');
+        alert('La livraison a été marquée comme terminée (action manuelle)!');
       } catch (err) {
         alert(err.message || 'Une erreur est survenue');
         console.error('Erreur:', err);
@@ -249,12 +298,30 @@ export default {
                 class="btn-action btn-start">
                 <i class="fas fa-play"></i> Démarrer la livraison
             </button>
+            <!-- Nouveau bouton "Je suis arrivé" -->
             <button
                 v-if="livraison.statut === 'EN_COURS'"
-                @click="terminerLivraison(livraison.idLivraison)"
-                class="btn-action btn-complete">
-                <i class="fas fa-check"></i> Terminer la livraison
+                @click="arriverALivraison(livraison.idLivraison)"
+                class="btn-action btn-arrived">
+                <i class="fas fa-map-marker-alt"></i> Je suis arrivé
             </button>
+
+            <!-- Section OTP si statut ARRIVED -->
+            <div v-if="livraison.statut === 'ARRIVED'" class="otp-section">
+              <input
+                type="text"
+                v-model="otpInputs[livraison.idLivraison]"
+                placeholder="Code OTP (6 chiffres)"
+                maxlength="6"
+                class="otp-input"
+              />
+              <button
+                @click="confirmerParOtp(livraison.idLivraison)"
+                class="btn-action btn-confirm-otp">
+                <i class="fas fa-key"></i> Confirmer par OTP
+              </button>
+            </div>
+
             <button v-if="livraison.statut === 'EN_ATTENTE_VALIDATION'" class="btn-action btn-disabled" disabled>
                 En attente de validation
             </button>
@@ -298,7 +365,6 @@ export default {
   margin-right: 0.5rem;
 }
 
-/* Onglets */
 .tabs {
   display: flex;
   gap: 0.5rem;
@@ -328,7 +394,6 @@ export default {
   border-bottom-color: #3F51B5;
 }
 
-/* Liste des livraisons */
 .livraisons-list {
   display: grid;
   gap: 1.5rem;
@@ -370,6 +435,11 @@ export default {
 .status-in-progress {
   background-color: #e8eaf6;
   color: #3f51b5;
+}
+
+.status-arrived {
+  background-color: #fff9c4;
+  color: #f57f17;
 }
 
 .status-completed {
@@ -499,6 +569,43 @@ export default {
   background-color: #388e3c;
 }
 
+.btn-arrived {
+  background-color: #FF9800;
+  color: white;
+}
+.btn-arrived:hover {
+  background-color: #F57C00;
+}
+
+.otp-section {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+.otp-input {
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex-grow: 1;
+}
+.btn-confirm-otp {
+  background-color: #009688;
+  color: white;
+}
+.btn-confirm-otp:hover {
+  background-color: #00796B;
+}
+.btn-complete-manual {
+  background-color: #757575;
+  color: white;
+  font-size: 0.8rem;
+}
+.btn-complete-manual:hover {
+  background-color: #616161;
+}
+
+
 .btn-disabled {
   background-color: #e0e0e0;
   color: #9e9e9e;
@@ -509,7 +616,6 @@ export default {
   margin-right: 0.5rem;
 }
 
-/* États vides et chargement */
 .loading, .error-message, .empty-state {
   text-align: center;
   padding: 3rem;
@@ -572,12 +678,12 @@ export default {
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .addresses {
     flex-direction: column;
     gap: 1.5rem;
   }
-  
+
   .divider {
     transform: rotate(90deg);
     padding: 0.5rem 0;

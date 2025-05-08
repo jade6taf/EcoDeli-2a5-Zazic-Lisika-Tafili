@@ -11,6 +11,7 @@ import com.ecodeli.ecodeli_backend.repositories.AnnonceRepository;
 import com.ecodeli.ecodeli_backend.repositories.ColisRepository;
 import com.ecodeli.ecodeli_backend.repositories.LivraisonRepository;
 import com.ecodeli.ecodeli_backend.repositories.UtilisateurRepository;
+import com.ecodeli.ecodeli_backend.models.Coordinates; // Ajout
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,15 +27,18 @@ public class AnnonceService {
     private final UtilisateurRepository utilisateurRepository;
     private final LivraisonRepository livraisonRepository;
     private final ColisRepository colisRepository;
+    private final GeocodingService geocodingService;
 
     public AnnonceService(AnnonceRepository annonceRepository,
                          UtilisateurRepository utilisateurRepository,
                          LivraisonRepository livraisonRepository,
-                         ColisRepository colisRepository) {
+                         ColisRepository colisRepository,
+                         GeocodingService geocodingService) {
         this.annonceRepository = annonceRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.livraisonRepository = livraisonRepository;
         this.colisRepository = colisRepository;
+        this.geocodingService = geocodingService;
     }
 
     public List<Annonce> getAllAnnonces() {
@@ -93,11 +97,10 @@ public class AnnonceService {
             Utilisateur destinataire = annonce.getDestinataire();
             Optional<Utilisateur> existingUser = utilisateurRepository.findByEmail(destinataire.getEmail());
             if (existingUser.isPresent()) {
-                destinataire = existingUser.get();
+                annonce.setDestinataire(existingUser.get());
             } else {
-                destinataire = utilisateurRepository.save(destinataire);
+                throw new IllegalArgumentException("Destinataire non trouvé avec l'email: " + destinataire.getEmail() + ". Le destinataire doit être un utilisateur existant.");
             }
-            annonce.setDestinataire(destinataire);
         }
         annonce.setExpediteur(expediteur);
         if (annonce.getStatut() == null)
@@ -269,14 +272,44 @@ public class AnnonceService {
             if (savedAnnonce.getPrixUnitaire() != null) {
                 livraison.setPrix(savedAnnonce.getPrixUnitaire().intValue());
             }
+
+            // Géocodage de l'adresse de départ
+            Optional<Coordinates> departCoordsOpt = geocodingService.geocodeAddress(
+                savedAnnonce.getAdresseDepart(),
+                null,
+                null
+            ).block();
+
+            if (departCoordsOpt.isPresent()) {
+                livraison.setLatitudeEnvoi(departCoordsOpt.get().getLatitude());
+                livraison.setLongitudeEnvoi(departCoordsOpt.get().getLongitude());
+            } else {
+                throw new IllegalArgumentException("Adresse de départ invalide ou non géocodable: " + savedAnnonce.getAdresseDepart());
+            }
+
+            // Géocodage de l'adresse d'arrivée
+            Optional<Coordinates> arriveeCoordsOpt = geocodingService.geocodeAddress(
+                savedAnnonce.getAdresseFin(),
+                null,
+                null
+            ).block();
+
+            if (arriveeCoordsOpt.isPresent()) {
+                livraison.setLatitudeLivraison(arriveeCoordsOpt.get().getLatitude());
+                livraison.setLongitudeLivraison(arriveeCoordsOpt.get().getLongitude());
+            } else {
+                throw new IllegalArgumentException("Adresse d'arrivée invalide ou non géocodable: " + savedAnnonce.getAdresseFin());
+            }
             if (livraison.getCodePostalEnvoi() == null || livraison.getCodePostalEnvoi().isEmpty()) {
                 livraison.setCodePostalEnvoi("00000");
             }
             if (livraison.getCodePostalLivraison() == null || livraison.getCodePostalLivraison().isEmpty()) {
                 livraison.setCodePostalLivraison("00000");
             }
-
             livraisonRepository.save(livraison);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Erreur de validation d'adresse lors de la création de la livraison: " + e.getMessage());
+            throw e;
         } catch (Exception e) {
             System.err.println("Erreur lors de la création de la livraison: " + e.getMessage());
         }

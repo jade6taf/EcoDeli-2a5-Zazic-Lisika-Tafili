@@ -53,4 +53,24 @@ public class LivraisonController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PutMapping("/{id}/arriver")
+    public ResponseEntity<?> arriverALivraison(@PathVariable Integer id) {
+        try {
+            Livraison livraison = livraisonService.arriverALivraison(id);
+            return ResponseEntity.ok(livraison);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/confirmer-otp")
+    public ResponseEntity<?> confirmerLivraisonParOtp(@PathVariable Integer id, @RequestBody OtpRequest otpRequest) {
+        try {
+            Livraison livraison = livraisonService.confirmerLivraisonParOtp(id, otpRequest.getOtp());
+            return ResponseEntity.ok(livraison);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

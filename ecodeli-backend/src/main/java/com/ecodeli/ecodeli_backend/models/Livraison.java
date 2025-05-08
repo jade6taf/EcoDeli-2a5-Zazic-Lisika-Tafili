@@ -71,10 +71,29 @@ public class Livraison {
     @JoinColumn(name = "id_colis")
     private Colis colis;
 
+    @Column(name = "otp_code", length = 6)
+    private String otpCode;
+
+    @Column(name = "otp_timestamp")
+    private LocalDateTime otpTimestamp;
+
+    @Column(name = "latitude_envoi")
+    private Double latitudeEnvoi;
+
+    @Column(name = "longitude_envoi")
+    private Double longitudeEnvoi;
+
+    @Column(name = "latitude_livraison")
+    private Double latitudeLivraison;
+
+    @Column(name = "longitude_livraison")
+    private Double longitudeLivraison;
+
     public enum StatutLivraison {
-        VALIDEE,              // Livraison directement validée suite à la postulation du livreur
-        EN_COURS,             // La livraison est en cours
-        TERMINEE,             // La livraison est terminée
-        ANNULEE               // La livraison a été annulée
+        VALIDEE,      // Annonce acceptée, en attente de démarrage par le livreur
+        EN_COURS,     // Le livreur a démarré la livraison
+        ARRIVED,      // Le livreur est arrivé au point de livraison, OTP envoyé
+        TERMINEE,     // Livraison terminée après validation OTP
+        ANNULEE       // Livraison annulée
     }
 }
