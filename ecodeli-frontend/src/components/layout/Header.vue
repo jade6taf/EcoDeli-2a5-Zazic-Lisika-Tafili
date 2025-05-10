@@ -27,6 +27,9 @@
           <router-link to="/client/annonces" class="dropdown-item">
             <i class="fas fa-bullhorn"></i> Mes annonces
           </router-link>
+          <router-link to="/client/profile" class="dropdown-item">
+            <i class="fas fa-user"></i> Profil
+          </router-link>
         </template>
 
         <template v-if="user && user.type === 'PRESTATAIRE'">
@@ -35,6 +38,15 @@
           </router-link>
           <router-link to="/prestataire/profil" class="dropdown-item">
             <i class="fas fa-user-edit"></i> Profil public
+          </router-link>
+        </template>
+
+        <template v-if="user && user.type === 'LIVREUR'">
+          <router-link to="/livreur/mes-livraisons" class="dropdown-item">
+            <i class="fas fa-truck"></i> Mes livraisons
+          </router-link>
+          <router-link to="/livreur/profile" class="dropdown-item">
+            <i class="fas fa-user"></i> Profil
           </router-link>
         </template>
 
@@ -64,7 +76,8 @@ export default {
             { name: 'Client', path: '/client' },
             { name: 'Livreur', path: '/livreur' },
             { name: 'Commerçant', path: '/commerçant' },
-            { name: 'Prestataire', path: '/prestataire' }
+            { name: 'Prestataire', path: '/prestataire' },
+            { name: 'Admin', path: '/admin' }
           ]
         },
         'À propos': {
@@ -93,7 +106,8 @@ export default {
         'CLIENT': '/client',
         'LIVREUR': '/livreur',
         'COMMERCANT': '/commerçant',
-        'PRESTATAIRE': '/prestataire'
+        'PRESTATAIRE': '/prestataire',
+        'ADMIN': '/admin/dashboard'
       };
       return typeToPath[this.user.type] || '/';
     }

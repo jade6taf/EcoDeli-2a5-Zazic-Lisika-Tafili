@@ -29,6 +29,11 @@ export const authStore = reactive({
     this.isAuthenticated = false
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+  },
+
+  updateUser(user) {
+    this.user = user
+    localStorage.setItem('user', JSON.stringify(user))
   }
 })
 
