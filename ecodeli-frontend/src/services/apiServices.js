@@ -4,10 +4,12 @@ export default {
 
     async fetch(endpoint, options = {}) {
         const token = authService.getToken();
-        const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers
-        };
+        const headers = options.headers || {};
+
+        if (!(options.body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
+        }
+
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
@@ -32,8 +34,21 @@ export default {
 
     async post(endpoint, data) {
         return this.fetch(endpoint, {
-        method: 'POST',
-        body: JSON.stringify(data)
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+
+    async postFormData(endpoint, formData) {
+        const token = authService.getToken();
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        return this.fetch(endpoint, {
+            method: 'POST',
+            headers,
+            body: formData
         });
     },
 

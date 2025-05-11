@@ -10,6 +10,9 @@ export default {
       isSaving: false,
       editedUser: null,
       message: null,
+      documents: [],
+      isUploading: false,
+      numeroPermis: '',
       showUploadModal: false
     }
   },
@@ -18,20 +21,25 @@ export default {
       return authStore.user
     },
     userInitials() {
-      if (!this.user) return '';
+      if (!this.user)
+        return '';
       return `${this.user.prenom?.charAt(0) || ''}${this.user.nom?.charAt(0) || ''}`.toUpperCase();
     },
     formatAddress() {
       const parts = [];
-      if (this.user.ville) parts.push(this.user.ville);
-      if (this.user.codePostal) parts.push(this.user.codePostal);
-      if (this.user.pays) parts.push(this.user.pays);
+      if (this.user.ville)
+        parts.push(this.user.ville);
+      if (this.user.codePostal)
+        parts.push(this.user.codePostal);
+      if (this.user.pays)
+        parts.push(this.user.pays);
       return parts.length > 0 ? parts.join(', ') : 'Adresse non renseignée';
     }
   },
   methods: {
     formatDate(date) {
-      if (!date) return 'Non renseignée'
+      if (!date)
+        return 'Non renseignée'
       return new Date(date).toLocaleDateString('fr-FR', {
         year: 'numeric',
         month: 'long',
@@ -78,6 +86,103 @@ export default {
       } finally {
         this.isSaving = false
       }
+    },
+    async loadDocuments() {
+      try {
+        const response = await apiServices.get(`documents/${this.user.idUtilisateur}`);
+        if (response.ok) {
+          this.documents = await response.json();
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des documents:', error);
+      }
+    },
+    hasDocument(type) {
+      return this.documents.some(doc => doc.typeJustificatif === type);
+    },
+    hasValidDocument(type) {
+      return this.documents.some(doc =>
+        doc.typeJustificatif === type && doc.validationParAd === true
+      );
+    },
+    getDocumentStatusClass(type) {
+      const doc = this.documents.find(d => d.typeJustificatif === type);
+      if (!doc)
+        return 'status-missing';
+      if (doc.validationParAd)
+        return 'status-approved';
+      return doc.commentaire ? 'status-rejected' : 'status-pending';
+    },
+    getDocumentStatusText(type) {
+      const doc = this.documents.find(d => d.typeJustificatif === type);
+      if (!doc)
+        return 'Non fourni';
+      if (doc.validationParAd)
+        return 'Validé';
+      return doc.commentaire ? 'Rejeté' : 'En attente';
+    },
+    getDocumentComment(type) {
+      const doc = this.documents.find(d => d.typeJustificatif === type);
+      return doc?.commentaire;
+    },
+    triggerFileInput(type) {
+      this.$refs[`${type}Input`].click();
+    },
+    async handleFileUpload(event, type) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.type !== 'application/pdf') {
+        this.message = {
+          type: 'error',
+          text: 'Seuls les fichiers PDF sont acceptés'
+        };
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        this.message = {
+          type: 'error',
+          text: 'La taille du fichier ne doit pas dépasser 5MB'
+        };
+        return;
+      }
+
+      try {
+        this.isUploading = true;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('type', type);
+        formData.append('userId', this.user.idUtilisateur);
+
+        if (type === 'PERMIS' && this.numeroPermis) {
+          formData.append('numeroPermis', this.numeroPermis);
+        }
+
+        const response = await apiServices.postFormData('documents/upload', formData);
+
+        if (!response.ok) throw new Error('Erreur lors de l\'upload du document');
+
+        this.message = {
+          type: 'success',
+          text: 'Document envoyé avec succès'
+        };
+        await this.loadDocuments();
+      } catch (error) {
+        this.message = {
+          type: 'error',
+          text: error.message
+        };
+      } finally {
+        this.isUploading = false;
+        event.target.value = '';
+      }
+    }
+  },
+  async mounted() {
+    await this.loadDocuments();
+    if (this.user.numeroPermis) {
+      this.numeroPermis = this.user.numeroPermis;
     }
   }
 }
@@ -258,6 +363,94 @@ export default {
             </div>
           </div>
         </div>
+
+        <div class="profile-card documents-section">
+          <div class="card-header">
+            <h2>Documents obligatoires</h2>
+            <div class="header-icon">
+              <i class="fas fa-file-pdf"></i>
+            </div>
+          </div>
+
+          <div class="documents-grid">
+
+            <div class="document-card">
+              <div class="document-header">
+                <h3>Carte d'identité</h3>
+                <div class="document-status" :class="getDocumentStatusClass('CNI')">
+                  {{ getDocumentStatusText('CNI') }}
+                </div>
+              </div>
+              <div class="document-content">
+                <i class="fas fa-id-card document-icon"></i>
+                <p class="document-info">Format PDF uniquement - Max 5MB</p>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  @change="handleFileUpload($event, 'CNI')"
+                  :disabled="isUploading"
+                  ref="cniInput"
+                  class="file-input"
+                />
+                <button
+                  class="upload-button"
+                  @click="triggerFileInput('cni')"
+                  :disabled="isUploading || hasValidDocument('CNI')"
+                >
+                  <i class="fas fa-upload"></i>
+                  {{ hasDocument('CNI') ? 'Modifier' : 'Ajouter' }}
+                </button>
+              </div>
+              <div v-if="getDocumentComment('CNI')" class="document-comment">
+                <i class="fas fa-comment-alt"></i>
+                {{ getDocumentComment('CNI') }}
+              </div>
+            </div>
+
+            <div class="document-card">
+              <div class="document-header">
+                <h3>Permis de conduire</h3>
+                <div class="document-status" :class="getDocumentStatusClass('PERMIS')">
+                  {{ getDocumentStatusText('PERMIS') }}
+                </div>
+              </div>
+              <div class="document-content">
+                <i class="fas fa-id-badge document-icon"></i>
+                <p class="document-info">Format PDF uniquement - Max 5MB</p>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  @change="handleFileUpload($event, 'PERMIS')"
+                  :disabled="isUploading"
+                  ref="permisInput"
+                  class="file-input"
+                />
+                <div class="permis-numero">
+                  <label>Numéro de permis :</label>
+                  <input
+                    type="text"
+                    v-model="numeroPermis"
+                    pattern="^[0-9A-Z]{9}$"
+                    placeholder="Ex: 123456789"
+                    class="permis-input"
+                  />
+                </div>
+                <button
+                  class="upload-button"
+                  @click="triggerFileInput('permis')"
+                  :disabled="isUploading || hasValidDocument('PERMIS')"
+                >
+                  <i class="fas fa-upload"></i>
+                  {{ hasDocument('PERMIS') ? 'Modifier' : 'Ajouter' }}
+                </button>
+              </div>
+              <div v-if="getDocumentComment('PERMIS')" class="document-comment">
+                <i class="fas fa-comment-alt"></i>
+                {{ getDocumentComment('PERMIS') }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -382,6 +575,140 @@ export default {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   padding: 2rem;
+}
+
+.documents-section {
+  margin-top: 2rem;
+}
+
+.documents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.document-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.document-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.document-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.document-status {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.status-missing {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.document-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.document-icon {
+  font-size: 3rem;
+  color: #4CAF50;
+}
+
+.document-info {
+  color: #666;
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 0;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.upload-button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.upload-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.document-comment {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #fff3cd;
+  border-radius: 4px;
+  color: #856404;
+  font-size: 0.9rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.permis-numero {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.permis-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 0.25rem;
 }
 
 .card-header {

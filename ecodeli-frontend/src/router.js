@@ -181,6 +181,12 @@ const routes = [
     name: 'admin-livraisons',
     component: AdminLivraisonsList,
     meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/documents',
+    name: 'admin-documents',
+    component: () => import('./views/admin/AdminDocumentsView.vue'),
+    meta: { requiresAuth: true, role: 'ADMIN' }
   }
 ]
 

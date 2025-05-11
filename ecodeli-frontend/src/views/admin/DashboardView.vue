@@ -43,14 +43,20 @@ export default {
 
         <router-link to="/admin/annonces" class="dashboard-card">
           <i class="fas fa-bullhorn"></i>
-          <h3>Liste des annonces</h3>
-          <p>Consulter toutes les annonces de la plateforme</p>
+          <h3>Annonces</h3>
+          <p>Gérer les annonces</p>
         </router-link>
 
         <router-link to="/admin/livraisons" class="dashboard-card">
           <i class="fas fa-truck"></i>
-          <h3>Liste des livraisons</h3>
-          <p>Consulter toutes les livraisons de la plateforme</p>
+          <h3>Livraisons</h3>
+          <p>Gérer les livraisons</p>
+        </router-link>
+
+        <router-link to="/admin/documents" class="dashboard-card">
+          <i class="fas fa-file-pdf"></i>
+          <h3>Documents</h3>
+          <p>Valider les documents d'identité</p>
         </router-link>
       </div>
     </div>
