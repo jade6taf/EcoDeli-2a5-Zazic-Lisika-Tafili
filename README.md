@@ -43,35 +43,6 @@ EcoDeli est une plateforme de livraison durable qui connecte commerçants, prest
 
 ---
 
-## ✨ Fonctionnalités principales
-
-### 🔐 Système d'authentification et sécurité
-- Authentification basée sur JWT (JSON Web Tokens)
-- Validation en deux étapes (2FA) disponible
-- Gestion fine des permissions par rôle
-- Chiffrement des données sensibles
-- Protection contre les attaques CSRF et XSS
-
-### 👥 Gestion des utilisateurs et rôles
-- Administration complète des profils utilisateurs
-- Rôles distincts : Administrateur, Client, Commerçant, Livreur, Prestataire
-- Tableau de bord personnalisé par rôle
-- Système de notation et d'évaluation
-
-### 📦 Système de livraison
-- Suivi en temps réel des livraisons
-- Géolocalisation des colis et livreurs
-- Gestion des retours et incidents
-
-### 🛡️ Protection des données
-- Conformité RGPD
-- Chiffrement des données personnelles
-- Politique de conservation des données
-- Journalisation des actions sensibles
-- Sauvegarde régulière des données
-
----
-
 ## 🚀 Installation et démarrage
 
 ### 1. Configuration de l'environnement
@@ -132,32 +103,6 @@ npm install
 npm run dev
 
 ```
-
----
-
-## 📚 Documentation API
-
-### Points d'entrée principaux
-
-#### Authentification
-- POST /api/auth/login : Connexion utilisateur
-- POST /api/auth/register : Inscription nouvel utilisateur
-- POST /api/auth/logout : Déconnexion
-- GET /api/auth/me : Informations utilisateur connecté
-
-#### Livraisons
-- GET /api/deliveries : Liste des livraisons
-- POST /api/deliveries : Créer une livraison
-- GET /api/deliveries/{id} : Détails d'une livraison
-- PUT /api/deliveries/{id}/status : Mettre à jour le statut
-
-#### Utilisateurs
-- GET /api/users : Liste des utilisateurs
-- POST /api/users : Créer un utilisateur
-- PUT /api/users/{id} : Modifier un utilisateur
-- DELETE /api/users/{id} : Supprimer un utilisateur
-
-Documentation complète disponible sur Swagger UI : http://localhost:8080/swagger-ui.html
 
 ---
 
