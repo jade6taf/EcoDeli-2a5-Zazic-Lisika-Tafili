@@ -10,6 +10,30 @@ EcoDeli est une plateforme de livraison durable qui connecte commerçants, prest
 
 ---
 
+## 📋 Prérequis système
+
+### Backend
+- JDK 17 ou supérieur
+- Maven 3.6 ou supérieur
+- MariaDB 10.6 ou supérieur
+
+### Frontend
+- Node.js 16.x ou supérieur
+- npm 8.x ou supérieur
+- Vue.js 3.x
+- Navigateurs supportés :
+  - Chrome
+  - Firefox
+  - Safari
+  - Edge
+
+### Outils recommandés
+- Git 2.30+
+- VS Code avec extensions recommandées
+- Postman pour les tests API
+
+---
+
 ## 🌱 Objectifs du projet
 
 - Faciliter la livraison et la logistique écologiques pour les entreprises locales et les particuliers
@@ -48,59 +72,92 @@ EcoDeli est une plateforme de livraison durable qui connecte commerçants, prest
 
 ---
 
-## 🏗️ Architecture technique
+## 🚀 Installation et démarrage
 
-### Backend (Spring Boot)
-- API REST sécurisée
-- Architecture en couches (MVC)
-- Persistence avec JPA/Hibernate
+### 1. Configuration de l'environnement
 
-### Frontend (Vue.js)
-- Architecture modulaire
-- State management centralisé
-- Composants réutilisables
-
----
-
-## 🚀 Installation et configuration
-
-### Prérequis
-- JDK 17 ou supérieur
-- Node.js 16 ou supérieur
-- MariaDB 10.x
-- Maven 3.6 ou supérieur
-
-### Configuration de l'environnement
 ```bash
+# Créer et configurer le fichier .env à la racine
+cp .env.example .env
+
 # Variables d'environnement requises
-export DB_HOST=localhost
-export DB_PORT=3306
-export DB_NAME=ecodeli
-export JWT_SECRET=your-secret-key
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=ecodeli
+DB_USER=your_user
+DB_PASSWORD=your_password
+JWT_SECRET=your-secret-key
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email
+MAIL_PASSWORD=your-app-password
 ```
 
-### Installation
+### 2. Installation de la base de données
 
-1. Backend
+```bash
+# Installer MariaDB
+sudo apt update
+sudo apt install mariadb-server
+
+# Sécuriser l'installation
+sudo mysql_secure_installation
+
+# Créer la base de données
+mysql -u root -p
+CREATE DATABASE ecodeli;
+```
+
+### 3. Backend
+
 ```bash
 cd ecodeli-backend
+
+# Installer les dépendances
+./mvnw clean install
+
+# Démarrer le serveur
 ./mvnw spring-boot:run
 ```
 
-2. Frontend
+### 4. Frontend
+
 ```bash
 cd ecodeli-frontend
+
+# Installer les dépendances
 npm install
+
+# Lancer en mode développement
 npm run dev
+
 ```
 
 ---
 
-### Conventions
-- Commit conventionnels (feat:, fix:, docs:, etc.)
-- Documentation des changements
-- Tests requis pour les nouvelles fonctionnalités
-- Code review obligatoire
+## 📚 Documentation API
+
+### Points d'entrée principaux
+
+#### Authentification
+- POST /api/auth/login : Connexion utilisateur
+- POST /api/auth/register : Inscription nouvel utilisateur
+- POST /api/auth/logout : Déconnexion
+- GET /api/auth/me : Informations utilisateur connecté
+
+#### Livraisons
+- GET /api/deliveries : Liste des livraisons
+- POST /api/deliveries : Créer une livraison
+- GET /api/deliveries/{id} : Détails d'une livraison
+- PUT /api/deliveries/{id}/status : Mettre à jour le statut
+
+#### Utilisateurs
+- GET /api/users : Liste des utilisateurs
+- POST /api/users : Créer un utilisateur
+- PUT /api/users/{id} : Modifier un utilisateur
+- DELETE /api/users/{id} : Supprimer un utilisateur
+
+Documentation complète disponible sur Swagger UI : http://localhost:8080/swagger-ui.html
 
 ---
 
@@ -112,9 +169,9 @@ npm run dev
 
 ---
 
-## 📝 Licence
+## 📄 Licence
 
-Ce projet est développé dans le cadre d'un projet académique.
+Ce projet est développé dans le cadre d'un projet académique. Tous droits réservés.
 
 ---
 
