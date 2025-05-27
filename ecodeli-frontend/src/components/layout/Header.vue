@@ -6,53 +6,58 @@
       </router-link>
     </div>
 
-    <div v-if="!isAuthenticated" class="auth-buttons">
-      <router-link to="/login" class="auth-button login">Connexion</router-link>
-      <router-link to="/register" class="auth-button">Inscription</router-link>
-    </div>
-
-    <div v-else class="user-menu">
-      <div class="user-profile" @click="toggleUserDropdown">
-        <i class="fas fa-user-circle user-icon"></i>
-        <span class="user-name" v-if="user && user.nom">{{ user.nom }}</span>
-        <i class="fas fa-chevron-down dropdown-arrow"></i>
+    <div class="header-actions">
+      <!-- Bouton de thème -->
+      <ThemeToggle />
+      
+      <div v-if="!isAuthenticated" class="auth-buttons">
+        <router-link to="/login" class="auth-button login">Connexion</router-link>
+        <router-link to="/register" class="auth-button">Inscription</router-link>
       </div>
 
-      <div v-if="showUserDropdown" class="user-dropdown">
-        <router-link :to="userProfilePath" class="dropdown-item">
-          <i class="fas fa-tachometer-alt"></i> Dashboard
-        </router-link>
+      <div v-else class="user-menu">
+        <div class="user-profile" @click="toggleUserDropdown">
+          <i class="fas fa-user-circle user-icon"></i>
+          <span class="user-name" v-if="user && user.nom">{{ user.nom }}</span>
+          <i class="fas fa-chevron-down dropdown-arrow"></i>
+        </div>
 
-        <template v-if="user && user.type === 'CLIENT'">
-          <router-link to="/client/annonces" class="dropdown-item">
-            <i class="fas fa-bullhorn"></i> Mes annonces
+        <div v-if="showUserDropdown" class="user-dropdown">
+          <router-link :to="userProfilePath" class="dropdown-item">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
           </router-link>
-          <router-link to="/client/profile" class="dropdown-item">
-            <i class="fas fa-user"></i> Profil
-          </router-link>
-        </template>
 
-        <template v-if="user && user.type === 'PRESTATAIRE'">
-          <router-link to="/prestataire/informations" class="dropdown-item">
-            <i class="fas fa-id-card"></i> Informations personnelles
-          </router-link>
-          <router-link to="/prestataire/profil" class="dropdown-item">
-            <i class="fas fa-user-edit"></i> Profil public
-          </router-link>
-        </template>
+          <template v-if="user && user.type === 'CLIENT'">
+            <router-link to="/client/annonces" class="dropdown-item">
+              <i class="fas fa-bullhorn"></i> Mes annonces
+            </router-link>
+            <router-link to="/client/profile" class="dropdown-item">
+              <i class="fas fa-user"></i> Profil
+            </router-link>
+          </template>
 
-        <template v-if="user && user.type === 'LIVREUR'">
-          <router-link to="/livreur/mes-livraisons" class="dropdown-item">
-            <i class="fas fa-truck"></i> Mes livraisons
-          </router-link>
-          <router-link to="/livreur/profile" class="dropdown-item">
-            <i class="fas fa-user"></i> Profil
-          </router-link>
-        </template>
+          <template v-if="user && user.type === 'PRESTATAIRE'">
+            <router-link to="/prestataire/informations" class="dropdown-item">
+              <i class="fas fa-id-card"></i> Informations personnelles
+            </router-link>
+            <router-link to="/prestataire/profil" class="dropdown-item">
+              <i class="fas fa-user-edit"></i> Profil public
+            </router-link>
+          </template>
 
-        <a href="#" @click.prevent="logout" class="dropdown-item logout">
-          <i class="fas fa-sign-out-alt"></i> Déconnexion
-        </a>
+          <template v-if="user && user.type === 'LIVREUR'">
+            <router-link to="/livreur/mes-livraisons" class="dropdown-item">
+              <i class="fas fa-truck"></i> Mes livraisons
+            </router-link>
+            <router-link to="/livreur/profile" class="dropdown-item">
+              <i class="fas fa-user"></i> Profil
+            </router-link>
+          </template>
+
+          <a href="#" @click.prevent="logout" class="dropdown-item logout">
+            <i class="fas fa-sign-out-alt"></i> Déconnexion
+          </a>
+        </div>
       </div>
     </div>
   </header>
@@ -60,9 +65,13 @@
 
 <script>
 import { authStore } from '@/store/auth'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 
 export default {
   name: 'Header',
+  components: {
+    ThemeToggle
+  },
   data() {
     return {
       menuItems: {
@@ -134,8 +143,15 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: var(--bg-color);
+  box-shadow: var(--shadow);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .logo-img {
@@ -153,20 +169,21 @@ export default {
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
+  color: var(--text-color);
 }
 
 .auth-button.login {
-  color: #4CAF50;
-  border: 1px solid #4CAF50;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
 }
 
 .auth-button:not(.login) {
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .auth-button:hover {
-  opacity: 0.8;
+  background-color: var(--primary-hover);
 }
 
 .user-menu {
@@ -180,15 +197,16 @@ export default {
   padding: 0.5rem;
   border-radius: 4px;
   transition: background-color 0.3s;
+  color: var(--text-color);
 }
 
 .user-profile:hover {
-  background-color: #f1f1f1;
+  background-color: var(--hover-bg);
 }
 
 .user-icon {
   font-size: 1.5rem;
-  color: #4CAF50;
+  color: var(--primary-color);
   margin-right: 0.5rem;
 }
 
@@ -199,52 +217,47 @@ export default {
 
 .dropdown-arrow {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .user-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
-  background: white;
+  background: var(--bg-color);
   border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-hover);
   width: 200px;
   z-index: 100;
   margin-top: 0.5rem;
+  border: 1px solid var(--border-color);
 }
 
 .dropdown-item {
   display: flex;
   align-items: center;
   padding: 0.75rem 1rem;
-  color: #333;
+  color: var(--text-color);
   text-decoration: none;
   transition: background-color 0.3s;
 }
 
 .dropdown-item:hover {
-  background-color: #f5f5f5;
+  background-color: var(--hover-bg);
 }
 
 .dropdown-item i {
   margin-right: 0.75rem;
   width: 16px;
-  color: #4CAF50;
+  color: var(--primary-color);
 }
 
 .dropdown-item.logout {
-  border-top: 1px solid #eee;
-  color: #e53935;
+  border-top: 1px solid var(--border-color);
+  color: var(--error-color);
 }
 
 .dropdown-item.logout:hover {
-  background-color: #ffebee;
-}
-
-.dropdown-item i {
-  margin-right: 0.8rem;
-  width: 1.2rem;
-  text-align: center;
+  background-color: var(--hover-bg);
 }
 </style>

@@ -71,16 +71,24 @@ export default {
 <style scoped>
 .login-container {
   max-width: 400px;
-  margin: 40px auto;
-  padding: 20px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background-color: var(--bg-color);
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+}
+
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1rem;
 }
 
 .form-group {
@@ -89,27 +97,51 @@ export default {
   gap: 8px;
 }
 
+.form-group label {
+  color: var(--text-color);
+  font-weight: 500;
+}
+
 input {
-  padding: 8px;
-  border: 1px solid #ddd;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
 
 .submit-btn {
-  padding: 10px;
-  background-color: #4CAF50;
+  padding: 0.75rem;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
 }
 
 .submit-btn:hover {
-  background-color: #45a049;
+  background-color: var(--primary-hover);
 }
 
 .register-link {
   text-align: center;
-  margin-top: 10px;
+  margin-top: 1rem;
+}
+
+.register-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
 }
 </style>

@@ -210,10 +210,14 @@ export default {
   margin-bottom: 2rem;
 }
 
+.annonces-header h1 {
+  color: var(--text-primary);
+}
+
 .btn-create {
   display: inline-flex;
   align-items: center;
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
   color: white;
   padding: 0.6rem 1.2rem;
   border-radius: 4px;
@@ -223,7 +227,7 @@ export default {
 }
 
 .btn-create:hover {
-  background-color: #45a049;
+  background-color: var(--primary-hover);
 }
 
 .btn-create i {
@@ -236,10 +240,11 @@ export default {
 }
 
 .annonce-card {
-  background-color: white;
+  background-color: var(--card-bg);
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
   overflow: hidden;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .annonce-header {
@@ -247,18 +252,18 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  background-color: #f8f8f8;
-  border-bottom: 1px solid #eee;
+  background-color: var(--card-header-bg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .annonce-title-link {
-  color: #333;
+  color: var(--text-primary);
   text-decoration: none;
   transition: color 0.3s;
 }
 
 .annonce-title-link:hover {
-  color: #4CAF50;
+  color: var(--primary-color);
 }
 
 .status-badge {
@@ -302,6 +307,11 @@ export default {
   padding: 1.5rem;
 }
 
+.annonce-details p {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
 .annonce-info {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -316,17 +326,21 @@ export default {
 
 .info-item i {
   margin-right: 0.5rem;
-  color: #666;
+  color: var(--text-secondary);
   width: 18px;
   text-align: center;
+}
+
+.info-item span {
+  color: var(--text-primary);
 }
 
 .annonce-actions {
   display: flex;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  background-color: #f8f8f8;
-  border-top: 1px solid #eee;
+  background-color: var(--card-header-bg);
+  border-top: 1px solid var(--border-color);
 }
 
 .btn-view, .btn-edit, .btn-cancel {
@@ -378,29 +392,30 @@ export default {
 .empty-state {
   text-align: center;
   padding: 3rem;
-  background-color: #f8f8f8;
+  background-color: var(--card-bg);
   border-radius: 8px;
+  transition: background-color 0.3s ease;
 }
 
 .empty-icon {
   font-size: 3rem;
-  color: #bdbdbd;
+  color: var(--text-disabled);
   margin-bottom: 1rem;
 }
 
 .empty-state h3 {
   margin-bottom: 1rem;
-  color: #616161;
+  color: var(--text-secondary);
 }
 
 .empty-state p {
   margin-bottom: 1.5rem;
-  color: #757575;
+  color: var(--text-secondary);
 }
 
 .btn-primary {
   display: inline-block;
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
   color: white;
   padding: 0.8rem 1.5rem;
   border-radius: 4px;
@@ -410,16 +425,17 @@ export default {
 }
 
 .btn-primary:hover {
-  background-color: #45a049;
+  background-color: var(--primary-hover);
 }
 
 .loading, .error-message {
   text-align: center;
   padding: 2rem;
+  color: var(--text-primary);
 }
 
 .error-message {
-  color: #e53935;
+  color: var(--error-color);
 }
 
 @media (max-width: 768px) {

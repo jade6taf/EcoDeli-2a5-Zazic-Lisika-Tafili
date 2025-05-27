@@ -232,10 +232,10 @@ export default {
 
 <style scoped>
 .home {
-  background-color: #f1f5f4;
+  background-color: var(--bg-tertiary);
   min-height: 100vh;
   font-family: "Open Sans", sans-serif;
-  color: #333;
+  color: var(--text-color);
 }
 
 .section-container {
@@ -250,7 +250,7 @@ export default {
 }
 
 .section-title {
-  color: #95B728;
+  color: var(--secondary-color);
   font-size: 2.5rem;
   margin-bottom: 1rem;
   position: relative;
@@ -265,12 +265,12 @@ export default {
   transform: translateX(-50%);
   width: 80px;
   height: 4px;
-  background-color: #A5C53D;
+  background-color: var(--secondary-color);
   border-radius: 2px;
 }
 
 .section-description {
-  color: #84A470;
+  color: var(--text-secondary);
   font-size: 1.2rem;
   max-width: 700px;
   margin: 0 auto;
@@ -290,25 +290,25 @@ export default {
 }
 
 .btn-primary {
-  background-color: #A5C53D;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #95B728;
+  background-color: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(149, 183, 40, 0.4);
+  box-shadow: var(--shadow-hover);
 }
 
 .btn-secondary {
   background-color: transparent;
-  color: #A5C53D;
-  border: 2px solid #A5C53D;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
   margin-left: 0;
 }
 
 .btn-secondary:hover {
-  background-color: rgba(165, 197, 61, 0.1);
+  background-color: var(--hover-bg);
   transform: translateY(-2px);
 }
 
@@ -324,6 +324,7 @@ export default {
   min-height: 600px;
   display: flex;
   align-items: center;
+  background-color: var(--bg-color);
 }
 
 .hero-background {
@@ -360,7 +361,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: linear-gradient(to right, rgba(241, 245, 244, 0.9), rgba(241, 245, 244, 0.5));
+  background-image: linear-gradient(to right, var(--bg-tertiary), rgba(241, 245, 244, 0.5));
   z-index: 1;
 }
 
@@ -372,28 +373,29 @@ export default {
   padding: 0 2rem;
   width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .hero-content {
   max-width: 700px;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: var(--bg-color);
   padding: 2.5rem;
   border-radius: 15px;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-hover);
   text-align: center;
+  border: 1px solid var(--border-color);
 }
 
 .hero-title {
   font-size: 3.5rem;
-  color: #205B01;
+  color: var(--text-color);
   line-height: 1.2;
   margin-bottom: 1rem;
 }
 
 .hero-title .highlight {
-  color: #A5C53D;
+  color: var(--secondary-color);
   position: relative;
   display: inline-block;
 }
@@ -405,18 +407,18 @@ export default {
   left: 0;
   width: 100%;
   height: 10px;
-  background-color: rgba(165, 197, 61, 0.2);
+  background-color: var(--hover-bg);
   z-index: -1;
 }
 
 .hero-subtitle {
   font-size: 1.8rem;
-  color: #84A470;
+  color: var(--text-secondary);
   margin-bottom: 2rem;
 }
 
 .hero-text {
-  color: #346A18;
+  color: var(--text-secondary);
   font-size: 1.2rem;
   line-height: 1.6;
   margin-bottom: 2rem;
@@ -429,27 +431,9 @@ export default {
   gap: 1rem;
 }
 
-.hero-image {
-  flex: 1;
-  position: relative;
-}
-
-.hero-image img {
-  width: 100%;
-  max-width: 600px;
-  height: auto;
-  border-radius: 20px;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s;
-}
-
-.hero-image:hover img {
-  transform: translateY(-10px);
-}
-
 .services {
   padding: 6rem 0 4rem;
-  background-color: #f1f5f4;
+  background-color: var(--bg-tertiary);
   position: relative;
 }
 
@@ -461,14 +445,15 @@ export default {
 }
 
 .service-card {
-  background-color: white;
+  background-color: var(--bg-color);
   border-radius: 15px;
   padding: 2rem;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow);
   transition: all 0.4s ease;
   text-align: center;
   position: relative;
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .service-card::before {
@@ -478,7 +463,7 @@ export default {
   left: 0;
   width: 4px;
   height: 0;
-  background-color: #A5C53D;
+  background-color: var(--secondary-color);
   transition: height 0.3s ease;
 }
 
@@ -488,8 +473,8 @@ export default {
 
 .service-card:hover, .service-card.active {
   transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-  background-color: #F5FCDD;
+  box-shadow: var(--shadow-hover);
+  background-color: var(--bg-secondary);
 }
 
 .service-icon {
@@ -498,29 +483,29 @@ export default {
 
 .service-icon i {
   font-size: 3rem;
-  color: #A5C53D;
+  color: var(--primary-color);
 }
 
 .service-title {
   font-size: 1.5rem;
-  color: #205B01;
+  color: var(--text-color);
   margin-bottom: 1rem;
   transition: color 0.3s;
 }
 
 .service-card:hover .service-title, .service-card.active .service-title {
-  color: #A5C53D;
+  color: var(--primary-color);
 }
 
 .service-description {
   font-size: 1rem;
-  color: #346A18;
+  color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 1.5rem;
 }
 
 .service-link {
-  color: #A5C53D;
+  color: var(--primary-color);
   font-weight: 600;
   text-decoration: none;
   position: relative;
@@ -538,11 +523,12 @@ export default {
 }
 
 .eco-banner {
-  background-color: #205B01;
-  color: white;
+  background-color: var(--bg-secondary);
+  color: var(--text-color);
   padding: 3rem 2rem;
   text-align: center;
   margin-top: 5rem;
+  border: 1px solid var(--border-color);
 }
 
 .eco-banner-content h3 {
@@ -551,7 +537,7 @@ export default {
 }
 
 .eco-banner-content span {
-  color: #A5C53D;
+  color: var(--primary-color);
   font-weight: 700;
 }
 
@@ -562,7 +548,7 @@ export default {
 
 .profiles {
   padding: 6rem 0;
-  background-color: white;
+  background-color: var(--bg-color);
 }
 
 .profiles-wrapper {
@@ -581,21 +567,23 @@ export default {
 
 .profile-tab {
   padding: 1rem 2rem;
-  background-color: #f1f5f4;
+  background-color: var(--bg-tertiary);
   border-radius: 30px;
   cursor: pointer;
   transition: all 0.3s;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
 }
 
 .profile-tab i {
-  color: #84A470;
+  color: var(--text-secondary);
 }
 
 .profile-tab.active {
-  background-color: #A5C53D;
+  background-color: var(--primary-color);
   color: white;
 }
 
@@ -611,17 +599,18 @@ export default {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 2rem;
-  background-color: #f9f9f9;
+  background-color: var(--bg-secondary);
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
 }
 
 .profile-icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #F5FCDD;
+  background-color: var(--bg-tertiary);
   position: relative;
   overflow: hidden;
 }
@@ -631,13 +620,13 @@ export default {
   position: absolute;
   width: 250px;
   height: 250px;
-  background-color: rgba(165, 197, 61, 0.1);
+  background-color: var(--hover-bg);
   border-radius: 50%;
 }
 
 .profile-icon-large {
   font-size: 8rem;
-  color: #A5C53D;
+  color: var(--primary-color);
   z-index: 1;
   padding: 2rem;
   animation: float 3s ease-in-out infinite;
@@ -661,13 +650,13 @@ export default {
 
 .profile-info h3 {
   font-size: 2rem;
-  color: #205B01;
+  color: var(--text-color);
   margin-bottom: 1rem;
 }
 
 .profile-info p {
   font-size: 1.1rem;
-  color: #346A18;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 1.5rem;
 }
@@ -686,14 +675,15 @@ export default {
 }
 
 .profile-benefits i {
-  color: #A5C53D;
+  color: var(--primary-color);
 }
 
 .cta {
-  background-color: #205B01;
-  color: white;
+  background-color: var(--bg-secondary);
+  color: var(--text-color);
   padding: 5rem 2rem;
   text-align: center;
+  border: 1px solid var(--border-color);
 }
 
 .cta-container {
@@ -704,7 +694,7 @@ export default {
 .cta h2 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  color: white;
+  color: var(--text-color);
 }
 
 .cta p {

@@ -263,33 +263,34 @@ export default {
   max-width: 600px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #fff;
+  background-color: var(--bg-color);
   border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 h2 {
   text-align: center;
   margin-bottom: 2rem;
-  color: #4CAF50;
+  color: var(--primary-color);
 }
 
 h3 {
   margin-bottom: 1.5rem;
   font-size: 1.3rem;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 h4 {
   margin-bottom: 1rem;
-  color: #666;
-  border-bottom: 1px solid #eee;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.5rem;
 }
 
 .error-message {
-  background-color: #ffebee;
-  color: #c62828;
+  background-color: var(--error-bg);
+  color: var(--error-color);
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 1.5rem;
@@ -309,21 +310,22 @@ h4 {
 .profile-option {
   display: flex;
   padding: 1.2rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  background-color: var(--card-bg);
 }
 
 .profile-option:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-hover);
 }
 
 .profile-option.selected {
-  border-color: #4CAF50;
-  background-color: #f1f8e9;
-  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+  border-color: var(--primary-color);
+  background-color: var(--primary-bg);
+  box-shadow: var(--shadow-selected);
 }
 
 .profile-icon {
@@ -332,7 +334,7 @@ h4 {
   justify-content: center;
   width: 50px;
   height: 50px;
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
   color: white;
   border-radius: 50%;
   margin-right: 1rem;
@@ -346,12 +348,13 @@ h4 {
   margin: 0 0 0.5rem 0;
   border-bottom: none;
   padding-bottom: 0;
+  color: var(--text-primary);
 }
 
 .profile-details p {
   margin: 0;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .form-section {
@@ -372,6 +375,7 @@ h4 {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
+  color: var(--text-primary);
 }
 
 .form-group input,
@@ -379,16 +383,18 @@ h4 {
 .form-group textarea {
   width: 100%;
   padding: 0.8rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: #4CAF50;
+  border-color: var(--primary-color);
   outline: none;
 }
 
@@ -408,31 +414,41 @@ h4 {
 }
 
 .btn-primary {
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #43a047;
+  background-color: var(--primary-hover);
 }
 
 .btn-secondary {
-  background-color: #f5f5f5;
-  color: #555;
+  background-color: var(--button-secondary-bg);
+  color: var(--text-secondary);
 }
 
 .btn-secondary:hover {
-  background-color: #e0e0e0;
+  background-color: var(--button-secondary-hover);
 }
 
 .btn-primary:disabled {
-  background-color: #a5d6a7;
+  background-color: var(--primary-light);
   cursor: not-allowed;
 }
 
 .login-link {
   text-align: center;
   margin-top: 1rem;
+  color: var(--text-secondary);
+}
+
+.login-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
 }
 
 @keyframes fadeIn {

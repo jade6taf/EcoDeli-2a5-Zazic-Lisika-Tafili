@@ -319,24 +319,25 @@ export default {
 
 .user-name {
   font-size: 1.5rem;
-  color: #333;
+  color: var(--text-primary);
   margin: 0.5rem 0;
   border: none;
   padding: 0;
 }
 
 .user-type {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   margin: 0;
 }
 
 .quick-info {
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
   margin-bottom: 1.5rem;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .info-item {
@@ -344,7 +345,7 @@ export default {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .info-item:last-child {
@@ -352,14 +353,18 @@ export default {
 }
 
 .info-item i {
-  color: #4CAF50;
+  color: var(--primary-color);
   font-size: 1.2rem;
   width: 24px;
 }
 
+.info-item span {
+  color: var(--text-primary);
+}
+
 .edit-button {
   width: 100%;
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   padding: 0.75rem;
@@ -374,14 +379,15 @@ export default {
 }
 
 .edit-button:hover {
-  background-color: #45a049;
+  background-color: var(--primary-hover);
 }
 
 .profile-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
   padding: 2rem;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card-header {
@@ -392,7 +398,7 @@ export default {
 }
 
 .header-icon {
-  background: #4CAF50;
+  background: var(--primary-color);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -407,7 +413,7 @@ export default {
 }
 
 h2 {
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.5rem;
   margin: 0;
   border: none;
@@ -431,28 +437,30 @@ h2 {
 
 label {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 0.25rem;
 }
 
 p {
   font-size: 1.1rem;
-  color: #333;
+  color: var(--text-primary);
   margin: 0;
   padding: 0.5rem 0;
 }
 
 input, select {
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
   width: 100%;
   transition: all 0.3s ease;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
 }
 
 input:hover, select:hover {
-  border-color: #4CAF50;
+  border-color: var(--primary-color);
 }
 
 .readonly-input-group {
@@ -462,29 +470,29 @@ input:hover, select:hover {
 }
 
 .readonly-input {
-  background-color: #f5f5f5;
+  background-color: var(--input-disabled-bg);
   cursor: not-allowed;
 }
 
 .readonly-icon {
   position: absolute;
   right: 10px;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
 .readonly-info {
   display: block;
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-secondary);
   margin-top: 0.25rem;
   font-style: italic;
 }
 
 input:focus, select:focus {
   outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-focus);
 }
 
 .form-buttons {
@@ -506,23 +514,23 @@ input:focus, select:focus {
 }
 
 .save-button {
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
   color: white;
   border: none;
 }
 
 .save-button:hover:not(:disabled) {
-  background-color: #45a049;
+  background-color: var(--primary-hover);
 }
 
 .cancel-button {
-  background-color: white;
-  color: #666;
-  border: 1px solid #ddd;
+  background-color: var(--card-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .cancel-button:hover:not(:disabled) {
-  background-color: #f5f5f5;
+  background-color: var(--button-secondary-hover);
 }
 
 button:disabled {
@@ -539,15 +547,15 @@ button:disabled {
 }
 
 .alert.success {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #c8e6c9;
+  background-color: var(--success-bg);
+  color: var(--success-color);
+  border: 1px solid var(--success-border);
 }
 
 .alert.error {
-  background-color: #ffebee;
-  color: #c62828;
-  border: 1px solid #ffcdd2;
+  background-color: var(--error-bg);
+  color: var(--error-color);
+  border: 1px solid var(--error-border);
 }
 
 @keyframes slideDown {

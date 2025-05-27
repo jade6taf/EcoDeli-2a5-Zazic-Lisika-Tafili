@@ -59,12 +59,27 @@ export default {
   padding: 2rem;
 }
 
+.dashboard-container h1 {
+  color: var(--text-primary);
+}
+
 .welcome-message {
   margin-bottom: 2rem;
   padding: 1.5rem;
-  background-color: #f5f5f5;
+  background-color: var(--card-bg);
   border-radius: 8px;
   border-left: 4px solid #3F51B5;
+  transition: background-color 0.3s ease;
+}
+
+.welcome-message h2 {
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+}
+
+.welcome-message p {
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 .dashboard-actions {
@@ -80,17 +95,18 @@ export default {
   align-items: center;
   text-align: center;
   padding: 2rem;
-  background-color: white;
+  background-color: var(--card-bg);
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s ease;
   text-decoration: none;
-  color: #333;
+  color: var(--text-primary);
+  cursor: pointer;
 }
 
 .dashboard-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-hover);
 }
 
 .dashboard-card i {
@@ -99,12 +115,23 @@ export default {
   color: #3F51B5;
 }
 
+.dashboard-card h3 {
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.dashboard-card p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
 .loading, .error-message {
   text-align: center;
   padding: 2rem;
+  color: var(--text-primary);
 }
 
 .error-message {
-  color: #e53935;
+  color: var(--error-color);
 }
 </style>

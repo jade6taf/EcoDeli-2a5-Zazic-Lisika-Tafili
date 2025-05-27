@@ -141,21 +141,22 @@ export default {
 }
 
 .dashboard-header {
-  background-color: white;
+  background-color: var(--card-bg);
   border-radius: 8px;
   padding: 2rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dashboard-header h1 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .header-info h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.5rem;
 }
 
@@ -167,6 +168,10 @@ export default {
   margin: 0.5rem 0;
 }
 
+.rating span {
+  color: var(--text-secondary);
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -174,16 +179,17 @@ export default {
 }
 
 .dashboard-card {
-  background-color: white;
+  background-color: var(--card-bg);
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dashboard-card h3 {
   margin: 0 0 1.5rem 0;
-  color: #333;
-  border-bottom: 1px solid #eee;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.5rem;
 }
 
@@ -199,7 +205,7 @@ export default {
 
 .stat-item i {
   font-size: 1.5rem;
-  color: #4CAF50;
+  color: var(--primary-color);
   margin-bottom: 0.5rem;
 }
 
@@ -207,19 +213,23 @@ export default {
   display: block;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .stat-label {
   display: block;
   font-size: 0.875rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .availability-toggle {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.availability-toggle span {
+  color: var(--text-primary);
 }
 
 .switch {
@@ -242,7 +252,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: var(--border-color);
   transition: .4s;
   border-radius: 34px;
 }
@@ -260,7 +270,7 @@ export default {
 }
 
 input:checked + .slider {
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
 }
 
 input:checked + .slider:before {
@@ -275,8 +285,10 @@ input:checked + .slider:before {
 
 .review-item {
   padding: 1rem;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
+  background-color: var(--input-bg);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .review-header {
@@ -295,22 +307,22 @@ input:checked + .slider:before {
 }
 
 .stars i:not(.filled) {
-  color: #e0e0e0;
+  color: var(--text-disabled);
 }
 
 .review-date {
   font-size: 0.875rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .review-text {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .no-reviews {
   text-align: center;
-  color: #666;
+  color: var(--text-secondary);
   font-style: italic;
 }
 

@@ -1,5 +1,6 @@
 <script>
 import Header from '@/components/layout/Header.vue'
+import '@/assets/css/themes.css'
 
 export default {
   components: {
@@ -17,7 +18,6 @@ export default {
   </div>
 </template>
 
-
 <style>
 * {
   box-sizing: border-box;
@@ -28,7 +28,15 @@ export default {
 body {
   font-family: 'Montserrat', sans-serif;
   line-height: 1.6;
-  color: #333;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+}
+
+.app {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .app-container {
@@ -42,7 +50,7 @@ body {
 }
 
 .hero {
-  background-color: #f1f5f4;
+  background-color: var(--bg-tertiary);
   padding: 4rem 2rem;
   text-align: center;
 }
@@ -50,17 +58,17 @@ body {
 .hero-content h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  color: #2c3e50;
+  color: var(--text-color);
 }
 
 .hero-content p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .cta-button {
-  background-color: #4CAF50;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
@@ -71,54 +79,40 @@ body {
 }
 
 .cta-button:hover {
-  background-color: #45a049;
+  background-color: var(--primary-hover);
 }
 
 .features {
   padding: 4rem 2rem;
-}
-
-.section-title {
-  text-align: center;
-  margin-bottom: 3rem;
-  color: #2c3e50;
-}
-
-.features-container {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 2rem;
+  background-color: var(--bg-color);
 }
 
 .feature-card {
-  background-color: #fff;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   padding: 2rem;
   width: 300px;
   text-align: center;
-  transition: transform 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid var(--border-color);
 }
 
 .feature-card:hover {
   transform: translateY(-5px);
-}
-
-.feature-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  box-shadow: var(--shadow-hover);
 }
 
 .feature-card h3 {
   margin-bottom: 1rem;
-  color: #2c3e50;
+  color: var(--text-color);
 }
 
 .footer {
-  background-color: #f9f9f9;
+  background-color: var(--bg-secondary);
   text-align: center;
   padding: 1.5rem;
-  color: #666;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
 }
 </style>
