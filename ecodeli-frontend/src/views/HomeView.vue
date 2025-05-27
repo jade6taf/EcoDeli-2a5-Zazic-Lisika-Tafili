@@ -1,92 +1,98 @@
 <script>
+import { useI18n } from 'vue-i18n'
+
 export default {
+  setup() {
+    const { t } = useI18n()
+    return { t }
+  },
   data() {
     return {
       hoveredService: -1,
       activeProfile: 0,
       services: [
         {
-          title: "Livraison de colis",
-          description: "Expédiez vos colis à moindre coût grâce à notre réseau de livreurs occasionnels.",
+          title: this.t('homeview.ship'),
+          description: this.t('homeview.send'),
           icon: "fas fa-box"
         },
         {
-          title: "Lâcher vos chariots",
-          description: "Faites vos courses chez nos commerçants partenaires et faites-vous livrer à domicile.",
+          title: this.t('homeview.carts'),
+          description: this.t('homeview.shopping-at-home'),
           icon: "fas fa-shopping-cart"
         },
         {
-          title: "Transport de personnes",
-          description: "Un service de transport pour les personnes âgées, à mobilités réduites.",
+          title: this.t('homeview.transportation'),
+          description: this.t('homeview.transportation-old'),
           icon: "fas fa-user-friends"
         },
         {
-          title: "Achats à l'étranger",
-          description: "Demandez à un voyageur de vous rapporter des produits introuvables en France.",
+          title: this.t('homeview.purchase'),
+          description: this.t('homeview.ask'),
           icon: "fas fa-globe-europe"
         },
         {
-          title: "Garde d'animaux",
-          description: "Prise en charge de vos compagnons pendant vos absences.",
+          title: this.t('homeview.pet'),
+          description: this.t('homeview.pet-sitting'),
           icon: "fas fa-paw"
         },
         {
-          title: "Aide à domicile",
-          description: "Petits travaux, jardinage et assistance ponctuelle.",
+          title: this.t('homeview.home-service'),
+          description: this.t('homeview.home-service-description'),
           icon: "fas fa-home"
         }
       ],
       profiles: [
         {
-          type: "Client",
-          description: "Bénéficiez de services de livraison économiques et écologiques directement à votre domicile.",
+          type: this.t('homeview.client'),
+          description: this.t('homeview.client-description'),
           largeIcon: "fas fa-user-circle",
           path: "/client",
           icon: "fas fa-user",
           benefits: [
-            "Livraison à domicile rapide",
-            "Prix avantageux",
-            "Tracking en temps réel",
-            "Service client réactif"
+            this.t('homeview.client-benefit-1'),
+            this.t('homeview.client-benefit-2'),
+            this.t('homeview.client-benefit-3'),
+            this.t('homeview.client-benefit-4')
           ]
         },
         {
-          type: "Commerçant",
-          description: "Étendez votre zone de chalandise et proposez la livraison à vos clients sans investissement.",
+          type: this.t('homeview.merchant'),
+          description: this.t('homeview.merchant-description'),
           largeIcon: "fas fa-store-alt",
           path: "/commerçant",
           icon: "fas fa-store",
           benefits: [
-            "Élargissement de votre clientèle",
-            "Aucun coût fixe",
-            "Intégration simple",
-            "Visibilité accrue"
+            this.t('homeview.merchant-benefit-1'),
+            this.t('homeview.merchant-benefit-2'),
+            this.t('homeview.merchant-benefit-3'),
+            this.t('homeview.merchant-benefit-4')
           ]
         },
         {
-          type: "Livreur",
-          description: "Gagnez un revenu complémentaire en effectuant des livraisons lors de vos déplacements habituels.",
+          type: this.t('homeview.deliverer'),
+          description: this.t('homeview.deliverer-description'),
           largeIcon: "fas fa-biking",
           path: "/livreur",
           icon: "fas fa-bicycle",
           benefits: [
-            "Revenu complémentaire",
-            "Flexibilité totale",
-            "Choix des missions",
-            "Paiement rapide"
+            this.t('homeview.deliverer-benefit-1'),
+            this.t('homeview.deliverer-benefit-2'),
+            this.t('homeview.deliverer-benefit-3'),
+            this.t('homeview.deliverer-benefit-4')
           ]
         },
         {
-          type: "Prestataire",
-          description: "Proposez vos services et compétences aux personnes de votre quartier en toute simplicité.",
+          type: this.t('homeview.service-provider'),
+          description: this.t('homeview.service-provider-description'),
           largeIcon: "fas fa-hands-helping",
           path: "/prestataire",
           icon: "fas fa-tools",
           benefits: [
-            "Visibilité locale",
-            "Gestion simple des rendez-vous",
-            "Paiements sécurisés",
-            "Évaluations clients"
+            this.t('homeview.service-provider-benefit-1'),
+            this.t('homeview.service-provider-benefit-2'),
+            this.t('homeview.service-provider-benefit-3'),
+            this.t('homeview.service-provider-benefit-4')
           ]
         }
       ]
@@ -121,16 +127,15 @@ export default {
       <div class="hero-container">
         <div class="hero-content">
           <h1 class="hero-title">
-            <span class="highlight">Réinventons</span> la livraison ensemble
+            <span class="highlight">{{ t('homeview.reinvent')}}</span> {{ t('homeview.delivery')}}
           </h1>
-          <h2 class="hero-subtitle">Écoresponsable, solidaire et locale</h2>
+          <h2 class="hero-subtitle">{{ t('homeview.e-c-l')}}</h2>
           <p class="hero-text">
-            Chez EcoDeli, chacun devient acteur de la mobilité durable. En livrant un colis ou en rendant un service, 
-            participez à un réseau collaboratif qui crée du lien et réduit l'impact écologique.
+            {{ t('homeview.at-ecodeli') }}
           </p>
           <div class="hero-buttons">
-            <router-link to="/register" class="btn btn-primary">Rejoignez-nous</router-link>
-            <router-link to="/services" class="btn btn-secondary">Découvrir nos services</router-link>
+            <router-link to="/register" class="btn btn-primary">{{ t('homeview.join-us') }}</router-link>
+            <router-link to="/services" class="btn btn-secondary">{{ t('homeview.discover-us') }}</router-link>
           </div>
         </div>
       </div>
@@ -139,9 +144,9 @@ export default {
     <section class="services" id="services">
       <div class="section-container">
         <div class="section-header">
-          <h2 class="section-title">Nos Services</h2>
+          <h2 class="section-title">{{ t('homeview.our-services')}}</h2>
           <p class="section-description">
-            <strong>EcoDeli</strong> vous propose une gamme complète de services locaux et écoresponsables
+            <strong>{{ t('homeview.ecodeli')}}</strong> {{ t('homeview.offers')}}
           </p>
         </div>
 
@@ -159,7 +164,7 @@ export default {
             <div class="service-content">
               <h3 class="service-title">{{ service.title }}</h3>
               <p class="service-description">{{ service.description }}</p>
-              <router-link to="/services" class="service-link">En savoir plus</router-link>
+              <router-link to="/services" class="service-link">{{ t('homeview.learn-more') }}</router-link>
             </div>
           </div>
         </div>
@@ -167,8 +172,8 @@ export default {
 
       <div class="eco-banner">
         <div class="eco-banner-content">
-          <h3>Un service <span>flexible</span>, <span>éthique</span> et adapté à <span>tous</span> !</h3>
-          <p>Nous nous engageons pour un monde plus durable</p>
+          <h3>{{ t('homeview.service-flexible') }} <span>{{ t('homeview.flexible') }}</span>, <span>{{ t('homeview.ethical') }}</span> {{ t('homeview.and-adapted-to') }} <span>{{ t('homeview.everyone') }}</span> !</h3>
+          <p>{{ t('homeview.commitment-sustainable') }}</p>
         </div>
       </div>
     </section>
@@ -176,9 +181,9 @@ export default {
     <section class="profiles" id="profiles">
       <div class="section-container">
         <div class="section-header">
-          <h2 class="section-title">Qui peut utiliser EcoDeli ?</h2>
+          <h2 class="section-title">{{ t('homeview.who-can-use') }}</h2>
           <p class="section-description">
-            Notre plateforme s'adapte à tous les profils et à tous les besoins
+            {{ t('homeview.platform-adapts') }}
           </p>
         </div>
 
@@ -210,7 +215,7 @@ export default {
                     </li>
                   </ul>
                   <router-link :to="profiles[activeProfile].path" class="btn btn-primary">
-                    Je suis {{ profiles[activeProfile].type.toLowerCase() }}
+                    {{ t('homeview.i-am') }} {{ profiles[activeProfile].type.toLowerCase() }}
                   </router-link>
                 </div>
               </div>
@@ -222,9 +227,9 @@ export default {
 
     <section class="cta">
       <div class="cta-container">
-        <h2>Prêt à rejoindre la communauté EcoDeli ?</h2>
-        <p>Inscrivez-vous dès maintenant et participez à la révolution de la livraison écoresponsable</p>
-        <router-link to="/register" class="btn btn-large">S'inscrire gratuitement</router-link>
+        <h2>{{ t('homeview.ready-to-join') }}</h2>
+        <p>{{ t('homeview.register-now') }}</p>
+        <router-link to="/register" class="btn btn-large">{{ t('homeview.register-free') }}</router-link>
       </div>
     </section>
   </div>
