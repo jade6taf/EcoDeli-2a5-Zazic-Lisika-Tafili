@@ -27,59 +27,11 @@ EcoDeli est une plateforme de livraison durable qui connecte commerçants, prest
   - Safari
   - Edge
 
-### Outils recommandés
-- Git 2.30+
-- VS Code avec extensions recommandées
-- Postman pour les tests API
-
----
-
-## 🌱 Objectifs du projet
-
-- Faciliter la livraison et la logistique écologiques pour les entreprises locales et les particuliers
-- Offrir une plateforme sécurisée et intuitive pour la gestion des colis, des annonces et des profils utilisateurs
-- Garantir la modularité et la maintenabilité grâce aux bonnes pratiques de développement backend et frontend
-- Promouvoir la transparence et la collaboration via une documentation claire et des règles de contribution ouvertes
-
 ---
 
 ## 🚀 Installation et démarrage
 
-### 1. Configuration de l'environnement
-
-```bash
-# Créer et configurer le fichier .env à la racine
-cp .env.example .env
-
-# Variables d'environnement requises
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=ecodeli
-DB_USER=your_user
-DB_PASSWORD=your_password
-JWT_SECRET=your-secret-key
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-email
-MAIL_PASSWORD=your-app-password
-```
-
-### 2. Installation de la base de données
-
-```bash
-# Installer MariaDB
-sudo apt update
-sudo apt install mariadb-server
-
-# Sécuriser l'installation
-sudo mysql_secure_installation
-
-# Créer la base de données
-mysql -u root -p
-CREATE DATABASE ecodeli;
-```
-
-### 3. Backend
+### 1. Backend
 
 ```bash
 cd ecodeli-backend
@@ -91,7 +43,7 @@ cd ecodeli-backend
 ./mvnw spring-boot:run
 ```
 
-### 4. Frontend
+### 2. Frontend
 
 ```bash
 cd ecodeli-frontend
@@ -117,12 +69,3 @@ npm run dev
 ## 📄 Licence
 
 Ce projet est développé dans le cadre d'un projet académique. Tous droits réservés.
-
----
-
-## 🔗 Liens utiles
-
-- [Documentation API (Swagger)](http://localhost:8080/swagger-ui/index.html)
-- [Application Frontend](http://localhost:5173)
-- [Documentation Backend](./ecodeli-backend/README.md)
-- [Documentation Frontend](./ecodeli-frontend/README.md)
