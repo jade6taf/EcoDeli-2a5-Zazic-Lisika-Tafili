@@ -67,15 +67,50 @@ public class Annonce {
     @JoinColumn(name = "id_destinataire", nullable = true)
     private Utilisateur destinataire;
 
+    @Column(name = "livraison_partielle_autorisee")
+    private Boolean livraisonPartielleAutorisee = false;
+
+    @ManyToOne
+    @JoinColumn(name = "id_livreur_segment1", nullable = true)
+    private Livreur livreurSegment1;
+
+    @ManyToOne
+    @JoinColumn(name = "id_livreur_segment2", nullable = true)
+    private Livreur livreurSegment2;
+
+    @Column(name = "entrepot_intermediaire")
+    private String entrepotIntermediaire;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "statut_segment1")
+    private StatutSegment statutSegment1 = StatutSegment.DISPONIBLE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "statut_segment2")
+    private StatutSegment statutSegment2 = StatutSegment.DISPONIBLE;
+
     public enum TypeAnnonce {
         unique, multiple
     }
 
     public enum StatutAnnonce {
         PUBLIEE,              // Annonce publiée par un client, visible par les livreurs
-        VALIDEE,              // Un livreur a pris en charge l'annonce
-        EN_COURS,             // La livraison associée est en cours
+        VALIDEE,              // Un livreur a pris en charge l'annonce (livraison complète)
+        SEGMENT_1_PRIS,       // Segment 1 pris, en attente du segment 2
+        SEGMENT_2_PRIS,       // Segment 2 pris, en attente du segment 1
+        SEGMENTS_COMPLETS,    // Les deux segments sont pris, prêt à commencer
+        EN_COURS_SEGMENT_1,   // Segment 1 en cours de livraison
+        ATTENTE_ENTREPOT,     // Segment 1 terminé, colis en attente à l'entrepôt
+        EN_COURS_SEGMENT_2,   // Segment 2 en cours de livraison
+        EN_COURS,             // La livraison associée est en cours (livraison complète)
         TERMINEE,             // L'annonce est complétée, la livraison est terminée
         ANNULEE               // L'annonce a été annulée par le client
+    }
+
+    public enum StatutSegment {
+        DISPONIBLE,           // Segment disponible pour prise en charge
+        PRIS,                 // Segment pris par un livreur
+        EN_COURS,             // Segment en cours de livraison
+        TERMINE               // Segment terminé
     }
 }

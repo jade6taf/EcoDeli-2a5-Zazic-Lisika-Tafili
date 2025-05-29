@@ -73,4 +73,46 @@ public class LivraisonController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/attente-segment-2")
+    public ResponseEntity<List<Livraison>> getLivraisonsEnAttenteSegment2() {
+        List<Livraison> livraisons = livraisonService.getLivraisonsEnAttenteSegment2();
+        return ResponseEntity.ok(livraisons);
+    }
+
+    @GetMapping("/attente-segment-2/{ville}")
+    public ResponseEntity<List<Livraison>> getLivraisonsEnAttenteSegment2ParVille(@PathVariable String ville) {
+        List<Livraison> livraisons = livraisonService.getLivraisonsEnAttenteSegment2ParVille(ville);
+        return ResponseEntity.ok(livraisons);
+    }
+
+    @PutMapping("/{id}/terminer-segment-1")
+    public ResponseEntity<?> terminerSegment1(@PathVariable Integer id) {
+        try {
+            Livraison livraison = livraisonService.terminerSegment1(id);
+            return ResponseEntity.ok(livraison);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/demarrer-segment-2/{idLivreur}")
+    public ResponseEntity<?> demarrerSegment2(@PathVariable Integer id, @PathVariable Integer idLivreur) {
+        try {
+            Livraison livraison = livraisonService.demarrerSegment2(id, idLivreur);
+            return ResponseEntity.ok(livraison);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/arriver-segment-2")
+    public ResponseEntity<?> arriverSegment2(@PathVariable Integer id) {
+        try {
+            Livraison livraison = livraisonService.arriverSegment2(id);
+            return ResponseEntity.ok(livraison);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

@@ -158,7 +158,6 @@ export default {
         this.originalAnnonce = JSON.parse(JSON.stringify(annonceData));
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
-        console.error('Erreur:', err);
       } finally {
         this.isLoading = false;
       }
@@ -210,7 +209,6 @@ export default {
         }, 2000);
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
-        console.error('Erreur:', err);
       } finally {
         this.isSaving = false;
       }

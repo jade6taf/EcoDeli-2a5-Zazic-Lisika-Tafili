@@ -58,5 +58,16 @@
         "ready-to-join": "Ready to join the EcoDeli community?",
         "register-now": "Sign up now and participate in the eco-friendly delivery revolution",
         "register-free": "Register for free"
+    },
+    "header": {
+        "inscription": "Sign up",
+        "connexion": "Login",
+        "dashboard": "Dashboard",
+        "annonces": "My ads",
+        "profil": "Profile",
+        "informations": "Personal information",
+        "profilPublic": "Public profile",
+        "livraisons": "My deliveries",
+        "logout": "Logout"
     }
 }

@@ -54,6 +54,11 @@ export default {
           <h3>Créer une annonce</h3>
           <p>Publiez une nouvelle annonce</p>
         </router-link>
+        <router-link to="/client/mes-segments" class="dashboard-card">
+          <i class="fas fa-route"></i>
+          <h3>Suivi livraisons partielles</h3>
+          <p>Suivez vos livraisons avec deux livreurs</p>
+        </router-link>
       </div>
 
       <h3 class="section-title">Services prestataires</h3>

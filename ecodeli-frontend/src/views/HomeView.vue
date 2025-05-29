@@ -9,8 +9,12 @@ export default {
   data() {
     return {
       hoveredService: -1,
-      activeProfile: 0,
-      services: [
+      activeProfile: 0
+    };
+  },
+  computed: {
+    services() {
+      return [
         {
           title: this.t('homeview.ship'),
           description: this.t('homeview.send'),
@@ -41,8 +45,10 @@ export default {
           description: this.t('homeview.home-service-description'),
           icon: "fas fa-home"
         }
-      ],
-      profiles: [
+      ];
+    },
+    profiles() {
+      return [
         {
           type: this.t('homeview.client'),
           description: this.t('homeview.client-description'),
@@ -95,8 +101,8 @@ export default {
             this.t('homeview.service-provider-benefit-4')
           ]
         }
-      ]
-    };
+      ];
+    }
   },
   methods: {
     hoverService(index) {

@@ -34,7 +34,7 @@ export default {
         this.prestataire = data;
         this.disponible = data.disponible;
       } catch (error) {
-        console.error('Erreur lors du chargement du profil:', error);
+        console.error('Erreur lors du chargement des données du prestataire:', error);
       }
     },
     async updateDisponibilite() {
@@ -44,7 +44,6 @@ export default {
           throw new Error('Erreur lors de la mise à jour de la disponibilité');
         }
       } catch (error) {
-        console.error('Erreur:', error);
         this.disponible = !this.disponible;
       }
     },

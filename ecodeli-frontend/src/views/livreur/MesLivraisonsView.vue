@@ -66,7 +66,6 @@ export default {
         this.livraisons = await response.json();
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
-        console.error('Erreur:', err);
       } finally {
         this.isLoading = false;
       }
@@ -103,7 +102,6 @@ export default {
         alert('La livraison a été démarrée avec succès!');
       } catch (err) {
         alert(err.message || 'Une erreur est survenue');
-        console.error('Erreur:', err);
       }
     },
     async arriverALivraison(idLivraison) {
@@ -121,7 +119,6 @@ export default {
         alert('Statut mis à jour à "Arrivé". Un OTP a été envoyé au destinataire.');
       } catch (err) {
         alert(err.message || 'Une erreur est survenue.');
-        console.error('Erreur:', err);
       }
     },
     async confirmerParOtp(idLivraison) {
@@ -149,7 +146,6 @@ export default {
         alert('Livraison confirmée avec succès !');
       } catch (err) {
         alert(err.message || 'Une erreur est survenue.');
-        console.error('Erreur:', err);
       }
     },
     async terminerLivraison(idLivraison) {
@@ -169,7 +165,6 @@ export default {
         alert('La livraison a été marquée comme terminée (action manuelle)!');
       } catch (err) {
         alert(err.message || 'Une erreur est survenue');
-        console.error('Erreur:', err);
       }
     }
   },

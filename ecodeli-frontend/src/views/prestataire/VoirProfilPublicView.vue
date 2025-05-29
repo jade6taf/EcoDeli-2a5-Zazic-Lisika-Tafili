@@ -23,7 +23,7 @@ export default {
   computed: {
     averageRating() {
       if (!this.prestataire.evaluations.length) return 0;
-      const sum = this.prestataire.evaluations.reduce((acc, eval) => acc + eval.note, 0);
+      const sum = this.prestataire.evaluations.reduce((acc, evaluation) => acc + evaluation.note, 0);
       return (sum / this.prestataire.evaluations.length).toFixed(1);
     },
     evaluations() {
@@ -42,7 +42,7 @@ export default {
         const data = await response.json();
         this.prestataire = data;
       } catch (error) {
-        console.error('Erreur lors du chargement du profil:', error);
+        console.error('Erreur lors du chargement du profil prestataire:', error);
       }
     },
     async loadServicesTypes() {

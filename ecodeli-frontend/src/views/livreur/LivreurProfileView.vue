@@ -94,7 +94,7 @@ export default {
           this.documents = await response.json();
         }
       } catch (error) {
-        console.error('Erreur lors du chargement des documents:', error);
+        // Erreur silencieuse pour le chargement des documents
       }
     },
     hasDocument(type) {

@@ -89,11 +89,39 @@ public class Livraison {
     @Column(name = "longitude_livraison")
     private Double longitudeLivraison;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type_livraison")
+    private TypeLivraison typeLivraison = TypeLivraison.DIRECTE;
+
+    @ManyToOne
+    @JoinColumn(name = "livreur_segment_1")
+    private Livreur livreurSegment1;
+
+    @ManyToOne
+    @JoinColumn(name = "livreur_segment_2")
+    private Livreur livreurSegment2;
+
+    @Column(name = "entrepot_ville", length = 50)
+    private String entrepotVille;
+
+    @Column(name = "date_depot_entrepot")
+    private LocalDateTime dateDepotEntrepot;
+
+    @Column(name = "date_collecte_entrepot")
+    private LocalDateTime dateCollecteEntrepot;
+
+    public enum TypeLivraison {
+        DIRECTE,      // Livraison classique en une fois
+        PARTIELLE     // Livraison en deux segments
+    }
+
     public enum StatutLivraison {
-        VALIDEE,      // Annonce acceptée, en attente de démarrage par le livreur
-        EN_COURS,     // Le livreur a démarré la livraison
-        ARRIVED,      // Le livreur est arrivé au point de livraison, OTP envoyé
-        TERMINEE,     // Livraison terminée après validation OTP
-        ANNULEE       // Livraison annulée
+        VALIDEE,               // Annonce acceptée, en attente de démarrage par le livreur
+        EN_COURS,              // Le livreur a démarré la livraison (directe ou segment 1)
+        ATTENTE_SEGMENT_2,     // Segment 1 terminé, colis en entrepôt, attente livreur 2
+        SEGMENT_2_EN_COURS,    // Segment 2 en cours
+        ARRIVED,               // Le livreur est arrivé au point de livraison final, OTP envoyé
+        TERMINEE,              // Livraison terminée après validation OTP
+        ANNULEE                // Livraison annulée
     }
 }

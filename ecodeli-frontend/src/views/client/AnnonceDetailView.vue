@@ -86,7 +86,6 @@ export default {
         this.fetchAnnonce();
       } catch (err) {
         alert(err.message || 'Une erreur est survenue');
-        console.error('Erreur:', err);
       }
     },
 

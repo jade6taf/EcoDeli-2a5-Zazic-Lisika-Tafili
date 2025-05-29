@@ -53,7 +53,6 @@ export default {
         this.annonces = await response.json();
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
-        console.error('Erreur:', err);
       } finally {
         this.isLoading = false;
       }
@@ -77,7 +76,6 @@ export default {
         this.fetchAnnonces();
       } catch (err) {
         alert(err.message || 'Une erreur est survenue');
-        console.error('Erreur:', err);
       }
     },
 

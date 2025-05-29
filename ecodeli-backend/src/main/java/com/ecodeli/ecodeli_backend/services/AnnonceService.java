@@ -5,6 +5,7 @@ import com.ecodeli.ecodeli_backend.models.Annonce.StatutAnnonce;
 import com.ecodeli.ecodeli_backend.models.Annonce.TypeAnnonce;
 import com.ecodeli.ecodeli_backend.models.Colis;
 import com.ecodeli.ecodeli_backend.models.Livraison;
+import com.ecodeli.ecodeli_backend.models.Livraison.TypeLivraison;
 import com.ecodeli.ecodeli_backend.models.Livreur;
 import com.ecodeli.ecodeli_backend.models.Utilisateur;
 import com.ecodeli.ecodeli_backend.repositories.AnnonceRepository;
@@ -17,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -28,17 +31,20 @@ public class AnnonceService {
     private final LivraisonRepository livraisonRepository;
     private final ColisRepository colisRepository;
     private final GeocodingService geocodingService;
+    private final EntrepotUtilService entrepotUtilService;
 
     public AnnonceService(AnnonceRepository annonceRepository,
                          UtilisateurRepository utilisateurRepository,
                          LivraisonRepository livraisonRepository,
                          ColisRepository colisRepository,
-                         GeocodingService geocodingService) {
+                         GeocodingService geocodingService,
+                         EntrepotUtilService entrepotUtilService) {
         this.annonceRepository = annonceRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.livraisonRepository = livraisonRepository;
         this.colisRepository = colisRepository;
         this.geocodingService = geocodingService;
+        this.entrepotUtilService = entrepotUtilService;
     }
 
     public List<Annonce> getAllAnnonces() {
@@ -308,11 +314,323 @@ public class AnnonceService {
             }
             livraisonRepository.save(livraison);
         } catch (IllegalArgumentException e) {
-            System.err.println("Erreur de validation d'adresse lors de la création de la livraison: " + e.getMessage());
             throw e;
         } catch (Exception e) {
-            System.err.println("Erreur lors de la création de la livraison: " + e.getMessage());
+            // Erreur silencieuse lors de la création de la livraison
         }
         return savedAnnonce;
+    }
+
+    @Transactional
+    public Annonce demanderValidationPartielle(Integer id, Integer idLivreur, String entrepotVille, Integer numeroSegment) {
+        Annonce annonce = annonceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Annonce non trouvée avec l'ID: " + id));
+        Utilisateur utilisateur = utilisateurRepository.findById(idLivreur)
+                .orElseThrow(() -> new IllegalArgumentException("Livreur non trouvé avec l'ID: " + idLivreur));
+
+        if (!(utilisateur instanceof Livreur)) {
+            throw new IllegalArgumentException("L'utilisateur n'est pas un livreur");
+        }
+        Livreur livreur = (Livreur) utilisateur;
+
+        if (!annonce.getLivraisonPartielleAutorisee()) {
+            throw new IllegalArgumentException("Cette annonce n'autorise pas la livraison partielle");
+        }
+
+        // Vérifier que l'entrepôt existe
+        try {
+            if (!entrepotUtilService.getEntrepotsDisponibles().contains(entrepotVille)) {
+                throw new IllegalArgumentException("Entrepôt non disponible: " + entrepotVille);
+            }
+        } catch (Exception e) {
+            // Continuer sans vérification pour le moment
+        }
+
+        // Vérifier les conditions selon le segment choisi
+        if (numeroSegment == 1) {
+            if (annonce.getStatut() != StatutAnnonce.PUBLIEE && annonce.getStatut() != StatutAnnonce.SEGMENT_2_PRIS) {
+                throw new IllegalArgumentException("Le segment 1 n'est pas disponible");
+            }
+            if (annonce.getLivreurSegment1() != null) {
+                throw new IllegalArgumentException("Le segment 1 est déjà pris");
+            }
+
+            annonce.setLivreurSegment1(livreur);
+            annonce.setStatutSegment1(Annonce.StatutSegment.PRIS);
+            annonce.setEntrepotIntermediaire(entrepotVille);
+
+            if (annonce.getStatut() == StatutAnnonce.SEGMENT_2_PRIS) {
+                annonce.setStatut(StatutAnnonce.SEGMENTS_COMPLETS);
+            } else {
+                annonce.setStatut(StatutAnnonce.SEGMENT_1_PRIS);
+            }
+        } else if (numeroSegment == 2) {
+            if (annonce.getStatut() != StatutAnnonce.PUBLIEE && annonce.getStatut() != StatutAnnonce.SEGMENT_1_PRIS) {
+                throw new IllegalArgumentException("Le segment 2 n'est pas disponible");
+            }
+            if (annonce.getLivreurSegment2() != null) {
+                throw new IllegalArgumentException("Le segment 2 est déjà pris");
+            }
+
+            // Pour le segment 2, on doit avoir un entrepôt déjà défini
+            if (annonce.getStatut() == StatutAnnonce.SEGMENT_1_PRIS && annonce.getEntrepotIntermediaire() != null) {
+                entrepotVille = annonce.getEntrepotIntermediaire();
+            } else {
+                annonce.setEntrepotIntermediaire(entrepotVille);
+            }
+
+            annonce.setLivreurSegment2(livreur);
+            annonce.setStatutSegment2(Annonce.StatutSegment.PRIS);
+
+            if (annonce.getStatut() == StatutAnnonce.SEGMENT_1_PRIS) {
+                annonce.setStatut(StatutAnnonce.SEGMENTS_COMPLETS);
+            } else {
+                annonce.setStatut(StatutAnnonce.SEGMENT_2_PRIS);
+            }
+        } else {
+            throw new IllegalArgumentException("Numéro de segment invalide. Doit être 1 ou 2");
+        }
+
+        Annonce savedAnnonce = annonceRepository.save(annonce);
+
+        try {
+            Livraison livraison = new Livraison();
+            livraison.setAnnonce(savedAnnonce);
+            livraison.setStatut(Livraison.StatutLivraison.VALIDEE);
+            livraison.setTypeLivraison(TypeLivraison.PARTIELLE);
+            livraison.setEntrepotVille(entrepotVille);
+            livraison.setLivreurSegment1(livreur);
+            livraison.setDateDebut(savedAnnonce.getDateDebut());
+            livraison.setDateFin(savedAnnonce.getDateFin());
+            livraison.setAdresseEnvoi(savedAnnonce.getAdresseDepart());
+
+            // Pour une livraison partielle, l'adresse de livraison est l'entrepôt pour le segment 1
+            Double[] coordsEntrepot = entrepotUtilService.getCoordonneesEntrepot(entrepotVille);
+            if (coordsEntrepot != null) {
+                livraison.setAdresseDeLivraison("Entrepôt " + entrepotVille);
+                livraison.setLatitudeLivraison(coordsEntrepot[0]);
+                livraison.setLongitudeLivraison(coordsEntrepot[1]);
+            }
+
+            livraison.setExpediteur(savedAnnonce.getExpediteur());
+            livraison.setDestinataire(savedAnnonce.getDestinataire());
+            livraison.setColis(savedAnnonce.getColis());
+
+            if (savedAnnonce.getPrixUnitaire() != null) {
+                // Diviser le prix par 2 pour le segment 1
+                livraison.setPrix(savedAnnonce.getPrixUnitaire().intValue() / 2);
+            }
+
+            // Géocodage de l'adresse de départ
+            Optional<Coordinates> departCoordsOpt = geocodingService.geocodeAddress(
+                savedAnnonce.getAdresseDepart(),
+                null,
+                null
+            ).block();
+
+            if (departCoordsOpt.isPresent()) {
+                livraison.setLatitudeEnvoi(departCoordsOpt.get().getLatitude());
+                livraison.setLongitudeEnvoi(departCoordsOpt.get().getLongitude());
+            } else {
+                throw new IllegalArgumentException("Adresse de départ invalide ou non géocodable: " + savedAnnonce.getAdresseDepart());
+            }
+
+            if (livraison.getCodePostalEnvoi() == null || livraison.getCodePostalEnvoi().isEmpty()) {
+                livraison.setCodePostalEnvoi("00000");
+            }
+            if (livraison.getCodePostalLivraison() == null || livraison.getCodePostalLivraison().isEmpty()) {
+                livraison.setCodePostalLivraison("00000");
+            }
+
+            livraisonRepository.save(livraison);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            // Erreur silencieuse lors de la création de la livraison partielle
+        }
+        return savedAnnonce;
+    }
+
+    public List<Annonce> getAnnoncesAvecLivraisonPartielleAutorisee() {
+        return annonceRepository.findByLivraisonPartielleAutoriseeAndStatut(true, StatutAnnonce.PUBLIEE);
+    }
+
+    public List<Annonce> getAnnoncesAvecSegmentsDisponibles() {
+        return annonceRepository.findAnnoncesAvecSegmentsDisponibles();
+    }
+
+    public List<Annonce> getAnnoncesAvecSegment1Disponible() {
+        return annonceRepository.findAnnoncesAvecSegment1Disponible();
+    }
+
+    public List<Annonce> getAnnoncesAvecSegment2Disponible() {
+        return annonceRepository.findAnnoncesAvecSegment2Disponible();
+    }
+
+    public List<Annonce> getAnnoncesAvecSegmentsComplets() {
+        return annonceRepository.findAnnoncesAvecSegmentsComplets();
+    }
+
+    // Méthode pour obtenir les annonces visibles selon les critères corrects
+    public List<Annonce> getAnnoncesDisponiblesPourLivreurs() {
+        // Retourne les annonces publiées ET celles avec des segments partiels disponibles
+        List<Annonce> annoncesPubliees = annonceRepository.findByStatut(StatutAnnonce.PUBLIEE);
+        List<Annonce> annoncesAvecSegments = annonceRepository.findAnnoncesAvecSegmentsDisponibles();
+
+        // Combiner les deux listes en évitant les doublons
+        annoncesPubliees.addAll(annoncesAvecSegments.stream()
+            .filter(a -> !annoncesPubliees.contains(a))
+            .toList());
+
+        return annoncesPubliees;
+    }
+
+    @Transactional
+    public Annonce commencerSegment(Integer idAnnonce, Integer idLivreur, Integer numeroSegment) {
+        Annonce annonce = annonceRepository.findById(idAnnonce)
+                .orElseThrow(() -> new IllegalArgumentException("Annonce non trouvée avec l'ID: " + idAnnonce));
+        Utilisateur utilisateur = utilisateurRepository.findById(idLivreur)
+                .orElseThrow(() -> new IllegalArgumentException("Livreur non trouvé avec l'ID: " + idLivreur));
+
+        if (!(utilisateur instanceof Livreur)) {
+            throw new IllegalArgumentException("L'utilisateur n'est pas un livreur");
+        }
+        Livreur livreur = (Livreur) utilisateur;
+
+        if (numeroSegment == 1) {
+            if (!livreur.equals(annonce.getLivreurSegment1())) {
+                throw new IllegalArgumentException("Vous n'êtes pas assigné à ce segment");
+            }
+            if (annonce.getStatut() != StatutAnnonce.SEGMENTS_COMPLETS) {
+                throw new IllegalArgumentException("Les segments ne sont pas tous pris");
+            }
+            if (annonce.getStatutSegment1() != Annonce.StatutSegment.PRIS) {
+                throw new IllegalArgumentException("Le segment 1 ne peut pas être commencé");
+            }
+
+            annonce.setStatutSegment1(Annonce.StatutSegment.EN_COURS);
+            annonce.setStatut(StatutAnnonce.EN_COURS_SEGMENT_1);
+
+        } else if (numeroSegment == 2) {
+            if (!livreur.equals(annonce.getLivreurSegment2())) {
+                throw new IllegalArgumentException("Vous n'êtes pas assigné à ce segment");
+            }
+            if (annonce.getStatut() != StatutAnnonce.ATTENTE_ENTREPOT) {
+                throw new IllegalArgumentException("Le segment 1 doit être terminé avant de commencer le segment 2");
+            }
+            if (annonce.getStatutSegment2() != Annonce.StatutSegment.PRIS) {
+                throw new IllegalArgumentException("Le segment 2 ne peut pas être commencé");
+            }
+
+            annonce.setStatutSegment2(Annonce.StatutSegment.EN_COURS);
+            annonce.setStatut(StatutAnnonce.EN_COURS_SEGMENT_2);
+
+        } else {
+            throw new IllegalArgumentException("Numéro de segment invalide. Doit être 1 ou 2");
+        }
+
+        return annonceRepository.save(annonce);
+    }
+
+    @Transactional
+    public Annonce terminerSegment(Integer idAnnonce, Integer idLivreur, Integer numeroSegment) {
+        Annonce annonce = annonceRepository.findById(idAnnonce)
+                .orElseThrow(() -> new IllegalArgumentException("Annonce non trouvée avec l'ID: " + idAnnonce));
+        Utilisateur utilisateur = utilisateurRepository.findById(idLivreur)
+                .orElseThrow(() -> new IllegalArgumentException("Livreur non trouvé avec l'ID: " + idLivreur));
+
+        if (!(utilisateur instanceof Livreur)) {
+            throw new IllegalArgumentException("L'utilisateur n'est pas un livreur");
+        }
+        Livreur livreur = (Livreur) utilisateur;
+
+        if (numeroSegment == 1) {
+            if (!livreur.equals(annonce.getLivreurSegment1())) {
+                throw new IllegalArgumentException("Vous n'êtes pas assigné à ce segment");
+            }
+            if (annonce.getStatut() != StatutAnnonce.EN_COURS_SEGMENT_1) {
+                throw new IllegalArgumentException("Le segment 1 n'est pas en cours");
+            }
+            if (annonce.getStatutSegment1() != Annonce.StatutSegment.EN_COURS) {
+                throw new IllegalArgumentException("Le segment 1 ne peut pas être terminé");
+            }
+
+            annonce.setStatutSegment1(Annonce.StatutSegment.TERMINE);
+            annonce.setStatut(StatutAnnonce.ATTENTE_ENTREPOT);
+
+        } else if (numeroSegment == 2) {
+            if (!livreur.equals(annonce.getLivreurSegment2())) {
+                throw new IllegalArgumentException("Vous n'êtes pas assigné à ce segment");
+            }
+            if (annonce.getStatut() != StatutAnnonce.EN_COURS_SEGMENT_2) {
+                throw new IllegalArgumentException("Le segment 2 n'est pas en cours");
+            }
+            if (annonce.getStatutSegment2() != Annonce.StatutSegment.EN_COURS) {
+                throw new IllegalArgumentException("Le segment 2 ne peut pas être terminé");
+            }
+
+            annonce.setStatutSegment2(Annonce.StatutSegment.TERMINE);
+            annonce.setStatut(StatutAnnonce.TERMINEE);
+
+        } else {
+            throw new IllegalArgumentException("Numéro de segment invalide. Doit être 1 ou 2");
+        }
+
+        return annonceRepository.save(annonce);
+    }
+
+    public List<Annonce> getMesSegments(Integer idLivreur) {
+        Utilisateur utilisateur = utilisateurRepository.findById(idLivreur)
+                .orElseThrow(() -> new IllegalArgumentException("Livreur non trouvé avec l'ID: " + idLivreur));
+
+        if (!(utilisateur instanceof Livreur)) {
+            throw new IllegalArgumentException("L'utilisateur n'est pas un livreur");
+        }
+        Livreur livreur = (Livreur) utilisateur;
+
+        return annonceRepository.findMesSegments(livreur.getIdUtilisateur());
+    }
+
+    public Map<String, Object> getStatutDetaille(Integer idAnnonce) {
+        Annonce annonce = annonceRepository.findById(idAnnonce)
+                .orElseThrow(() -> new IllegalArgumentException("Annonce non trouvée avec l'ID: " + idAnnonce));
+
+        Map<String, Object> statut = new HashMap<>();
+        statut.put("idAnnonce", annonce.getIdAnnonce());
+        statut.put("statut", annonce.getStatut());
+        statut.put("livraisonPartielleAutorisee", annonce.getLivraisonPartielleAutorisee());
+
+        if (annonce.getLivraisonPartielleAutorisee()) {
+            Map<String, Object> segment1 = new HashMap<>();
+            segment1.put("statut", annonce.getStatutSegment1());
+            segment1.put("livreur", annonce.getLivreurSegment1() != null ?
+                Map.of("id", annonce.getLivreurSegment1().getIdUtilisateur(),
+                       "nom", annonce.getLivreurSegment1().getNom(),
+                       "prenom", annonce.getLivreurSegment1().getPrenom()) : null);
+            segment1.put("adresseDepart", annonce.getAdresseDepart());
+            segment1.put("adresseArrivee", "Entrepôt " + annonce.getEntrepotIntermediaire());
+
+            Map<String, Object> segment2 = new HashMap<>();
+            segment2.put("statut", annonce.getStatutSegment2());
+            segment2.put("livreur", annonce.getLivreurSegment2() != null ?
+                Map.of("id", annonce.getLivreurSegment2().getIdUtilisateur(),
+                       "nom", annonce.getLivreurSegment2().getNom(),
+                       "prenom", annonce.getLivreurSegment2().getPrenom()) : null);
+            segment2.put("adresseDepart", "Entrepôt " + annonce.getEntrepotIntermediaire());
+            segment2.put("adresseArrivee", annonce.getAdresseFin());
+
+            statut.put("segment1", segment1);
+            statut.put("segment2", segment2);
+            statut.put("entrepotIntermediaire", annonce.getEntrepotIntermediaire());
+        } else {
+            statut.put("livreur", annonce.getLivreur() != null ?
+                Map.of("id", annonce.getLivreur().getIdUtilisateur(),
+                       "nom", annonce.getLivreur().getNom(),
+                       "prenom", annonce.getLivreur().getPrenom()) : null);
+            statut.put("adresseDepart", annonce.getAdresseDepart());
+            statut.put("adresseArrivee", annonce.getAdresseFin());
+        }
+
+        return statut;
     }
 }

@@ -43,6 +43,11 @@ export default {
           <h3>Mes livraisons</h3>
           <p>Suivez vos livraisons en cours et passées</p>
         </router-link>
+        <router-link to="/livreur/mes-segments" class="dashboard-card">
+          <i class="fas fa-route"></i>
+          <h3>Mes segments</h3>
+          <p>Gérez vos segments de livraison partielle</p>
+        </router-link>
       </div>
     </div>
 

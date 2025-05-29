@@ -43,7 +43,7 @@ export default {
         const data = await response.json();
         this.prestataire = data;
       } catch (error) {
-        console.error('Erreur lors du chargement du profil:', error);
+        console.error('Erreur lors du chargement du profil prestataire:', error);
       }
     },
     getServiceLibelle(code) {
@@ -72,7 +72,6 @@ export default {
       } catch (error) {
         this.message = 'Une erreur est survenue lors de la communication avec le serveur';
         this.messageType = 'error';
-        console.error('Erreur lors de la sauvegarde du profil:', error);
       } finally {
         this.saving = false;
       }

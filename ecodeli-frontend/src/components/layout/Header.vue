@@ -1,76 +1,16 @@
-<template>
-  <header class="header">
-    <div>
-      <router-link to="/">
-        <img src="@/assets/logo.png" alt="EcoDeli Logo" class="logo-img" />
-      </router-link>
-    </div>
-
-    <div class="header-actions">
-      <!-- Bouton de thème -->
-      <ThemeToggle />
-      
-      <div v-if="!isAuthenticated" class="auth-buttons">
-        <router-link to="/login" class="auth-button login">Connexion</router-link>
-        <router-link to="/register" class="auth-button">Inscription</router-link>
-      </div>
-
-      <div v-else class="user-menu">
-        <div class="user-profile" @click="toggleUserDropdown">
-          <i class="fas fa-user-circle user-icon"></i>
-          <span class="user-name" v-if="user && user.nom">{{ user.nom }}</span>
-          <i class="fas fa-chevron-down dropdown-arrow"></i>
-        </div>
-
-        <div v-if="showUserDropdown" class="user-dropdown">
-          <router-link :to="userProfilePath" class="dropdown-item">
-            <i class="fas fa-tachometer-alt"></i> Dashboard
-          </router-link>
-
-          <template v-if="user && user.type === 'CLIENT'">
-            <router-link to="/client/annonces" class="dropdown-item">
-              <i class="fas fa-bullhorn"></i> Mes annonces
-            </router-link>
-            <router-link to="/client/profile" class="dropdown-item">
-              <i class="fas fa-user"></i> Profil
-            </router-link>
-          </template>
-
-          <template v-if="user && user.type === 'PRESTATAIRE'">
-            <router-link to="/prestataire/informations" class="dropdown-item">
-              <i class="fas fa-id-card"></i> Informations personnelles
-            </router-link>
-            <router-link to="/prestataire/profil" class="dropdown-item">
-              <i class="fas fa-user-edit"></i> Profil public
-            </router-link>
-          </template>
-
-          <template v-if="user && user.type === 'LIVREUR'">
-            <router-link to="/livreur/mes-livraisons" class="dropdown-item">
-              <i class="fas fa-truck"></i> Mes livraisons
-            </router-link>
-            <router-link to="/livreur/profile" class="dropdown-item">
-              <i class="fas fa-user"></i> Profil
-            </router-link>
-          </template>
-
-          <a href="#" @click.prevent="logout" class="dropdown-item logout">
-            <i class="fas fa-sign-out-alt"></i> Déconnexion
-          </a>
-        </div>
-      </div>
-    </div>
-  </header>
-</template>
-
 <script>
 import { authStore } from '@/store/auth'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'Header',
   components: {
     ThemeToggle
+  },
+  setup() {
+    const { t } = useI18n()
+    return { t }
   },
   data() {
     return {
@@ -136,6 +76,71 @@ export default {
   }
 }
 </script>
+
+<template>
+  <header class="header">
+    <div>
+      <router-link to="/">
+        <img src="@/assets/logo.png" alt="EcoDeli Logo" class="logo-img" />
+      </router-link>
+    </div>
+
+    <div class="header-actions">
+
+      <ThemeToggle />
+
+      <div v-if="!isAuthenticated" class="auth-buttons">
+        <router-link to="/login" class="auth-button login">{{ t('header.connexion') }}</router-link>
+        <router-link to="/register" class="auth-button">{{ t('header.inscription') }}</router-link>
+      </div>
+
+      <div v-else class="user-menu">
+        <div class="user-profile" @click="toggleUserDropdown">
+          <i class="fas fa-user-circle user-icon"></i>
+          <span class="user-name" v-if="user && user.nom">{{ user.nom }}</span>
+          <i class="fas fa-chevron-down dropdown-arrow"></i>
+        </div>
+
+        <div v-if="showUserDropdown" class="user-dropdown">
+          <router-link :to="userProfilePath" class="dropdown-item">
+            <i class="fas fa-tachometer-alt"></i> {{ t('header.dashboard') }}
+          </router-link>
+
+          <template v-if="user && user.type === 'CLIENT'">
+            <router-link to="/client/annonces" class="dropdown-item">
+              <i class="fas fa-bullhorn"></i> {{ t('header.annonces') }}
+            </router-link>
+            <router-link to="/client/profile" class="dropdown-item">
+              <i class="fas fa-user"></i> {{ t('header.profil') }}
+            </router-link>
+          </template>
+
+          <template v-if="user && user.type === 'PRESTATAIRE'">
+            <router-link to="/prestataire/informations" class="dropdown-item">
+              <i class="fas fa-id-card"></i> {{ t('header.informations') }}
+            </router-link>
+            <router-link to="/prestataire/profil" class="dropdown-item">
+              <i class="fas fa-user-edit"></i> {{ t('header.profilPublic') }}
+            </router-link>
+          </template>
+
+          <template v-if="user && user.type === 'LIVREUR'">
+            <router-link to="/livreur/mes-livraisons" class="dropdown-item">
+              <i class="fas fa-truck"></i> {{ t('header.livraisons') }}
+            </router-link>
+            <router-link to="/livreur/profile" class="dropdown-item">
+              <i class="fas fa-user"></i> {{ t('header.profil') }}
+            </router-link>
+          </template>
+
+          <a href="#" @click.prevent="logout" class="dropdown-item logout">
+            <i class="fas fa-sign-out-alt"></i> {{ t('header.logout') }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+</template>
 
 <style scoped>
 .header {

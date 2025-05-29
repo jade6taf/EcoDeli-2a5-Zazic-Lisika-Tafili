@@ -85,6 +85,12 @@ const routes = [
     meta: { requiresAuth: true, role: 'CLIENT' }
   },
   {
+    path: '/client/mes-segments',
+    name: 'client-mes-segments',
+    component: () => import('./views/client/MesSegmentsView.vue'),
+    meta: { requiresAuth: true, role: 'CLIENT' }
+  },
+  {
     path: '/livreur',
     name: 'livreur-dashboard',
     component: () => import('./views/livreur/DashboardView.vue'),
@@ -106,6 +112,12 @@ const routes = [
     path: '/livreur/profile',
     name: 'livreur-profile',
     component: () => import('./views/livreur/LivreurProfileView.vue'),
+    meta: { requiresAuth: true, role: 'LIVREUR' }
+  },
+  {
+    path: '/livreur/mes-segments',
+    name: 'livreur-mes-segments',
+    component: () => import('./views/livreur/MesSegmentsView.vue'),
     meta: { requiresAuth: true, role: 'LIVREUR' }
   },
   {

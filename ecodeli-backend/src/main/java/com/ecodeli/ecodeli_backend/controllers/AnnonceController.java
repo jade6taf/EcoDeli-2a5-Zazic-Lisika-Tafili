@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -121,6 +122,140 @@ public class AnnonceController {
         try {
             Annonce annonce = annonceService.demanderValidation(id, idLivreur);
             return ResponseEntity.ok(annonce);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/demande-validation-segment1")
+    public ResponseEntity<?> demanderValidationSegment1(
+            @PathVariable Integer id,
+            @RequestParam Integer idLivreur,
+            @RequestParam String entrepotVille) {
+        try {
+            Annonce annonce = annonceService.demanderValidationPartielle(id, idLivreur, entrepotVille, 1);
+            return ResponseEntity.ok(annonce);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erreur interne du serveur");
+        }
+    }
+
+    @PutMapping("/{id}/demande-validation-segment2")
+    public ResponseEntity<?> demanderValidationSegment2(
+            @PathVariable Integer id,
+            @RequestParam Integer idLivreur,
+            @RequestParam(required = false) String entrepotVille) {
+        try {
+            Annonce annonce = annonceService.demanderValidationPartielle(id, idLivreur, entrepotVille, 2);
+            return ResponseEntity.ok(annonce);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/demande-validation-partielle")
+    public ResponseEntity<?> demanderValidationPartielle(
+            @PathVariable Integer id,
+            @RequestParam Integer idLivreur,
+            @RequestParam String entrepotVille,
+            @RequestParam(defaultValue = "1") Integer numeroSegment) {
+        try {
+            Annonce annonce = annonceService.demanderValidationPartielle(id, idLivreur, entrepotVille, numeroSegment);
+            return ResponseEntity.ok(annonce);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/livraison-partielle-autorisee")
+    public ResponseEntity<List<Annonce>> getAnnoncesAvecLivraisonPartielleAutorisee() {
+        List<Annonce> annonces = annonceService.getAnnoncesAvecLivraisonPartielleAutorisee();
+        return ResponseEntity.ok(annonces);
+    }
+
+    @GetMapping("/segments-disponibles")
+    public ResponseEntity<List<Annonce>> getAnnoncesAvecSegmentsDisponibles() {
+        List<Annonce> annonces = annonceService.getAnnoncesAvecSegmentsDisponibles();
+        return ResponseEntity.ok(annonces);
+    }
+
+    @GetMapping("/segment1-disponible")
+    public ResponseEntity<List<Annonce>> getAnnoncesAvecSegment1Disponible() {
+        List<Annonce> annonces = annonceService.getAnnoncesAvecSegment1Disponible();
+        return ResponseEntity.ok(annonces);
+    }
+
+    @GetMapping("/segment2-disponible")
+    public ResponseEntity<List<Annonce>> getAnnoncesAvecSegment2Disponible() {
+        List<Annonce> annonces = annonceService.getAnnoncesAvecSegment2Disponible();
+        return ResponseEntity.ok(annonces);
+    }
+
+    @GetMapping("/segments-complets")
+    public ResponseEntity<List<Annonce>> getAnnoncesAvecSegmentsComplets() {
+        List<Annonce> annonces = annonceService.getAnnoncesAvecSegmentsComplets();
+        return ResponseEntity.ok(annonces);
+    }
+
+    @GetMapping("/disponibles-livreurs")
+    public ResponseEntity<List<Annonce>> getAnnoncesDisponiblesPourLivreurs() {
+        List<Annonce> annonces = annonceService.getAnnoncesDisponiblesPourLivreurs();
+        return ResponseEntity.ok(annonces);
+    }
+
+    @PutMapping("/{id}/commencer-segment1")
+    public ResponseEntity<?> commencerSegment1(@PathVariable Integer id, @RequestParam Integer idLivreur) {
+        try {
+            Annonce annonce = annonceService.commencerSegment(id, idLivreur, 1);
+            return ResponseEntity.ok(annonce);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/terminer-segment1")
+    public ResponseEntity<?> terminerSegment1(@PathVariable Integer id, @RequestParam Integer idLivreur) {
+        try {
+            Annonce annonce = annonceService.terminerSegment(id, idLivreur, 1);
+            return ResponseEntity.ok(annonce);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/commencer-segment2")
+    public ResponseEntity<?> commencerSegment2(@PathVariable Integer id, @RequestParam Integer idLivreur) {
+        try {
+            Annonce annonce = annonceService.commencerSegment(id, idLivreur, 2);
+            return ResponseEntity.ok(annonce);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/terminer-segment2")
+    public ResponseEntity<?> terminerSegment2(@PathVariable Integer id, @RequestParam Integer idLivreur) {
+        try {
+            Annonce annonce = annonceService.terminerSegment(id, idLivreur, 2);
+            return ResponseEntity.ok(annonce);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/mes-segments")
+    public ResponseEntity<List<Annonce>> getMesSegments(@RequestParam Integer idLivreur) {
+        List<Annonce> annonces = annonceService.getMesSegments(idLivreur);
+        return ResponseEntity.ok(annonces);
+    }
+
+    @GetMapping("/{id}/statut-detaille")
+    public ResponseEntity<?> getStatutDetaille(@PathVariable Integer id) {
+        try {
+            Map<String, Object> statut = annonceService.getStatutDetaille(id);
+            return ResponseEntity.ok(statut);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

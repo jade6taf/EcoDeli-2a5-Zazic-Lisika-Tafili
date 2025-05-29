@@ -7,10 +7,16 @@ export default {
       user: null,
       isLoading: true,
       error: null,
+      entrepots: [],
+      showPartialModal: false,
+      selectedAnnonce: null,
+      selectedEntrepot: '',
+      selectedSegment: 1,
       filtres: {
         adresse: '',
         minPrix: '',
-        maxPrix: ''
+        maxPrix: '',
+        livraisonPartielle: false
       }
     }
   },
@@ -40,7 +46,7 @@ export default {
           this.$router.push('/login');
           return;
         }
-        const response = await fetch('/api/annonces/statut/PUBLIEE', {
+        const response = await fetch('/api/annonces/disponibles-livreurs', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -51,14 +57,29 @@ export default {
         this.annonces = await response.json();
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
-        console.error('Erreur:', err);
       } finally {
         this.isLoading = false;
       }
     },
 
+    async fetchEntrepots() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/entrepots/disponibles', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          this.entrepots = await response.json();
+        }
+      } catch (err) {
+        console.error('Erreur lors de la récupération des entrepôts:', err);
+      }
+    },
+
     async demanderValidation(idAnnonce) {
-      if (!confirm('Êtes-vous sûr de vouloir prendre en charge cette livraison?')) {
+      if (!confirm('Êtes-vous sûr de vouloir prendre en charge cette livraison complète?')) {
         return;
       }
       try {
@@ -77,7 +98,49 @@ export default {
         this.fetchAnnonces();
       } catch (err) {
         alert(err.message || 'Une erreur est survenue');
-        console.error('Erreur:', err);
+      }
+    },
+
+    openPartialModal(annonce) {
+      this.selectedAnnonce = annonce;
+      this.selectedEntrepot = '';
+      this.showPartialModal = true;
+    },
+
+    closePartialModal() {
+      this.showPartialModal = false;
+      this.selectedAnnonce = null;
+      this.selectedEntrepot = '';
+    },
+
+    async confirmerLivraisonPartielle() {
+      if (!this.selectedEntrepot) {
+        alert('Veuillez sélectionner un entrepôt');
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(
+          `/api/annonces/${this.selectedAnnonce.idAnnonce}/demande-validation-partielle?idLivreur=${this.user.idUtilisateur}&entrepotVille=${this.selectedEntrepot}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData || 'Erreur lors de la prise en charge partielle');
+        }
+
+        alert('Vous avez pris en charge le segment 1 de cette livraison avec succès!');
+        this.closePartialModal();
+        this.fetchAnnonces();
+      } catch (err) {
+        alert(err.message || 'Une erreur est survenue');
       }
     },
     appliquerFiltres() {
@@ -101,10 +164,67 @@ export default {
         hour: '2-digit',
         minute: '2-digit'
       }).format(date);
+    },
+    getSegmentStatusClass(livreur) {
+      return livreur ? 'segment-taken' : 'segment-available';
+    },
+    canTakeSegment1(annonce) {
+      return annonce.livraisonPartielleAutorisee && !annonce.livreurSegment1;
+    },
+    canTakeSegment2(annonce) {
+      return annonce.livraisonPartielleAutorisee && !annonce.livreurSegment2;
+    },
+    openSegmentModal(annonce, segment) {
+      this.selectedAnnonce = annonce;
+      this.selectedSegment = segment;
+      this.selectedEntrepot = annonce.entrepotIntermediaire || '';
+      this.showPartialModal = true;
+    },
+    async confirmerSegment() {
+      if (this.selectedSegment === 2 && this.selectedAnnonce.entrepotIntermediaire) {
+        this.selectedEntrepot = this.selectedAnnonce.entrepotIntermediaire;
+      } else if (!this.selectedEntrepot) {
+        alert('Veuillez sélectionner un entrepôt');
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        const endpoint = this.selectedSegment === 1
+          ? `/api/annonces/${this.selectedAnnonce.idAnnonce}/demande-validation-segment1`
+          : `/api/annonces/${this.selectedAnnonce.idAnnonce}/demande-validation-segment2`;
+
+        const params = new URLSearchParams({
+          idLivreur: this.user.idUtilisateur
+        });
+
+        if (this.selectedSegment === 1 || !this.selectedAnnonce.entrepotIntermediaire) {
+          params.append('entrepotVille', this.selectedEntrepot);
+        }
+
+        const response = await fetch(`${endpoint}?${params}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData || 'Erreur lors de la prise en charge du segment');
+        }
+
+        alert(`Vous avez pris en charge le segment ${this.selectedSegment} avec succès!`);
+        this.closePartialModal();
+        this.fetchAnnonces();
+      } catch (err) {
+        alert(err.message || 'Une erreur est survenue');
+      }
     }
   },
   mounted() {
     this.fetchAnnonces();
+    this.fetchEntrepots();
   }
 }
 </script>
@@ -212,6 +332,31 @@ export default {
               <i class="fas fa-glass-whiskey"></i>
               <span>Colis fragile</span>
             </div>
+            <div class="info-item" v-if="annonce.livraisonPartielleAutorisee">
+              <i class="fas fa-route"></i>
+              <span class="partial-delivery-badge">Livraison partielle autorisée</span>
+            </div>
+            <!-- Affichage de l'état des segments -->
+            <div v-if="annonce.livraisonPartielleAutorisee" class="segments-status">
+              <div class="segment-status">
+                <i class="fas fa-play"></i>
+                <span>Segment 1:</span>
+                <span :class="getSegmentStatusClass(annonce.livreurSegment1)">
+                  {{ annonce.livreurSegment1 ? 'Pris' : 'Disponible' }}
+                </span>
+              </div>
+              <div class="segment-status">
+                <i class="fas fa-stop"></i>
+                <span>Segment 2:</span>
+                <span :class="getSegmentStatusClass(annonce.livreurSegment2)">
+                  {{ annonce.livreurSegment2 ? 'Pris' : 'Disponible' }}
+                </span>
+              </div>
+              <div v-if="annonce.entrepotIntermediaire" class="entrepot-info">
+                <i class="fas fa-warehouse"></i>
+                <span>Entrepôt: {{ annonce.entrepotIntermediaire }}</span>
+              </div>
+            </div>
           </div>
 
           <div class="contact-info">
@@ -233,10 +378,101 @@ export default {
         </div>
 
         <div class="annonce-actions">
+          <!-- Livraison complète (uniquement si aucun segment n'est pris) -->
           <button
+            v-if="!annonce.livraisonPartielleAutorisee || (!annonce.livreurSegment1 && !annonce.livreurSegment2)"
             @click="demanderValidation(annonce.idAnnonce)"
             class="btn-action btn-primary">
-            <i class="fas fa-check"></i> Prendre en charge
+            <i class="fas fa-check"></i> Livraison complète
+          </button>
+
+          <!-- Boutons pour les segments -->
+          <template v-if="annonce.livraisonPartielleAutorisee">
+            <button
+              v-if="canTakeSegment1(annonce)"
+              @click="openSegmentModal(annonce, 1)"
+              class="btn-action btn-segment-1">
+              <i class="fas fa-play"></i> Prendre segment 1
+            </button>
+
+            <button
+              v-if="canTakeSegment2(annonce)"
+              @click="openSegmentModal(annonce, 2)"
+              class="btn-action btn-segment-2">
+              <i class="fas fa-stop"></i> Prendre segment 2
+            </button>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal pour livraison partielle -->
+    <div v-if="showPartialModal" class="modal-overlay" @click="closePartialModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Livraison partielle - Segment {{ selectedSegment }}</h3>
+          <button @click="closePartialModal" class="close-btn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div v-if="selectedAnnonce" class="annonce-summary">
+            <h4>{{ selectedAnnonce.titre }}</h4>
+            <p><strong>De :</strong> {{ selectedAnnonce.adresseDepart }}</p>
+            <p><strong>À :</strong> {{ selectedAnnonce.adresseFin }}</p>
+            <p><strong>Prix total :</strong> {{ selectedAnnonce.prixUnitaire }}€</p>
+          </div>
+
+          <div class="segment-info">
+            <div class="info-box" :class="selectedSegment === 1 ? 'segment-1' : 'segment-2'">
+              <h5>
+                <i :class="selectedSegment === 1 ? 'fas fa-play' : 'fas fa-stop'"></i>
+                Segment {{ selectedSegment }} (Votre mission)
+              </h5>
+              <p v-if="selectedSegment === 1">De l'adresse de départ vers un entrepôt intermédiaire</p>
+              <p v-else>De l'entrepôt vers l'adresse de destination finale</p>
+              <p><strong>Rémunération :</strong> {{ Math.round((selectedAnnonce?.prixUnitaire || 0) / 2) }}€</p>
+            </div>
+
+            <div class="info-box" :class="selectedSegment === 1 ? 'segment-2' : 'segment-1'">
+              <h5>
+                <i :class="selectedSegment === 1 ? 'fas fa-stop' : 'fas fa-play'"></i>
+                Segment {{ selectedSegment === 1 ? 2 : 1 }} (Autre livreur)
+              </h5>
+              <p v-if="selectedSegment === 1">De l'entrepôt vers l'adresse de destination finale</p>
+              <p v-else>De l'adresse de départ vers un entrepôt intermédiaire</p>
+              <p><strong>Rémunération :</strong> {{ Math.round((selectedAnnonce?.prixUnitaire || 0) / 2) }}€</p>
+            </div>
+          </div>
+
+          <div class="entrepot-selection" v-if="selectedSegment === 1 || !selectedAnnonce?.entrepotIntermediaire">
+            <label for="entrepot-select">
+              {{ selectedSegment === 1 ? 'Sélectionnez l\'entrepôt de dépôt :' : 'Sélectionnez l\'entrepôt de récupération :' }}
+            </label>
+            <select id="entrepot-select" v-model="selectedEntrepot" required>
+              <option value="">-- Choisir un entrepôt --</option>
+              <option v-for="entrepot in entrepots" :key="entrepot" :value="entrepot">
+                {{ entrepot }}
+              </option>
+            </select>
+          </div>
+
+          <div v-else class="entrepot-info-fixed">
+            <p><strong>Entrepôt de récupération :</strong> {{ selectedAnnonce.entrepotIntermediaire }}</p>
+            <p class="info-text">L'entrepôt est déjà défini par le livreur du segment 1.</p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button @click="closePartialModal" class="btn-cancel">
+            Annuler
+          </button>
+          <button
+            @click="confirmerSegment"
+            class="btn-confirm"
+            :disabled="(selectedSegment === 1 || !selectedAnnonce?.entrepotIntermediaire) && !selectedEntrepot">
+            <i class="fas fa-check"></i> Confirmer le segment {{ selectedSegment }}
           </button>
         </div>
       </div>
@@ -481,6 +717,297 @@ export default {
 
 .btn-primary i {
   margin-right: 0.5rem;
+}
+
+.btn-secondary {
+  background-color: #ff9800;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #f57c00;
+}
+
+.btn-secondary i {
+  margin-right: 0.5rem;
+}
+
+.partial-delivery-badge {
+  color: #ff9800;
+  font-weight: 600;
+}
+
+.segments-status {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.segment-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.segment-available {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.segment-taken {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.entrepot-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.btn-segment-1 {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-segment-1:hover {
+  background-color: #218838;
+}
+
+.btn-segment-1 i {
+  margin-right: 0.5rem;
+}
+
+.btn-segment-2 {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-segment-2:hover {
+  background-color: #5a6268;
+}
+
+.btn-segment-2 i {
+  margin-right: 0.5rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.annonce-summary {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.annonce-summary h4 {
+  margin: 0 0 1rem 0;
+  color: #333;
+}
+
+.annonce-summary p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.segment-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.info-box {
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 2px solid;
+}
+
+.segment-1 {
+  border-color: #28a745;
+  background: #f8fff9;
+}
+
+.segment-2 {
+  border-color: #6c757d;
+  background: #f8f9fa;
+}
+
+.info-box h5 {
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.segment-1 h5 {
+  color: #28a745;
+}
+
+.segment-2 h5 {
+  color: #6c757d;
+}
+
+.info-box p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.entrepot-selection {
+  margin-top: 2rem;
+}
+
+.entrepot-selection label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.entrepot-selection select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: white;
+}
+
+.entrepot-selection select:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.entrepot-info-fixed {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #e3f2fd;
+  border-radius: 8px;
+  border-left: 4px solid #2196f3;
+}
+
+.entrepot-info-fixed p {
+  margin: 0.5rem 0;
+  color: #333;
+}
+
+.entrepot-info-fixed .info-text {
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #eee;
+  background: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+}
+
+.btn-cancel {
+  padding: 0.8rem 1.5rem;
+  border: 1px solid #ddd;
+  background: white;
+  color: #666;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.btn-confirm {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  background: #28a745;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-confirm:hover:not(:disabled) {
+  background: #218838;
+}
+
+.btn-confirm:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .loading, .error-message, .empty-state {

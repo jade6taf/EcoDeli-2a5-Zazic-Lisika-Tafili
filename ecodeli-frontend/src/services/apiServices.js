@@ -73,7 +73,6 @@ export default {
             }
             return await response.json();
         } catch (error) {
-            console.error('Erreur lors de la récupération des prestataires:', error);
             throw error;
         }
     }

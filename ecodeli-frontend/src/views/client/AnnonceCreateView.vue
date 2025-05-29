@@ -22,6 +22,7 @@ export default {
           fragile: false,
           description: ''
         },
+        livraisonPartielleAutorisee: false,
         expediteur: {
           nom: '',
           prenom: '',
@@ -156,7 +157,6 @@ export default {
         }, 2000);
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
-        console.error('Erreur:', err);
       } finally {
         this.isSubmitting = false;
       }
@@ -255,14 +255,14 @@ export default {
               ></textarea>
               <small>Précisez tout détail important pour les livreurs potentiels</small>
             </div>
-            <div class="form-group">
+            <!-- <div class="form-group">
               <label for="type">Type d'annonce *</label>
               <select id="type" v-model="annonce.typeAnnonce" required>
                 <option v-for="option in typeOptions" :key="option.value" :value="option.value">
                   {{ option.label }}
                 </option>
               </select>
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -501,6 +501,19 @@ export default {
                 <span class="euro-symbol">€</span>
               </div>
               <small>Proposez un prix équitable pour votre livraison</small>
+            </div>
+
+            <div class="form-group checkbox-group livraison-partielle">
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="annonce.livraisonPartielleAutorisee">
+                Autoriser la livraison partielle
+              </label>
+              <small class="delivery-info">
+                La livraison partielle permet à deux livreurs différents de prendre en charge votre colis :
+                <br>• <strong>Segment 1</strong> : De votre adresse de départ vers un entrepôt intermédiaire
+                <br>• <strong>Segment 2</strong> : De l'entrepôt vers l'adresse de destination finale
+                <br>Cela peut réduire les coûts et améliorer la disponibilité des livreurs.
+              </small>
             </div>
 
             <div class="summary-container">
@@ -767,6 +780,33 @@ export default {
 .checkbox-label input {
   width: auto;
   margin-right: 0.5rem;
+}
+
+.livraison-partielle {
+  background-color: #f0f8ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #b3d9ff;
+  margin-top: 2rem;
+}
+
+.livraison-partielle .checkbox-label {
+  font-weight: 600;
+  color: #1976d2;
+  margin-bottom: 1rem;
+}
+
+.delivery-info {
+  background-color: #e3f2fd;
+  padding: 1rem;
+  border-radius: 4px;
+  border-left: 4px solid #2196f3;
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
+.delivery-info strong {
+  color: #1976d2;
 }
 
 .contact-form {
