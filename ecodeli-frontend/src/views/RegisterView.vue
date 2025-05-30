@@ -1,4 +1,5 @@
 <script>
+import { useI18n } from 'vue-i18n'
 import { authStore } from '@/store/auth'
 import PasswordInput from '@/components/PasswordInput.vue'
 
@@ -6,6 +7,10 @@ export default {
   name: 'RegisterView',
   components: {
     PasswordInput
+  },
+  setup() {
+    const { t } = useI18n()
+    return { t }
   },
   data() {
     return {
@@ -34,72 +39,74 @@ export default {
         strength: 0,
         errors: [],
         suggestions: []
-      },
-      profileData: {
-        'CLIENT': {
-          title: 'Client',
-          subtitle: 'J\'ai des colis à expédier',
-          description: 'Passez vos commandes et suivez vos livraisons en temps réel',
-          icon: 'fa-shipping-fast',
-          highlights: [
-            'Expédition rapide et sécurisée',
-            'Suivi en temps réel',
-            'Support client dédié'
-          ],
-          gradient: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)'
-        },
-        'LIVREUR': {
-          title: 'Livreur',
-          subtitle: 'Je veux livrer des colis',
-          description: 'Effectuez des livraisons et gagnez un revenu complémentaire',
-          icon: 'fa-bicycle',
-          highlights: [
-            'Horaires flexibles',
-            'Rémunération attractive',
-            'Zone de livraison personnalisable'
-          ],
-          gradient: 'linear-gradient(135deg, #A5C53D 0%, #9CCC65 100%)'
-        },
-        'COMMERCANT': {
-          title: 'Commerçant',
-          subtitle: 'Je vends des produits locaux',
-          description: 'Gérez votre commerce et vos produits en ligne',
-          icon: 'fa-store',
-          highlights: [
-            'Vitrine en ligne gratuite',
-            'Gestion simplifiée des stocks',
-            'Promotion locale ciblée'
-          ],
-          gradient: 'linear-gradient(135deg, #95B728 0%, #8BC34A 100%)'
-        },
-        'PRESTATAIRE': {
-          title: 'Prestataire',
-          subtitle: 'J\'offre des services',
-          description: 'Proposez vos services et compétences aux particuliers',
-          icon: 'fa-tools',
-          highlights: [
-            'Profil professionnel détaillé',
-            'Système d\'évaluation',
-            'Paiement sécurisé'
-          ],
-          gradient: 'linear-gradient(135deg, #2e7d32 0%, #4CAF50 100%)'
-        },
-        'ADMIN': {
-          title: 'Administrateur',
-          subtitle: 'Gestion de la plateforme',
-          description: 'Accès complet aux outils d\'administration',
-          icon: 'fa-user-shield',
-          highlights: [
-            'Gestion des utilisateurs',
-            'Modération du contenu',
-            'Statistiques avancées'
-          ],
-          gradient: 'linear-gradient(135deg, #1976d2 0%, #2196F3 100%)'
-        }
       }
     }
   },
   computed: {
+    profileData() {
+      return {
+        'CLIENT': {
+          title: this.t('registerview.profiles.client.title'),
+          subtitle: this.t('registerview.profiles.client.subtitle'),
+          description: this.t('registerview.profiles.client.description'),
+          icon: 'fa-shipping-fast',
+          highlights: [
+            this.t('registerview.profiles.client.highlight-1'),
+            this.t('registerview.profiles.client.highlight-2'),
+            this.t('registerview.profiles.client.highlight-3')
+          ],
+          gradient: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)'
+        },
+        'LIVREUR': {
+          title: this.t('registerview.profiles.livreur.title'),
+          subtitle: this.t('registerview.profiles.livreur.subtitle'),
+          description: this.t('registerview.profiles.livreur.description'),
+          icon: 'fa-bicycle',
+          highlights: [
+            this.t('registerview.profiles.livreur.highlight-1'),
+            this.t('registerview.profiles.livreur.highlight-2'),
+            this.t('registerview.profiles.livreur.highlight-3')
+          ],
+          gradient: 'linear-gradient(135deg, #A5C53D 0%, #9CCC65 100%)'
+        },
+        'COMMERCANT': {
+          title: this.t('registerview.profiles.commercant.title'),
+          subtitle: this.t('registerview.profiles.commercant.subtitle'),
+          description: this.t('registerview.profiles.commercant.description'),
+          icon: 'fa-store',
+          highlights: [
+            this.t('registerview.profiles.commercant.highlight-1'),
+            this.t('registerview.profiles.commercant.highlight-2'),
+            this.t('registerview.profiles.commercant.highlight-3')
+          ],
+          gradient: 'linear-gradient(135deg, #95B728 0%, #8BC34A 100%)'
+        },
+        'PRESTATAIRE': {
+          title: this.t('registerview.profiles.prestataire.title'),
+          subtitle: this.t('registerview.profiles.prestataire.subtitle'),
+          description: this.t('registerview.profiles.prestataire.description'),
+          icon: 'fa-tools',
+          highlights: [
+            this.t('registerview.profiles.prestataire.highlight-1'),
+            this.t('registerview.profiles.prestataire.highlight-2'),
+            this.t('registerview.profiles.prestataire.highlight-3')
+          ],
+          gradient: 'linear-gradient(135deg, #2e7d32 0%, #4CAF50 100%)'
+        },
+        'ADMIN': {
+          title: this.t('registerview.profiles.admin.title'),
+          subtitle: this.t('registerview.profiles.admin.subtitle'),
+          description: this.t('registerview.profiles.admin.description'),
+          icon: 'fa-user-shield',
+          highlights: [
+            this.t('registerview.profiles.admin.highlight-1'),
+            this.t('registerview.profiles.admin.highlight-2'),
+            this.t('registerview.profiles.admin.highlight-3')
+          ],
+          gradient: 'linear-gradient(135deg, #1976d2 0%, #2196F3 100%)'
+        }
+      };
+    },
     stepValid() {
       if (this.step === 1) {
         return !!this.selectedProfile;
@@ -154,7 +161,7 @@ export default {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.message || 'Erreur lors de l\'inscription');
+          throw new Error(errorData?.message || this.t('registerview.error-default'));
         }
 
         const data = await response.json();
@@ -171,7 +178,7 @@ export default {
         const redirectPath = userTypeToPath[this.user.type] || '/';
         this.$router.push(redirectPath);
       } catch (err) {
-        this.error = err.message || 'Une erreur est survenue lors de l\'inscription';
+        this.error = err.message || this.t('registerview.error-generic');
       } finally {
         this.loading = false;
       }
@@ -189,8 +196,8 @@ export default {
     <!-- Étape 1: Sélection du profil avec cartes immersives -->
     <div v-if="step === 1" class="profile-selection-container">
       <div class="selection-header">
-        <h1 class="main-title">Rejoignez EcoDeli</h1>
-        <p class="main-subtitle">Choisissez votre profil pour commencer votre aventure écologique</p>
+        <h1 class="main-title">{{ t('registerview.join-ecodeli') }}</h1>
+        <p class="main-subtitle">{{ t('registerview.choose-profile') }}</p>
       </div>
 
       <div v-if="error" class="error-message">
@@ -240,7 +247,7 @@ export default {
           @click="nextStep"
           :disabled="!stepValid"
         >
-          <span>Continuer</span>
+          <span>{{ t('registerview.continue') }}</span>
           <i class="fas fa-arrow-right"></i>
         </button>
       </div>
@@ -258,7 +265,7 @@ export default {
             <p>{{ profileData[selectedProfile].subtitle }}</p>
           </div>
         </div>
-        <h2>Vos informations</h2>
+        <h2>{{ t('registerview.your-information') }}</h2>
       </div>
 
       <div v-if="error" class="error-message">
@@ -270,48 +277,48 @@ export default {
         <div class="form-section">
           <h4>
             <i class="fas fa-user"></i>
-            Informations personnelles
+            {{ t('registerview.personal-info') }}
           </h4>
           <div class="form-row">
             <div class="form-group">
-              <label for="nom">Nom</label>
+              <label for="nom">{{ t('registerview.last-name') }}</label>
               <input
                 type="text"
                 id="nom"
                 v-model="user.nom"
                 required
-                placeholder="Votre nom"
+                :placeholder="t('registerview.last-name-placeholder')"
               >
             </div>
             <div class="form-group">
-              <label for="prenom">Prénom</label>
+              <label for="prenom">{{ t('registerview.first-name') }}</label>
               <input
                 type="text"
                 id="prenom"
                 v-model="user.prenom"
                 required
-                placeholder="Votre prénom"
+                :placeholder="t('registerview.first-name-placeholder')"
               >
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="email">Email</label>
+              <label for="email">{{ t('registerview.email') }}</label>
               <input
                 type="email"
                 id="email"
                 v-model="user.email"
                 required
-                placeholder="votre@email.com"
+                :placeholder="t('registerview.email-placeholder')"
               >
             </div>
             <div class="form-group password-field-group">
-              <label for="email">Mot de passe</label>
+              <label for="password">{{ t('registerview.password') }}</label>
               <PasswordInput
                 v-model="user.motDePasse"
                 label="Mot de passe *"
-                placeholder="Créez un mot de passe sécurisé"
+                :placeholder="t('registerview.password-placeholder')"
                 :required="true"
                 :show-strength="true"
                 :show-criteria="true"
@@ -331,29 +338,29 @@ export default {
         <div v-if="user.type === 'PRESTATAIRE'" class="form-section">
           <h4>
             <i class="fas fa-building"></i>
-            Informations de l'entreprise
+            {{ t('registerview.company-info') }}
           </h4>
           <div class="form-row">
             <div class="form-group">
-              <label for="nomEntreprise">Nom de l'entreprise</label>
+              <label for="nomEntreprise">{{ t('registerview.company-name') }}</label>
               <input
                 type="text"
                 id="nomEntreprise"
                 v-model="user.nomEntreprise"
                 required
-                placeholder="Nom de votre entreprise"
+                :placeholder="t('registerview.company-name-placeholder')"
               >
             </div>
             <div class="form-group">
-              <label for="siret">Numéro SIRET</label>
+              <label for="siret">{{ t('registerview.siret-number') }}</label>
               <input
                 type="text"
                 id="siret"
                 v-model="user.siret"
                 required
                 pattern="[0-9]{14}"
-                placeholder="14 chiffres"
-                title="Le numéro SIRET doit contenir exactement 14 chiffres"
+                :placeholder="t('registerview.siret-placeholder')"
+                :title="t('registerview.siret-title')"
               >
             </div>
           </div>
@@ -362,7 +369,7 @@ export default {
         <div class="form-navigation">
           <button type="button" class="btn-secondary" @click="prevStep">
             <i class="fas fa-arrow-left"></i>
-            Retour
+            {{ t('registerview.back') }}
           </button>
           <button
             type="submit"
@@ -371,18 +378,18 @@ export default {
           >
             <span v-if="loading">
               <i class="fas fa-spinner fa-spin"></i>
-              Inscription en cours...
+              {{ t('registerview.registering') }}
             </span>
             <span v-else>
               <i class="fas fa-user-plus"></i>
-              S'inscrire
+              {{ t('registerview.register') }}
             </span>
           </button>
         </div>
 
         <p class="login-link">
-          Déjà un compte ?
-          <router-link to="/login">Se connecter</router-link>
+          {{ t('registerview.already-account') }}
+          <router-link to="/login">{{ t('registerview.login-link') }}</router-link>
         </p>
       </form>
     </div>

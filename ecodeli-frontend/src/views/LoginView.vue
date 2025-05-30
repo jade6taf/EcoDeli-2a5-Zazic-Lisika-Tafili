@@ -1,6 +1,12 @@
 <script>
+import { useI18n } from 'vue-i18n'
+
 export default {
   name: 'LoginView',
+  setup() {
+    const { t } = useI18n()
+    return { t }
+  },
   data() {
     return {
       email: '',
@@ -18,11 +24,11 @@ export default {
       this.errorMessage = '';
 
       if (!this.email) {
-        this.emailError = 'L\'email est requis';
+        this.emailError = this.t('loginview.email-required');
         return;
       }
       if (!this.password) {
-        this.passwordError = 'Le mot de passe est requis';
+        this.passwordError = this.t('loginview.password-required');
         return;
       }
       this.loading = true;
@@ -45,16 +51,16 @@ export default {
           localStorage.setItem('user', JSON.stringify(data.user));
           window.location.href = '/';
         } else {
-          this.errorMessage = 'Identifiants incorrects. Veuillez réessayer.';
+          this.errorMessage = this.t('loginview.invalid-credentials');
         }
       } catch (error) {
-        this.errorMessage = 'Erreur lors de la connexion. Veuillez réessayer.';
+        this.errorMessage = this.t('loginview.connection-error');
       } finally {
         this.loading = false;
       }
     },
     handleForgotPassword() {
-      alert('Fonctionnalité de récupération de mot de passe à venir !');
+      alert(this.t('loginview.forgot-password-coming-soon'));
     }
   }
 }
@@ -66,8 +72,8 @@ export default {
       <div class="login-card">
 
         <div class="login-header-content">
-          <h1 class="login-title">Bienvenue sur EcoDeli</h1>
-          <p class="login-subtitle">Connectez-vous pour accéder à votre espace personnel</p>
+          <h1 class="login-title">{{ t('loginview.welcome-to-ecodeli') }}</h1>
+          <p class="login-subtitle">{{ t('loginview.login-to-access') }}</p>
         </div>
         <div v-if="errorMessage" class="error-message">
           <i class="fas fa-exclamation-triangle"></i>
@@ -76,13 +82,13 @@ export default {
 
         <form @submit.prevent="handleLogin" class="login-form">
           <div class="form-group">
-            <label for="email">Adresse email</label>
+            <label for="email">{{ t('loginview.email-address') }}</label>
             <input
               type="email"
               id="email"
               v-model="email"
               required
-              placeholder="votre@email.com"
+              :placeholder="t('loginview.email-placeholder')"
               class="form-input"
               :class="{ 'error': emailError }"
             >
@@ -90,13 +96,13 @@ export default {
           </div>
 
           <div class="form-group">
-            <label for="password">Mot de passe</label>
+            <label for="password">{{ t('loginview.password') }}</label>
             <input
               type="password"
               id="password"
               v-model="password"
               required
-              placeholder="Votre mot de passe"
+              :placeholder="t('loginview.password-placeholder')"
               class="form-input"
               :class="{ 'error': passwordError }"
             >
@@ -106,11 +112,11 @@ export default {
           <button type="submit" class="login-btn" :disabled="loading">
             <span v-if="loading">
               <i class="fas fa-spinner fa-spin"></i>
-              Connexion en cours...
+              {{ t('loginview.logging-in') }}
             </span>
             <span v-else>
               <i class="fas fa-sign-in-alt"></i>
-              Se connecter
+              {{ t('loginview.login') }}
             </span>
           </button>
         </form>
@@ -118,18 +124,18 @@ export default {
         <div class="login-footer">
           <a href="#" class="forgot-password" @click.prevent="handleForgotPassword">
             <i class="fas fa-key"></i>
-            Mot de passe oublié ?
+            {{ t('loginview.forgot-password') }}
           </a>
           <p class="register-link">
-            Pas encore de compte ?
-            <router-link to="/register">Créer un compte</router-link>
+            {{ t('loginview.no-account') }}
+            <router-link to="/register">{{ t('loginview.create-account') }}</router-link>
           </p>
         </div>
       </div>
 
       <div class="eco-badge">
         <i class="fas fa-leaf"></i>
-        <span>Plateforme éco-responsable</span>
+        <span>{{ t('loginview.eco-platform') }}</span>
       </div>
     </div>
   </div>

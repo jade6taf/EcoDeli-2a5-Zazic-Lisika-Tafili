@@ -69,5 +69,94 @@
         "profilPublic": "Profil public",
         "livraisons": "Mes livraisons",
         "logout": "Déconnexion"
+    },
+    "registerview": {
+        "join-ecodeli": "Rejoignez EcoDeli",
+        "choose-profile": "Choisissez votre profil pour commencer votre aventure écologique",
+        "continue": "Continuer",
+        "your-information": "Vos informations",
+        "personal-info": "Informations personnelles",
+        "company-info": "Informations de l'entreprise",
+        "first-name": "Prénom",
+        "first-name-placeholder": "Votre prénom",
+        "last-name": "Nom",
+        "last-name-placeholder": "Votre nom",
+        "email": "Email",
+        "email-placeholder": "votre@email.com",
+        "password": "Mot de passe",
+        "password-placeholder": "Créez un mot de passe sécurisé",
+        "company-name": "Nom de l'entreprise",
+        "company-name-placeholder": "Nom de votre entreprise",
+        "siret-number": "Numéro SIRET",
+        "siret-placeholder": "14 chiffres",
+        "siret-title": "Le numéro SIRET doit contenir exactement 14 chiffres",
+        "back": "Retour",
+        "register": "S'inscrire",
+        "registering": "Inscription en cours...",
+        "already-account": "Déjà un compte ?",
+        "login-link": "Se connecter",
+        "error-default": "Erreur lors de l'inscription",
+        "error-generic": "Une erreur est survenue lors de l'inscription",
+        "profiles": {
+            "client": {
+                "title": "Client",
+                "subtitle": "J'ai des colis à expédier",
+                "description": "Passez vos commandes et suivez vos livraisons en temps réel",
+                "highlight-1": "Expédition rapide et sécurisée",
+                "highlight-2": "Suivi en temps réel",
+                "highlight-3": "Support client dédié"
+            },
+            "livreur": {
+                "title": "Livreur",
+                "subtitle": "Je veux livrer des colis",
+                "description": "Effectuez des livraisons et gagnez un revenu complémentaire",
+                "highlight-1": "Horaires flexibles",
+                "highlight-2": "Rémunération attractive",
+                "highlight-3": "Zone de livraison personnalisable"
+            },
+            "commercant": {
+                "title": "Commerçant",
+                "subtitle": "Je vends des produits locaux",
+                "description": "Gérez votre commerce et vos produits en ligne",
+                "highlight-1": "Vitrine en ligne gratuite",
+                "highlight-2": "Gestion simplifiée des stocks",
+                "highlight-3": "Promotion locale ciblée"
+            },
+            "prestataire": {
+                "title": "Prestataire",
+                "subtitle": "J'offre des services",
+                "description": "Proposez vos services et compétences aux particuliers",
+                "highlight-1": "Profil professionnel détaillé",
+                "highlight-2": "Système d'évaluation",
+                "highlight-3": "Paiement sécurisé"
+            },
+            "admin": {
+                "title": "Administrateur",
+                "subtitle": "Gestion de la plateforme",
+                "description": "Accès complet aux outils d'administration",
+                "highlight-1": "Gestion des utilisateurs",
+                "highlight-2": "Modération du contenu",
+                "highlight-3": "Statistiques avancées"
+            }
+        }
+    },
+    "loginview": {
+        "welcome-to-ecodeli": "Bienvenue sur EcoDeli",
+        "login-to-access": "Connectez-vous pour accéder à votre espace personnel",
+        "email-address": "Adresse email",
+        "email-placeholder": "votre@email.com",
+        "password": "Mot de passe",
+        "password-placeholder": "Votre mot de passe",
+        "login": "Se connecter",
+        "logging-in": "Connexion en cours...",
+        "forgot-password": "Mot de passe oublié ?",
+        "no-account": "Pas encore de compte ?",
+        "create-account": "Créer un compte",
+        "eco-platform": "Plateforme éco-responsable",
+        "email-required": "L'email est requis",
+        "password-required": "Le mot de passe est requis",
+        "invalid-credentials": "Identifiants incorrects. Veuillez réessayer.",
+        "connection-error": "Erreur lors de la connexion. Veuillez réessayer.",
+        "forgot-password-coming-soon": "Fonctionnalité de récupération de mot de passe à venir !"
     }
 }

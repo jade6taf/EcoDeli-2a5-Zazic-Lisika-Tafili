@@ -69,5 +69,94 @@
         "profilPublic": "Public profile",
         "livraisons": "My deliveries",
         "logout": "Logout"
+    },
+    "registerview": {
+        "join-ecodeli": "Join EcoDeli",
+        "choose-profile": "Choose your profile to start your ecological adventure",
+        "continue": "Continue",
+        "your-information": "Your information",
+        "personal-info": "Personal information",
+        "company-info": "Company information",
+        "first-name": "First name",
+        "first-name-placeholder": "Your first name",
+        "last-name": "Last name",
+        "last-name-placeholder": "Your last name",
+        "email": "Email",
+        "email-placeholder": "your@email.com",
+        "password": "Password",
+        "password-placeholder": "Create a secure password",
+        "company-name": "Company name",
+        "company-name-placeholder": "Your company name",
+        "siret-number": "SIRET number",
+        "siret-placeholder": "14 digits",
+        "siret-title": "The SIRET number must contain exactly 14 digits",
+        "back": "Back",
+        "register": "Sign up",
+        "registering": "Signing up...",
+        "already-account": "Already have an account?",
+        "login-link": "Sign in",
+        "error-default": "Registration error",
+        "error-generic": "An error occurred during registration",
+        "profiles": {
+            "client": {
+                "title": "Client",
+                "subtitle": "I have packages to ship",
+                "description": "Place your orders and track your deliveries in real time",
+                "highlight-1": "Fast and secure shipping",
+                "highlight-2": "Real-time tracking",
+                "highlight-3": "Dedicated customer support"
+            },
+            "livreur": {
+                "title": "Deliverer",
+                "subtitle": "I want to deliver packages",
+                "description": "Make deliveries and earn supplementary income",
+                "highlight-1": "Flexible schedule",
+                "highlight-2": "Attractive compensation",
+                "highlight-3": "Customizable delivery zone"
+            },
+            "commercant": {
+                "title": "Merchant",
+                "subtitle": "I sell local products",
+                "description": "Manage your business and products online",
+                "highlight-1": "Free online storefront",
+                "highlight-2": "Simplified inventory management",
+                "highlight-3": "Targeted local promotion"
+            },
+            "prestataire": {
+                "title": "Service provider",
+                "subtitle": "I offer services",
+                "description": "Offer your services and skills to individuals",
+                "highlight-1": "Detailed professional profile",
+                "highlight-2": "Rating system",
+                "highlight-3": "Secure payment"
+            },
+            "admin": {
+                "title": "Administrator",
+                "subtitle": "Platform management",
+                "description": "Complete access to administration tools",
+                "highlight-1": "User management",
+                "highlight-2": "Content moderation",
+                "highlight-3": "Advanced statistics"
+            }
+        }
+    },
+    "loginview": {
+        "welcome-to-ecodeli": "Welcome to EcoDeli",
+        "login-to-access": "Log in to access your personal space",
+        "email-address": "Email address",
+        "email-placeholder": "your@email.com",
+        "password": "Password",
+        "password-placeholder": "Your password",
+        "login": "Sign in",
+        "logging-in": "Signing in...",
+        "forgot-password": "Forgot password?",
+        "no-account": "Don't have an account yet?",
+        "create-account": "Create an account",
+        "eco-platform": "Eco-responsible platform",
+        "email-required": "Email is required",
+        "password-required": "Password is required",
+        "invalid-credentials": "Invalid credentials. Please try again.",
+        "connection-error": "Connection error. Please try again.",
+        "forgot-password-coming-soon": "Password recovery feature coming soon!"
     }
 }
