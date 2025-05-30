@@ -158,5 +158,10 @@
         "invalid-credentials": "Invalid credentials. Please try again.",
         "connection-error": "Connection error. Please try again.",
         "forgot-password-coming-soon": "Password recovery feature coming soon!"
+    },
+    "language": {
+        "toggle": "Switch language",
+        "current": "English",
+        "switch-to": "Switch to French"
     }
 }

@@ -158,5 +158,10 @@
         "invalid-credentials": "Identifiants incorrects. Veuillez réessayer.",
         "connection-error": "Erreur lors de la connexion. Veuillez réessayer.",
         "forgot-password-coming-soon": "Fonctionnalité de récupération de mot de passe à venir !"
+    },
+    "language": {
+        "toggle": "Changer de langue",
+        "current": "Français",
+        "switch-to": "Passer en anglais"
     }
 }

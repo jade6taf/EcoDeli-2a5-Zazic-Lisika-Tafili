@@ -1,12 +1,15 @@
 <script>
 import { authStore } from '@/store/auth'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import LanguageToggle from '@/components/LanguageToggle.vue'
 import { useI18n } from 'vue-i18n'
+import { languageStore } from '@/store/language.js'
 
 export default {
   name: 'Header',
   components: {
-    ThemeToggle
+    ThemeToggle,
+    LanguageToggle
   },
   setup() {
     const { t } = useI18n()
@@ -73,6 +76,7 @@ export default {
   },
   mounted() {
     authStore.initialize();
+    languageStore.init();
   }
 }
 </script>
@@ -86,7 +90,7 @@ export default {
     </div>
 
     <div class="header-actions">
-
+      <LanguageToggle />
       <ThemeToggle />
 
       <div v-if="!isAuthenticated" class="auth-buttons">
