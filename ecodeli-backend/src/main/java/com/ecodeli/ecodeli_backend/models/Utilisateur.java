@@ -58,7 +58,7 @@ public abstract class Utilisateur {
     private String email;
 
     @NotBlank(message = "Le mot de passe est obligatoire")
-    @Size(min = 8, max = 255, message = "Le mot de passe doit contenir au moins 8 caractères")
+    @com.ecodeli.ecodeli_backend.validation.PasswordSecurity(minLength = 8, maxLength = 128)
     @Column(name = "mot_de_passe", length = 255, nullable = false)
     private String motDePasse;
 

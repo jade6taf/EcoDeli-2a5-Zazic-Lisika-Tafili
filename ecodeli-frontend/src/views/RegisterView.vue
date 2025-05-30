@@ -1,8 +1,12 @@
 <script>
 import { authStore } from '@/store/auth'
+import PasswordInput from '@/components/PasswordInput.vue'
 
 export default {
   name: 'RegisterView',
+  components: {
+    PasswordInput
+  },
   data() {
     return {
       user: {
@@ -25,6 +29,12 @@ export default {
       error: null,
       loading: false,
       step: 1,
+      passwordValidation: {
+        valid: false,
+        strength: 0,
+        errors: [],
+        suggestions: []
+      },
       profileData: {
         'CLIENT': {
           title: 'Client',
@@ -94,7 +104,7 @@ export default {
       if (this.step === 1) {
         return !!this.selectedProfile;
       } else if (this.step === 2) {
-        const baseValidation = this.user.nom && this.user.prenom && this.user.email && this.user.motDePasse;
+        const baseValidation = this.user.nom && this.user.prenom && this.user.email && this.user.motDePasse && this.passwordValidation.valid;
 
         if (this.user.type === 'PRESTATAIRE') {
           return baseValidation && this.user.nomEntreprise && this.user.siret && /^[0-9]{14}$/.test(this.user.siret);
@@ -165,6 +175,9 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    handlePasswordValidation(validationResult) {
+      this.passwordValidation = validationResult;
     }
   }
 }
@@ -261,7 +274,7 @@ export default {
           </h4>
           <div class="form-row">
             <div class="form-group">
-              <label for="nom">Nom *</label>
+              <label for="nom">Nom</label>
               <input
                 type="text"
                 id="nom"
@@ -271,7 +284,7 @@ export default {
               >
             </div>
             <div class="form-group">
-              <label for="prenom">Prénom *</label>
+              <label for="prenom">Prénom</label>
               <input
                 type="text"
                 id="prenom"
@@ -284,7 +297,7 @@ export default {
 
           <div class="form-row">
             <div class="form-group">
-              <label for="email">Email *</label>
+              <label for="email">Email</label>
               <input
                 type="email"
                 id="email"
@@ -293,15 +306,23 @@ export default {
                 placeholder="votre@email.com"
               >
             </div>
-            <div class="form-group">
-              <label for="motDePasse">Mot de passe *</label>
-              <input
-                type="password"
-                id="motDePasse"
+            <div class="form-group password-field-group">
+              <label for="email">Mot de passe</label>
+              <PasswordInput
                 v-model="user.motDePasse"
-                required
-                placeholder="8 caractères minimum"
-              >
+                label="Mot de passe *"
+                placeholder="Créez un mot de passe sécurisé"
+                :required="true"
+                :show-strength="true"
+                :show-criteria="true"
+                :show-generator="true"
+                :user-info="{
+                  nom: user.nom,
+                  prenom: user.prenom,
+                  email: user.email
+                }"
+                @validation-change="handlePasswordValidation"
+              />
             </div>
           </div>
         </div>
@@ -314,7 +335,7 @@ export default {
           </h4>
           <div class="form-row">
             <div class="form-group">
-              <label for="nomEntreprise">Nom de l'entreprise *</label>
+              <label for="nomEntreprise">Nom de l'entreprise</label>
               <input
                 type="text"
                 id="nomEntreprise"
@@ -324,7 +345,7 @@ export default {
               >
             </div>
             <div class="form-group">
-              <label for="siret">Numéro SIRET *</label>
+              <label for="siret">Numéro SIRET</label>
               <input
                 type="text"
                 id="siret"
@@ -973,5 +994,45 @@ export default {
 
 [data-theme="dark"] .admin-card {
   background: linear-gradient(135deg, var(--bg-tertiary) 0%, #2d3e42 100%);
+}
+
+/* Styles spécifiques pour le composant PasswordInput dans le formulaire */
+.password-field-group {
+  margin-bottom: 0;
+}
+
+.password-field-group :deep(.password-input-container) {
+  margin-bottom: 0;
+}
+
+.password-field-group :deep(.password-field) {
+  margin-bottom: 0;
+}
+
+.password-field-group :deep(.password-label) {
+  display: none; /* Le label est déjà affiché par le form-group */
+}
+
+.password-field-group :deep(.password-strength),
+.password-field-group :deep(.password-criteria),
+.password-field-group :deep(.password-errors),
+.password-field-group :deep(.password-suggestions) {
+  margin-top: 1rem;
+}
+
+/* Ajustements responsive pour le champ mot de passe */
+@media (max-width: 768px) {
+  .password-field-group :deep(.criteria-list) {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .password-field-group :deep(.password-criteria) {
+    margin-top: 0.75rem;
+  }
+  
+  .password-field-group :deep(.criteria-title) {
+    font-size: 0.85rem;
+  }
 }
 </style>
