@@ -7,7 +7,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class GeocodingService {
@@ -17,7 +21,7 @@ public class GeocodingService {
     @Value("${nominatim.api.url:https://nominatim.openstreetmap.org}")
     private String nominatimApiUrl;
 
-    @Value("${application.name:EcodeliBackend}") // Pour le User-Agent
+    @Value("${application.name:EcodeliBackend}")
     private String applicationName;
 
     private final WebClient.Builder webClientBuilder;
@@ -34,17 +38,54 @@ public class GeocodingService {
             .build();
     }
 
+    public Mono<List<Map<String, Object>>> searchAddresses(String query) {
+        if (query == null || query.trim().length() < 3) {
+            return Mono.just(new ArrayList<>());
+        }
 
-    /**
-     * Géocode une adresse en utilisant l'API Nominatim.
-     *
-     * @param address L'adresse complète (rue, numéro, ville, code postal si possible).
-     *                Nominatim est plus efficace avec une adresse complète dans le paramètre 'q'
-     *                ou des paramètres structurés.
-     * @param postalCode Le code postal (optionnel, peut être inclus dans address).
-     * @param city La ville (optionnel, peut être inclus dans address).
-     * @return Un Optional contenant les Coordinates si trouvées, sinon Optional.empty().
-     */
+        return this.webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/search")
+                        .queryParam("q", query.trim())
+                        .queryParam("format", "jsonv2")
+                        .queryParam("addressdetails", 1)
+                        .queryParam("limit", 5)
+                        .queryParam("countrycodes", "fr")
+                        .queryParam("dedupe", 1)
+                        .build())
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .map(responseArray -> {
+                    List<Map<String, Object>> suggestions = new ArrayList<>();
+                    if (responseArray.isArray()) {
+                        for (JsonNode result : responseArray) {
+                            Map<String, Object> suggestion = new HashMap<>();
+                            suggestion.put("display_name", result.path("display_name").asText());
+                            suggestion.put("lat", result.path("lat").asDouble());
+                            suggestion.put("lon", result.path("lon").asDouble());
+
+                            JsonNode address = result.path("address");
+                            if (!address.isMissingNode()) {
+                                Map<String, String> addressComponents = new HashMap<>();
+                                addressComponents.put("house_number", address.path("house_number").asText(""));
+                                addressComponents.put("road", address.path("road").asText(""));
+                                addressComponents.put("postcode", address.path("postcode").asText(""));
+                                addressComponents.put("city", address.path("city").asText(address.path("town").asText(address.path("village").asText(""))));
+                                suggestion.put("address_components", addressComponents);
+                            }
+
+                            suggestion.put("type", result.path("type").asText());
+                            suggestion.put("importance", result.path("importance").asDouble(0.0));
+                            suggestions.add(suggestion);
+                        }
+                    }
+                    return suggestions;
+                })
+                .onErrorResume(e -> {
+                    return Mono.just(new ArrayList<>());
+                });
+    }
+
     public Mono<Optional<Coordinates>> geocodeAddress(String address, String postalCode, String city) {
         StringBuilder queryBuilder = new StringBuilder(address);
         if (city != null && !city.isEmpty() && !address.toLowerCase().contains(city.toLowerCase())) {

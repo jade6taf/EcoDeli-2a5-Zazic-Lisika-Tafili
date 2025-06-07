@@ -4,6 +4,7 @@ import com.ecodeli.ecodeli_backend.models.Annonce;
 import com.ecodeli.ecodeli_backend.models.Annonce.StatutAnnonce;
 import com.ecodeli.ecodeli_backend.models.Annonce.TypeAnnonce;
 import com.ecodeli.ecodeli_backend.models.Colis;
+import com.ecodeli.ecodeli_backend.models.Commercant;
 import com.ecodeli.ecodeli_backend.models.Livraison;
 import com.ecodeli.ecodeli_backend.models.Livraison.TypeLivraison;
 import com.ecodeli.ecodeli_backend.models.Livreur;
@@ -632,5 +633,57 @@ public class AnnonceService {
         }
 
         return statut;
+    }
+
+    public List<Annonce> getAnnoncesByCommercant(Integer idCommercant) {
+        return annonceRepository.findByExpediteurIdUtilisateur(idCommercant);
+    }
+
+    public Map<String, Object> getStatistiquesCommercant(Integer idCommercant) {
+        List<Annonce> annonces = getAnnoncesByCommercant(idCommercant);
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalAnnonces", annonces.size());
+        stats.put("annoncesActives", annonces.stream().filter(a ->
+            a.getStatut() == StatutAnnonce.PUBLIEE ||
+            a.getStatut() == StatutAnnonce.SEGMENT_1_PRIS ||
+            a.getStatut() == StatutAnnonce.SEGMENT_2_PRIS ||
+            a.getStatut() == StatutAnnonce.SEGMENTS_COMPLETS
+        ).count());
+        stats.put("annoncesEnCours", annonces.stream().filter(a ->
+            a.getStatut() == StatutAnnonce.VALIDEE ||
+            a.getStatut() == StatutAnnonce.EN_COURS ||
+            a.getStatut() == StatutAnnonce.EN_COURS_SEGMENT_1 ||
+            a.getStatut() == StatutAnnonce.ATTENTE_ENTREPOT ||
+            a.getStatut() == StatutAnnonce.EN_COURS_SEGMENT_2
+        ).count());
+        stats.put("annoncesTerminees", annonces.stream().filter(a ->
+            a.getStatut() == StatutAnnonce.TERMINEE
+        ).count());
+        stats.put("annoncesAnnulees", annonces.stream().filter(a ->
+            a.getStatut() == StatutAnnonce.ANNULEE
+        ).count());
+
+        return stats;
+    }
+
+    @Transactional
+    public Annonce createAnnonceCommercant(Annonce annonce, Integer idCommercant) {
+
+        Utilisateur utilisateur = utilisateurRepository.findById(idCommercant)
+                .orElseThrow(() -> new IllegalArgumentException("Commerçant non trouvé avec l'ID: " + idCommercant));
+
+        if (!(utilisateur instanceof Commercant)) {
+            throw new IllegalArgumentException("L'utilisateur n'est pas un commerçant");
+        }
+
+        return createAnnonce(annonce, idCommercant);
+    }
+
+    public List<Annonce> getAnnoncesByCommercantAndStatut(Integer idCommercant, StatutAnnonce statut) {
+        List<Annonce> annonces = getAnnoncesByCommercant(idCommercant);
+        return annonces.stream()
+                .filter(a -> a.getStatut() == statut)
+                .toList();
     }
 }

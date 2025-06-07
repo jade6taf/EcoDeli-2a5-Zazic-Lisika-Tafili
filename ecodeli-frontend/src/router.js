@@ -127,6 +127,30 @@ const routes = [
       meta: { requiresAuth: true, role: 'COMMERCANT' }
     },
     {
+      path: '/commercant/annonces',
+      name: 'commercant-annonces',
+      component: () => import('./views/commercant/AnnoncesListView.vue'),
+      meta: { requiresAuth: true, role: 'COMMERCANT' }
+    },
+    {
+      path: '/commercant/annonces/new',
+      name: 'commercant-annonce-create',
+      component: () => import('./views/commercant/AnnonceCreateView.vue'),
+      meta: { requiresAuth: true, role: 'COMMERCANT' }
+    },
+    {
+      path: '/commercant/annonces/:id/edit',
+      name: 'commercant-annonce-edit',
+      component: () => import('./views/commercant/AnnonceEditView.vue'),
+      meta: { requiresAuth: true, role: 'COMMERCANT' }
+    },
+    {
+      path: '/commercant/annonces/:id',
+      name: 'commercant-annonce-detail',
+      component: () => import('./views/commercant/AnnonceDetailView.vue'),
+      meta: { requiresAuth: true, role: 'COMMERCANT' }
+    },
+    {
       path: '/commercant/profile',
       name: 'commercant-profile',
       component: () => import('./views/commercant/CommercantProfileView.vue'),

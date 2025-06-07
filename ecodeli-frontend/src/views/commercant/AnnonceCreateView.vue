@@ -2,7 +2,7 @@
 import AddressAutocomplete from '@/components/AddressAutocomplete.vue';
 
 export default {
-  name: 'AnnonceCreateView',
+  name: 'CommercantAnnonceCreateView',
   components: {
     AddressAutocomplete
   },
@@ -108,8 +108,8 @@ export default {
       this.success = false;
 
       try {
-        if (!this.annonce.titre || !this.annonce.description || !this.annonce.prixUnitaire || 
-            !this.annonce.adresseDepart || !this.annonce.adresseFin || !this.annonce.dateDebut || 
+        if (!this.annonce.titre || !this.annonce.description || !this.annonce.prixUnitaire ||
+            !this.annonce.adresseDepart || !this.annonce.adresseFin || !this.annonce.dateDebut ||
             !this.annonce.dateFin) {
           throw new Error('Veuillez remplir tous les champs obligatoires');
         }
@@ -122,28 +122,32 @@ export default {
         if (dateDebut < new Date()) {
           throw new Error('La date de début ne peut pas être dans le passé');
         }
+
         this.annonce.prixUnitaire = parseFloat(this.annonce.prixUnitaire);
         const token = localStorage.getItem('token');
         if (!token) {
           this.$router.push('/login');
           return;
         }
+
         const annonceData = {
           ...this.annonce,
           idExpediteur: this.user.idUtilisateur,
           expediteur: {
             ...this.annonce.expediteur,
             idUtilisateur: this.user.idUtilisateur,
-            type: "CLIENT"
+            type: "COMMERCANT"
           }
         };
+
         if (annonceData.destinataire) {
           annonceData.destinataire = {
             ...annonceData.destinataire,
             type: "CLIENT"
           };
         }
-        const response = await fetch(`/api/annonces?idExpediteur=${this.user.idUtilisateur}`, {
+
+        const response = await fetch(`/api/commercants/${this.user.idUtilisateur}/annonces`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -151,14 +155,16 @@ export default {
           },
           body: JSON.stringify(annonceData)
         });
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
-          throw new Error(errorData || 'Erreur lors de la création de l\'annonce');
+          throw new Error(errorData?.message || 'Erreur lors de la création de l\'annonce');
         }
+
         const result = await response.json();
         this.success = true;
         setTimeout(() => {
-          this.$router.push('/client/annonces');
+          this.$router.push('/commercant/annonces');
         }, 2000);
       } catch (err) {
         this.error = err.message || 'Une erreur est survenue';
@@ -166,6 +172,7 @@ export default {
         this.isSubmitting = false;
       }
     },
+
     goToStep(step) {
       for (let i = 1; i < step; i++) {
         if (!this.stepValidation[i] && !this.isStepValid && this.currentStep < i) {
@@ -176,6 +183,7 @@ export default {
     },
 
     onDepartAddressSelected(data) {
+      console.log('Adresse de départ sélectionnée:', data);
       if (data.fullSuggestion) {
         this.annonce.departCoordinates = {
           lat: data.fullSuggestion.lat,
@@ -193,6 +201,7 @@ export default {
       }
     }
   },
+
   mounted() {
     const now = new Date();
     this.minDate = this.formatDateForInput(now);
@@ -214,8 +223,8 @@ export default {
 <template>
   <div class="create-annonce-container">
     <div class="create-annonce-header">
-      <h1>Créer une nouvelle annonce</h1>
-      <router-link to="/client/annonces" class="btn-back">
+      <h1>Créer une nouvelle annonce de livraison</h1>
+      <router-link to="/commercant/annonces" class="btn-back">
         <i class="fas fa-arrow-left"></i> Retour aux annonces
       </router-link>
     </div>
@@ -253,6 +262,7 @@ export default {
       </div>
 
       <form @submit.prevent="currentStep === totalSteps ? handleSubmit() : nextStep()" class="annonce-form">
+        <!-- Step 1: General Information -->
         <div v-if="currentStep === 1" class="form-step">
           <h2>Étape 1: Informations générales</h2>
           <div class="form-section">
@@ -262,25 +272,26 @@ export default {
                 id="titre"
                 v-model="annonce.titre"
                 type="text"
-                placeholder="Ex: Livraison de produits bio"
+                placeholder="Ex: Livraison de produits de ma boutique"
                 required
               >
-              <small>Donnez un titre clair qui décrit votre besoin</small>
+              <small>Donnez un titre clair qui décrit votre besoin de livraison</small>
             </div>
             <div class="form-group">
               <label for="description">Description *</label>
               <textarea
                 id="description"
                 v-model="annonce.description"
-                placeholder="Décrivez votre annonce en détail"
+                placeholder="Décrivez en détail ce qui doit être livré et toute instruction spéciale"
                 rows="4"
                 required
               ></textarea>
-              <small>Précisez tout détail important pour les livreurs potentiels</small>
+              <small>Précisez le type de produits, les instructions spéciales, etc.</small>
             </div>
           </div>
         </div>
 
+        <!-- Step 2: Package Details -->
         <div v-if="currentStep === 2" class="form-step">
           <h2>Étape 2: Détails du colis</h2>
           <div class="form-section">
@@ -339,7 +350,7 @@ export default {
             <div class="form-group checkbox-group">
               <label class="checkbox-label">
                 <input type="checkbox" v-model="annonce.colis.fragile">
-                Colis fragile
+                Colis fragile (nécessite une attention particulière)
               </label>
             </div>
             <div class="form-group">
@@ -347,17 +358,18 @@ export default {
               <textarea
                 id="colis-description"
                 v-model="annonce.colis.description"
-                placeholder="Décrivez le contenu du colis"
+                placeholder="Décrivez le contenu du colis (produits alimentaires, vêtements, etc.)"
                 rows="2"
               ></textarea>
             </div>
           </div>
         </div>
 
+        <!-- Step 3: Addresses and Contacts -->
         <div v-if="currentStep === 3" class="form-step">
           <h2>Étape 3: Adresses et contacts</h2>
           <div class="form-section">
-            <h3>Adresse de départ</h3>
+            <h3>Adresse de départ (votre boutique)</h3>
             <div class="form-group">
               <label for="adresseDepart">Adresse complète de départ *</label>
               <AddressAutocomplete
@@ -369,7 +381,7 @@ export default {
               />
             </div>
 
-            <h3>Expéditeur</h3>
+            <h3>Expéditeur (vous)</h3>
             <div class="contact-form">
               <div class="form-group">
                 <label for="exp-nom">Nom *</label>
@@ -412,9 +424,9 @@ export default {
           </div>
 
           <div class="form-section">
-            <h3>Adresse d'arrivée</h3>
+            <h3>Adresse de livraison</h3>
             <div class="form-group">
-              <label for="adresseFin">Adresse complète d'arrivée *</label>
+              <label for="adresseFin">Adresse complète de livraison *</label>
               <AddressAutocomplete
                 v-model="annonce.adresseFin"
                 input-id="adresseFin"
@@ -467,6 +479,7 @@ export default {
           </div>
         </div>
 
+        <!-- Step 4: Dates and Times -->
         <div v-if="currentStep === 4" class="form-step">
           <h2>Étape 4: Dates et horaires</h2>
           <div class="form-section">
@@ -481,7 +494,7 @@ export default {
                   :min="minDate"
                   required
                 >
-                <small>À partir de quand le colis peut être récupéré</small>
+                <small>À partir de quand le colis peut être récupéré dans votre boutique</small>
               </div>
               <div>
                 <label for="dateFin">Date et heure de livraison *</label>
@@ -498,11 +511,12 @@ export default {
           </div>
         </div>
 
+        <!-- Step 5: Price and Validation -->
         <div v-if="currentStep === 5" class="form-step">
           <h2>Étape 5: Prix et validation</h2>
           <div class="form-section">
             <div class="form-group price-group">
-              <label for="prix">Prix proposé (€) *</label>
+              <label for="prix">Prix proposé pour la livraison (€) *</label>
               <div class="price-input-container">
                 <input
                   id="prix"
@@ -515,44 +529,28 @@ export default {
                 >
                 <span class="euro-symbol">€</span>
               </div>
-              <small>Proposez un prix équitable pour votre livraison</small>
+              <small>Montant que vous êtes prêt à payer pour cette livraison</small>
             </div>
 
-            <div class="form-group checkbox-group livraison-partielle">
+            <div class="form-group checkbox-group">
               <label class="checkbox-label">
                 <input type="checkbox" v-model="annonce.livraisonPartielleAutorisee">
-                Autoriser la livraison partielle
+                Autoriser la livraison partielle si nécessaire
               </label>
-              <small class="delivery-info">
-                La livraison partielle permet à deux livreurs différents de prendre en charge votre colis :
-                <br>• <strong>Segment 1</strong> : De votre adresse de départ vers un entrepôt intermédiaire
-                <br>• <strong>Segment 2</strong> : De l'entrepôt vers l'adresse de destination finale
-                <br>Cela peut réduire les coûts et améliorer la disponibilité des livreurs.
-              </small>
             </div>
 
-            <div class="summary-container">
-              <h3>Récapitulatif de l'annonce</h3>
-              <div class="summary-item">
-                <strong>Titre:</strong> {{ annonce.titre }}
-              </div>
-              <div class="summary-item">
-                <strong>Type:</strong> {{ annonce.typeAnnonce === 'unique' ? 'Livraison unique' : 'Livraison récurrente' }}
-              </div>
-              <div class="summary-item">
-                <strong>Départ:</strong> {{ annonce.adresseDepart }}
-              </div>
-              <div class="summary-item">
-                <strong>Arrivée:</strong> {{ annonce.adresseFin }}
-              </div>
-              <div class="summary-item">
-                <strong>Dimensions:</strong> {{ annonce.colis.longueur }}×{{ annonce.colis.largeur }}×{{ annonce.colis.hauteur }} cm
-              </div>
-              <div class="summary-item">
-                <strong>Poids:</strong> {{ annonce.colis.poids }} kg
-              </div>
-              <div class="summary-item">
-                <strong>Prix:</strong> {{ annonce.prixUnitaire }} €
+            <div class="summary-section">
+              <h3>Récapitulatif de votre annonce</h3>
+              <div class="summary-content">
+                <p><strong>Titre:</strong> {{ annonce.titre }}</p>
+                <p><strong>Description:</strong> {{ annonce.description }}</p>
+                <p><strong>Poids:</strong> {{ annonce.colis.poids }} kg</p>
+                <p><strong>Dimensions:</strong> {{ annonce.colis.longueur }} × {{ annonce.colis.largeur }} × {{ annonce.colis.hauteur }} cm</p>
+                <p><strong>De:</strong> {{ annonce.adresseDepart }}</p>
+                <p><strong>Vers:</strong> {{ annonce.adresseFin }}</p>
+                <p><strong>Prise en charge:</strong> {{ new Date(annonce.dateDebut).toLocaleString('fr-FR') }}</p>
+                <p><strong>Livraison avant:</strong> {{ new Date(annonce.dateFin).toLocaleString('fr-FR') }}</p>
+                <p><strong>Prix:</strong> {{ annonce.prixUnitaire }}€</p>
               </div>
             </div>
           </div>
@@ -561,24 +559,26 @@ export default {
         <div class="form-navigation">
           <button
             type="button"
-            v-if="currentStep > 1"
+            class="btn-secondary"
             @click="prevStep"
-            class="btn-prev"
+            v-if="currentStep > 1"
+            :disabled="isSubmitting"
           >
             <i class="fas fa-arrow-left"></i> Précédent
           </button>
+
           <button
             type="submit"
-            class="btn-submit"
-            :disabled="!isStepValid || (currentStep === totalSteps && isSubmitting)"
+            class="btn-primary"
+            :disabled="!isStepValid || isSubmitting"
           >
-            <template v-if="currentStep < totalSteps">
+            <i v-if="isSubmitting" class="fas fa-spinner fa-spin"></i>
+            <span v-if="currentStep < totalSteps">
               Suivant <i class="fas fa-arrow-right"></i>
-            </template>
-            <template v-else>
-              <i v-if="isSubmitting" class="fas fa-spinner fa-spin"></i>
-              <span v-else>Créer l'annonce</span>
-            </template>
+            </span>
+            <span v-else>
+              {{ isSubmitting ? 'Création...' : 'Créer l\'annonce' }}
+            </span>
           </button>
         </div>
       </form>
@@ -591,6 +591,9 @@ export default {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .create-annonce-header {
@@ -598,25 +601,61 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.create-annonce-header h1 {
+  color: #4CAF50;
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 700;
 }
 
 .btn-back {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  color: #555;
-  text-decoration: none;
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
-  background-color: #f0f0f0;
-  transition: background-color 0.3s;
+  background: #f3f4f6;
+  color: #374151;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s;
 }
 
 .btn-back:hover {
-  background-color: #e0e0e0;
+  background: #e5e7eb;
 }
 
-.btn-back i {
-  margin-right: 0.5rem;
+.success-message {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.success-message i {
+  font-size: 1.5rem;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.error-message i {
+  font-size: 1.25rem;
 }
 
 .progress-container {
@@ -626,223 +665,167 @@ export default {
 .progress-bar {
   width: 100%;
   height: 8px;
-  background-color: #e0e0e0;
+  background: #e5e7eb;
   border-radius: 4px;
-  margin-bottom: 1rem;
   overflow: hidden;
+  margin-bottom: 1rem;
 }
 
 .progress-fill {
   height: 100%;
-  background-color: #4CAF50;
+  background: linear-gradient(90deg, #4CAF50, #66BB6A);
   transition: width 0.3s ease;
 }
 
 .steps-indicator {
   display: flex;
   justify-content: space-between;
-  margin: 0 10px;
+  align-items: center;
 }
 
 .step-circle {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background-color: #e0e0e0;
-  color: #555;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  position: relative;
+  font-weight: 600;
+  background: #e5e7eb;
+  color: #6b7280;
+  transition: all 0.3s ease;
 }
 
 .step-circle.active {
-  background-color: #4CAF50;
+  background: #4CAF50;
   color: white;
 }
 
 .step-circle.current {
+  background: #66BB6A;
+  color: white;
   transform: scale(1.1);
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
 }
 
 .step-circle.clickable {
   cursor: pointer;
 }
 
-.annonce-form-container {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  overflow: hidden;
-}
-
-.error-message, .success-message {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 4px;
-}
-
-.error-message {
-  background-color: #ffebee;
-  color: #c62828;
-}
-
-.success-message {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-}
-
-.error-message i, .success-message i {
-  font-size: 1.5rem;
-  margin-right: 1rem;
+.step-circle.clickable:hover {
+  transform: scale(1.05);
 }
 
 .annonce-form {
-  padding: 1.5rem;
+  margin-top: 2rem;
 }
 
 .form-step {
-  min-height: 300px;
+  min-height: 400px;
 }
 
 .form-step h2 {
-  color: #4CAF50;
+  color: #1f2937;
   margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .form-section {
   margin-bottom: 2rem;
-  padding-bottom: 1rem;
 }
 
 .form-section h3 {
+  color: #374151;
   margin-bottom: 1rem;
-  color: #333;
-  font-size: 1.1rem;
-}
-
-.form-info {
-  margin-bottom: 1rem;
-  color: #666;
-  font-style: italic;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
 }
 
 .form-group {
   margin-bottom: 1.5rem;
 }
 
-.form-group small {
-  display: block;
-  margin-top: 0.25rem;
-  color: #666;
-  font-size: 0.8rem;
-}
-
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: #374151;
 }
 
-.form-group input, 
+.form-group input,
 .form-group textarea,
 .form-group select {
   width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.3s;
+  transition: border-color 0.2s;
 }
 
-.form-group input:focus, 
+.form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-  border-color: #4CAF50;
   outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.25rem;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
 
 .dimensions-container {
-  background-color: #f9f9f9;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .dimensions-group {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  margin-top: 1rem;
-}
-
-.checkbox-group {
-  margin-top: 1rem;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.checkbox-label input {
-  width: auto;
-  margin-right: 0.5rem;
-}
-
-.livraison-partielle {
-  background-color: #f0f8ff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #b3d9ff;
-  margin-top: 2rem;
-}
-
-.livraison-partielle .checkbox-label {
-  font-weight: 600;
-  color: #1976d2;
-  margin-bottom: 1rem;
-}
-
-.delivery-info {
-  background-color: #e3f2fd;
-  padding: 1rem;
-  border-radius: 4px;
-  border-left: 4px solid #2196f3;
-  margin-top: 1rem;
-  line-height: 1.6;
-}
-
-.delivery-info strong {
-  color: #1976d2;
 }
 
 .contact-form {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
-  margin-bottom: 1.5rem;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
 }
 
 .date-group {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
-.price-group {
-  max-width: 200px;
-}
-
-.price-input-container {
+.price-group .price-input-container {
   position: relative;
+  display: inline-block;
+  width: 200px;
 }
 
 .price-input-container input {
@@ -851,98 +834,125 @@ export default {
 
 .euro-symbol {
   position: absolute;
-  right: 0.8rem;
+  right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #666;
+  color: #6b7280;
+  font-weight: 600;
 }
 
-.summary-container {
-  background-color: #f5f5f5;
+.form-info {
+  background: #f0f8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  color: #1b5e20;
+  margin-bottom: 1rem;
+  border-left: 4px solid #4CAF50;
+}
+
+.summary-section {
+  background: #f9fafb;
   padding: 1.5rem;
-  border-radius: 4px;
-  margin-top: 2rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 }
 
-.summary-item {
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px dashed #ddd;
+.summary-content p {
+  margin: 0.5rem 0;
+  color: #374151;
 }
 
-.summary-item:last-child {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
+.summary-content strong {
+  color: #1f2937;
 }
 
 .form-navigation {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #e5e7eb;
 }
 
-.btn-prev, .btn-submit {
-  padding: 0.8rem 1.5rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: none;
+.btn-primary,
+.btn-secondary {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.btn-prev {
-  background-color: #f5f5f5;
-  color: #555;
-}
-
-.btn-prev:hover:not(:disabled) {
-  background-color: #e0e0e0;
-}
-
-.btn-prev i {
-  margin-right: 0.5rem;
-}
-
-.btn-submit {
-  background-color: #4CAF50;
+.btn-primary {
+  background: #4CAF50;
   color: white;
-  font-weight: 500;
 }
 
-.btn-submit:hover:not(:disabled) {
-  background-color: #45a049;
+.btn-primary:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-1px);
 }
 
-.btn-submit:disabled {
-  opacity: 0.7;
+.btn-primary:disabled {
+  background: #9ca3af;
   cursor: not-allowed;
-  background-color: #a5d6a7;
 }
 
-.btn-submit i:first-child {
-  margin-right: 0.5rem;
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
 }
 
-.btn-submit i:last-child {
-  margin-left: 0.5rem;
+.btn-secondary:hover:not(:disabled) {
+  background: #e5e7eb;
 }
 
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-  .date-group,
-  .contact-form,
-  .dimensions-group {
-    grid-template-columns: 1fr;
+  .create-annonce-container {
+    padding: 1rem;
+    margin: 1rem;
   }
 
   .create-annonce-header {
     flex-direction: column;
-    align-items: flex-start;
     gap: 1rem;
+    text-align: center;
+  }
+
+  .create-annonce-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .steps-indicator {
+    gap: 0.5rem;
+  }
+
+  .step-circle {
+    width: 35px;
+    height: 35px;
+    font-size: 0.875rem;
+  }
+
+  .dimensions-group,
+  .contact-form,
+  .date-group {
+    grid-template-columns: 1fr;
   }
 
   .form-navigation {
@@ -950,9 +960,84 @@ export default {
     gap: 1rem;
   }
 
-  .btn-prev, .btn-submit {
+  .btn-primary,
+  .btn-secondary {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .create-annonce-container {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+
+  .create-annonce-header {
+    border-bottom-color: #374151;
+  }
+
+  .create-annonce-header h1 {
+    color: #66BB6A;
+  }
+
+  .btn-back {
+    background: #374151;
+    color: #d1d5db;
+  }
+
+  .btn-back:hover {
+    background: #4b5563;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: #66BB6A;
+    box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.1);
+  }
+
+  .form-section h3 {
+    color: #d1d5db;
+    border-bottom-color: #4b5563;
+  }
+
+  .form-info {
+    background: #1b4332;
+    color: #a7f3d0;
+    border-left-color: #66BB6A;
+  }
+
+  .summary-section {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .summary-content p,
+  .summary-content strong {
+    color: #f9fafb;
+  }
+
+  .form-navigation {
+    border-top-color: #4b5563;
+  }
+
+  .btn-secondary {
+    background: #4b5563;
+    color: #d1d5db;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: #6b7280;
   }
 }
 </style>
