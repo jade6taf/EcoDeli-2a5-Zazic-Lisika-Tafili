@@ -57,7 +57,7 @@ export default {
       const typeToPath = {
         'CLIENT': '/client',
         'LIVREUR': '/livreur',
-        'COMMERCANT': '/commerçant',
+        'COMMERCANT': '/commercant',
         'PRESTATAIRE': '/prestataire',
         'ADMIN': '/admin/dashboard'
       };
@@ -125,6 +125,12 @@ export default {
             </router-link>
             <router-link to="/prestataire/profil" class="dropdown-item">
               <i class="fas fa-user-edit"></i> {{ t('header.profilPublic') }}
+            </router-link>
+          </template>
+
+          <template v-if="user && user.type === 'COMMERCANT'">
+            <router-link to="/commercant/profile" class="dropdown-item">
+              <i class="fas fa-store"></i> {{ t('header.profil') }}
             </router-link>
           </template>
 

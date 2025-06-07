@@ -334,6 +334,57 @@ export default {
           </div>
         </div>
 
+        <!-- Section spécifique pour les commerçants -->
+        <div v-if="user.type === 'COMMERCANT'" class="form-section">
+          <h4>
+            <i class="fas fa-store"></i>
+            {{ t('registerview.business-info') }}
+          </h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nomCommerce">{{ t('registerview.business-name') }}</label>
+              <input
+                type="text"
+                id="nomCommerce"
+                v-model="user.nomCommerce"
+                required
+                :placeholder="t('registerview.business-name-placeholder')"
+              >
+            </div>
+            <div class="form-group">
+              <label for="siretCommercant">{{ t('registerview.siret-number') }}</label>
+              <input
+                type="text"
+                id="siretCommercant"
+                v-model="user.siret"
+                pattern="[0-9]{14}"
+                :placeholder="t('registerview.siret-placeholder')"
+                :title="t('registerview.siret-title')"
+              >
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="descriptionCommerce">{{ t('registerview.business-description') }}</label>
+              <textarea
+                id="descriptionCommerce"
+                v-model="user.descriptionCommerce"
+                rows="3"
+                :placeholder="t('registerview.business-description-placeholder')"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="horairesOuverture">{{ t('registerview.opening-hours') }}</label>
+              <textarea
+                id="horairesOuverture"
+                v-model="user.horairesOuverture"
+                rows="3"
+                :placeholder="t('registerview.opening-hours-placeholder')"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
         <!-- Section spécifique pour les prestataires -->
         <div v-if="user.type === 'PRESTATAIRE'" class="form-section">
           <h4>
@@ -796,10 +847,25 @@ export default {
   color: var(--text-color);
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group textarea:focus {
   border-color: var(--primary-color);
   outline: none;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.form-group textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+  color: var(--text-color);
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
 }
 
 .form-navigation {
@@ -993,7 +1059,8 @@ export default {
   background: var(--bg-secondary);
 }
 
-[data-theme="dark"] .form-group input {
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group textarea {
   background: var(--bg-color);
   border-color: var(--border-color);
   color: var(--text-color);

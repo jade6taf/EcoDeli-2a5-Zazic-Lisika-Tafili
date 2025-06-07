@@ -120,6 +120,18 @@ const routes = [
     component: () => import('./views/livreur/MesSegmentsView.vue'),
     meta: { requiresAuth: true, role: 'LIVREUR' }
   },
+    {
+      path: '/commercant',
+      name: 'commercant-dashboard',
+      component: () => import('./views/commercant/DashboardView.vue'),
+      meta: { requiresAuth: true, role: 'COMMERCANT' }
+    },
+    {
+      path: '/commercant/profile',
+      name: 'commercant-profile',
+      component: () => import('./views/commercant/CommercantProfileView.vue'),
+      meta: { requiresAuth: true, role: 'COMMERCANT' }
+    },
   {
     path: '/prestataire',
     meta: { requiresAuth: true, role: 'PRESTATAIRE' },

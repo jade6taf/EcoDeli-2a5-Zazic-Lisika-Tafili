@@ -77,6 +77,7 @@
         "your-information": "Your information",
         "personal-info": "Personal information",
         "company-info": "Company information",
+        "business-info": "Business information",
         "first-name": "First name",
         "first-name-placeholder": "Your first name",
         "last-name": "Last name",
@@ -87,6 +88,12 @@
         "password-placeholder": "Create a secure password",
         "company-name": "Company name",
         "company-name-placeholder": "Your company name",
+        "business-name": "Business name",
+        "business-name-placeholder": "Your business name",
+        "business-description": "Business description",
+        "business-description-placeholder": "Describe your business activity...",
+        "opening-hours": "Opening hours",
+        "opening-hours-placeholder": "Ex: Mon-Fri 9am-6pm, Sat 9am-12pm",
         "siret-number": "SIRET number",
         "siret-placeholder": "14 digits",
         "siret-title": "The SIRET number must contain exactly 14 digits",
@@ -163,5 +170,31 @@
         "toggle": "Switch language",
         "current": "English",
         "switch-to": "Switch to French"
+    },
+    "commercant": {
+        "dashboard": {
+            "welcome": "Welcome to your merchant space",
+            "subtitle": "Manage your business activity with ease",
+            "development": {
+                "title": "Space under development",
+                "message": "Your merchant dashboard is currently under development. We are working to provide you with the best business management features."
+            },
+            "coming-soon": "Coming soon:",
+            "features": {
+                "contracts": "Contract management",
+                "announcements": "Create announcements",
+                "billing": "Service billing",
+                "payments": "Payment management",
+                "analytics": "Analytics dashboard"
+            },
+            "stats": {
+                "business": "Your Business",
+                "business-desc": "Grow your activity with EcoDeli",
+                "partnership": "EcoDeli Partnership",
+                "partnership-desc": "Benefit from our delivery network",
+                "eco": "Ecological Impact",
+                "eco-desc": "Participate in sustainable delivery"
+            }
+        }
     }
 }

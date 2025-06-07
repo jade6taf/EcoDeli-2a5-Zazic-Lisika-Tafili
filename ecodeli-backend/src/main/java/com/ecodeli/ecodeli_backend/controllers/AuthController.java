@@ -15,6 +15,7 @@ import com.ecodeli.ecodeli_backend.models.Utilisateur;
 import com.ecodeli.ecodeli_backend.security.JwtUtil;
 import com.ecodeli.ecodeli_backend.services.UtilisateurService;
 import com.ecodeli.ecodeli_backend.services.PasswordSecurityService;
+import com.ecodeli.ecodeli_backend.services.EmailService;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
@@ -26,12 +27,14 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final PasswordSecurityService passwordSecurityService;
+    private final EmailService emailService;
 
-    public AuthController(UtilisateurService utilisateurService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, PasswordSecurityService passwordSecurityService) {
+    public AuthController(UtilisateurService utilisateurService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, PasswordSecurityService passwordSecurityService, EmailService emailService) {
         this.utilisateurService = utilisateurService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.passwordSecurityService = passwordSecurityService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/register")
@@ -40,6 +43,12 @@ public class AuthController {
 
         try {
             Utilisateur newUser = utilisateurService.createUtilisateur(utilisateur);
+
+            try {
+                emailService.sendWelcomeEmail(newUser);
+            } catch (Exception emailException) {
+                System.err.println("Erreur lors de l'envoi de l'email de bienvenue : " + emailException.getMessage());
+            }
             String token = jwtUtil.generateToken(newUser.getEmail(), newUser.getIdUtilisateur(), newUser.getType());
             return ResponseEntity.ok(new JwtResponse(token, newUser));
         } catch (Exception e) {
