@@ -77,8 +77,10 @@ export default {
           bValue = new Date(bValue)
         }
 
-        if (aValue < bValue) return sortOrder.value === 'asc' ? -1 : 1
-        if (aValue > bValue) return sortOrder.value === 'asc' ? 1 : -1
+        if (aValue < bValue)
+          return sortOrder.value === 'asc' ? -1 : 1
+        if (aValue > bValue)
+          return sortOrder.value === 'asc' ? 1 : -1
         return 0
       })
 

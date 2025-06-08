@@ -14,14 +14,8 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Intege
 
     Optional<Utilisateur> findByEmail(String email);
 
-    @Query("SELECT u FROM Utilisateur u WHERE TYPE(u) = CASE " +
-           "WHEN :type = 'CLIENT' THEN Client " +
-           "WHEN :type = 'LIVREUR' THEN Livreur " +
-           "WHEN :type = 'COMMERCANT' THEN Commercant " +
-           "WHEN :type = 'PRESTATAIRE' THEN Prestataire " +
-           "WHEN :type = 'ADMIN' THEN Admin " +
-           "END")
-    List<Utilisateur> findByType(@Param("type") String type);
+    @Query(value = "SELECT * FROM UTILISATEUR WHERE type_utilisateur = ?1", nativeQuery = true)
+    List<Object[]> findByTypeNative(@Param("type") String type);
 
     boolean existsByEmail(String email);
 }

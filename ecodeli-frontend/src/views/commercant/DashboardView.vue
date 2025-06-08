@@ -228,6 +228,16 @@ export default {
                 <p>Modifier les informations de votre commerce</p>
               </div>
             </router-link>
+
+            <router-link to="/commercant/contrats" class="action-card">
+              <div class="action-icon">
+                <i class="fas fa-file-contract"></i>
+              </div>
+              <div class="action-content">
+                <h4>Mes contrats</h4>
+                <p>Consulter et signer vos contrats EcoDeli</p>
+              </div>
+            </router-link>
           </div>
         </div>
 

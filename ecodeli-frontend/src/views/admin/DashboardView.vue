@@ -58,6 +58,12 @@ export default {
           <h3>Documents</h3>
           <p>Valider les documents d'identité</p>
         </router-link>
+
+        <router-link to="/admin/contrats" class="dashboard-card">
+          <i class="fas fa-file-contract"></i>
+          <h3>Gestion des contrats</h3>
+          <p>Créer et gérer les contrats avec les commerçants</p>
+        </router-link>
       </div>
     </div>
     <div v-else class="error-message">

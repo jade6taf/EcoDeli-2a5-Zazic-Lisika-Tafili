@@ -1,11 +1,17 @@
 package com.ecodeli.ecodeli_backend.services;
 
 import com.ecodeli.ecodeli_backend.models.Utilisateur;
+import com.ecodeli.ecodeli_backend.models.Commercant;
+import com.ecodeli.ecodeli_backend.models.Client;
+import com.ecodeli.ecodeli_backend.models.Livreur;
+import com.ecodeli.ecodeli_backend.models.Prestataire;
+import com.ecodeli.ecodeli_backend.models.Admin;
 import com.ecodeli.ecodeli_backend.repositories.UtilisateurRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 @Service
 public class UtilisateurService {
@@ -89,7 +95,68 @@ public class UtilisateurService {
     }
 
     public List<Utilisateur> getUtilisateursByType(String type) {
-        return utilisateurRepository.findByType(type);
+        List<Object[]> results = utilisateurRepository.findByTypeNative(type);
+        List<Utilisateur> utilisateurs = new ArrayList<>();
+
+        for (Object[] row : results) {
+            Utilisateur utilisateur = mapRowToUtilisateur(row, type);
+            if (utilisateur != null) {
+                utilisateurs.add(utilisateur);
+            }
+        }
+
+        return utilisateurs;
+    }
+
+    private Utilisateur mapRowToUtilisateur(Object[] row, String type) {
+        try {
+            Utilisateur utilisateur = null;
+
+            switch (type) {
+                case "COMMERCANT":
+                    utilisateur = new Commercant();
+                    break;
+                case "CLIENT":
+                    utilisateur = new Client();
+                    break;
+                case "LIVREUR":
+                    utilisateur = new Livreur();
+                    break;
+                case "PRESTATAIRE":
+                    utilisateur = new Prestataire();
+                    break;
+                case "ADMIN":
+                    utilisateur = new Admin();
+                    break;
+                default:
+                    return null;
+            }
+
+            if (row[2] != null && row[2] instanceof Integer) {
+                utilisateur.setIdUtilisateur((Integer) row[2]);
+            }
+
+            if (row[7] != null && row[7] instanceof String) {
+                utilisateur.setNom((String) row[7]);
+            }
+
+            if (row[8] != null && row[8] instanceof String) {
+                utilisateur.setPrenom((String) row[8]);
+            }
+
+            if (row[10] != null && row[10] instanceof String) {
+                utilisateur.setEmail((String) row[10]);
+            }
+
+            if (row[12] != null && row[12] instanceof String) {
+                utilisateur.setMotDePasse((String) row[12]);
+            }
+            return utilisateur;
+        } catch (Exception e) {
+            System.err.println("Erreur lors du mapping de l'utilisateur: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

@@ -1,11 +1,6 @@
 <script>
-import AddressAutocomplete from '@/components/AddressAutocomplete.vue';
-
 export default {
   name: 'CommercantAnnonceCreateView',
-  components: {
-    AddressAutocomplete
-  },
   data() {
     return {
       currentStep: 1,
@@ -65,12 +60,12 @@ export default {
         case 1:
           return this.annonce.titre && this.annonce.description && this.annonce.typeAnnonce;
         case 2:
-          return this.annonce.colis.poids && this.annonce.colis.longueur &&
+          return this.annonce.colis.poids && this.annonce.colis.longueur && 
                  this.annonce.colis.largeur && this.annonce.colis.hauteur;
         case 3:
-          return this.annonce.adresseDepart && this.annonce.adresseFin &&
-                 this.annonce.expediteur.nom && this.annonce.expediteur.prenom &&
-                 this.annonce.expediteur.telephone && this.annonce.destinataire.nom &&
+          return this.annonce.adresseDepart && this.annonce.adresseFin && 
+                 this.annonce.expediteur.nom && this.annonce.expediteur.prenom && 
+                 this.annonce.expediteur.telephone && this.annonce.destinataire.nom && 
                  this.annonce.destinataire.prenom && this.annonce.destinataire.telephone;
         case 4:
           return this.annonce.dateDebut && this.annonce.dateFin;
@@ -108,8 +103,8 @@ export default {
       this.success = false;
 
       try {
-        if (!this.annonce.titre || !this.annonce.description || !this.annonce.prixUnitaire ||
-            !this.annonce.adresseDepart || !this.annonce.adresseFin || !this.annonce.dateDebut ||
+        if (!this.annonce.titre || !this.annonce.description || !this.annonce.prixUnitaire || 
+            !this.annonce.adresseDepart || !this.annonce.adresseFin || !this.annonce.dateDebut || 
             !this.annonce.dateFin) {
           throw new Error('Veuillez remplir tous les champs obligatoires');
         }
@@ -147,6 +142,7 @@ export default {
           };
         }
 
+        // Use the merchant-specific endpoint
         const response = await fetch(`/api/commercants/${this.user.idUtilisateur}/annonces`, {
           method: 'POST',
           headers: {
@@ -180,25 +176,6 @@ export default {
         }
       }
       this.currentStep = step;
-    },
-
-    onDepartAddressSelected(data) {
-      console.log('Adresse de départ sélectionnée:', data);
-      if (data.fullSuggestion) {
-        this.annonce.departCoordinates = {
-          lat: data.fullSuggestion.lat,
-          lon: data.fullSuggestion.lon
-        };
-      }
-    },
-
-    onDestinationAddressSelected(data) {
-      if (data.fullSuggestion) {
-        this.annonce.destinationCoordinates = {
-          lat: data.fullSuggestion.lat,
-          lon: data.fullSuggestion.lon
-        };
-      }
     }
   },
 
@@ -210,6 +187,7 @@ export default {
     if (userStr) {
       this.user = JSON.parse(userStr);
 
+      // Pre-fill merchant information
       this.annonce.expediteur.nom = this.user.nom || '';
       this.annonce.expediteur.prenom = this.user.prenom || '';
       this.annonce.expediteur.email = this.user.email || '';
@@ -372,13 +350,13 @@ export default {
             <h3>Adresse de départ (votre boutique)</h3>
             <div class="form-group">
               <label for="adresseDepart">Adresse complète de départ *</label>
-              <AddressAutocomplete
+              <input
+                id="adresseDepart"
                 v-model="annonce.adresseDepart"
-                input-id="adresseDepart"
+                type="text"
                 placeholder="Numéro, rue, code postal, ville"
-                :required="true"
-                @address-selected="onDepartAddressSelected"
-              />
+                required
+              >
             </div>
 
             <h3>Expéditeur (vous)</h3>
@@ -427,13 +405,13 @@ export default {
             <h3>Adresse de livraison</h3>
             <div class="form-group">
               <label for="adresseFin">Adresse complète de livraison *</label>
-              <AddressAutocomplete
+              <input
+                id="adresseFin"
                 v-model="annonce.adresseFin"
-                input-id="adresseFin"
+                type="text"
                 placeholder="Numéro, rue, code postal, ville"
-                :required="true"
-                @address-selected="onDestinationAddressSelected"
-              />
+                required
+              >
             </div>
 
             <h3>Destinataire</h3>
@@ -606,7 +584,7 @@ export default {
 }
 
 .create-annonce-header h1 {
-  color: #4CAF50;
+  color: #2563eb;
   margin: 0;
   font-size: 1.875rem;
   font-weight: 700;
@@ -673,7 +651,7 @@ export default {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4CAF50, #66BB6A);
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
   transition: width 0.3s ease;
 }
 
@@ -697,12 +675,12 @@ export default {
 }
 
 .step-circle.active {
-  background: #4CAF50;
+  background: #2563eb;
   color: white;
 }
 
 .step-circle.current {
-  background: #66BB6A;
+  background: #3b82f6;
   color: white;
   transform: scale(1.1);
 }
@@ -769,8 +747,8 @@ export default {
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .form-group small {
@@ -842,12 +820,12 @@ export default {
 }
 
 .form-info {
-  background: #f0f8f0;
+  background: #f0f9ff;
   padding: 1rem;
   border-radius: 8px;
-  color: #1b5e20;
+  color: #0c4a6e;
   margin-bottom: 1rem;
-  border-left: 4px solid #4CAF50;
+  border-left: 4px solid #0ea5e9;
 }
 
 .summary-section {
@@ -890,12 +868,12 @@ export default {
 }
 
 .btn-primary {
-  background: #4CAF50;
+  background: #2563eb;
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #45a049;
+  background: #1d4ed8;
   transform: translateY(-1px);
 }
 
@@ -979,7 +957,7 @@ export default {
   }
 
   .create-annonce-header h1 {
-    color: #66BB6A;
+    color: #60a5fa;
   }
 
   .btn-back {
@@ -1002,8 +980,8 @@ export default {
   .form-group input:focus,
   .form-group textarea:focus,
   .form-group select:focus {
-    border-color: #66BB6A;
-    box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.1);
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
   }
 
   .form-section h3 {
@@ -1012,9 +990,9 @@ export default {
   }
 
   .form-info {
-    background: #1b4332;
-    color: #a7f3d0;
-    border-left-color: #66BB6A;
+    background: #1e3a8a;
+    color: #bfdbfe;
+    border-left-color: #3b82f6;
   }
 
   .summary-section {

@@ -669,7 +669,6 @@ public class AnnonceService {
 
     @Transactional
     public Annonce createAnnonceCommercant(Annonce annonce, Integer idCommercant) {
-
         Utilisateur utilisateur = utilisateurRepository.findById(idCommercant)
                 .orElseThrow(() -> new IllegalArgumentException("Commerçant non trouvé avec l'ID: " + idCommercant));
 

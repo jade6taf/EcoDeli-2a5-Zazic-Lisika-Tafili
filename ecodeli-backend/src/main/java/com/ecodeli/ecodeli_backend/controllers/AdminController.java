@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/admin/utilisateurs")
+@RequestMapping("/api/admin")
 @CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
 
@@ -29,13 +29,21 @@ public class AdminController {
         this.livraisonService = livraisonService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Utilisateur>> getAllUtilisateurs() {
-        List<Utilisateur> utilisateurs = utilisateurService.getAllUtilisateurs();
-        return new ResponseEntity<>(utilisateurs, HttpStatus.OK);
+    @GetMapping("/utilisateurs")
+    public ResponseEntity<List<Utilisateur>> getAllUtilisateurs(@RequestParam(required = false) String type) {
+        System.out.println("Admin controller - getAllUtilisateurs called with type: " + type);
+
+        if (type != null && !type.isEmpty()) {
+            List<Utilisateur> utilisateurs = utilisateurService.getUtilisateursByType(type);
+            System.out.println("Found " + utilisateurs.size() + " users of type: " + type);
+            return new ResponseEntity<>(utilisateurs, HttpStatus.OK);
+        } else {
+            List<Utilisateur> utilisateurs = utilisateurService.getAllUtilisateurs();
+            return new ResponseEntity<>(utilisateurs, HttpStatus.OK);
+        }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/utilisateurs/{id}")
     public ResponseEntity<Utilisateur> getUtilisateurById(@PathVariable Integer id) {
         return utilisateurService.getUtilisateurById(id)
                 .map(utilisateur -> new ResponseEntity<>(utilisateur, HttpStatus.OK))

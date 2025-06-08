@@ -156,6 +156,18 @@ const routes = [
       component: () => import('./views/commercant/CommercantProfileView.vue'),
       meta: { requiresAuth: true, role: 'COMMERCANT' }
     },
+    {
+      path: '/commercant/contrats',
+      name: 'commercant-contrats',
+      component: () => import('./views/commercant/ContratsListView.vue'),
+      meta: { requiresAuth: true, role: 'COMMERCANT' }
+    },
+    {
+      path: '/commercant/contrats/:id',
+      name: 'commercant-contrat-detail',
+      component: () => import('./views/commercant/ContratDetailView.vue'),
+      meta: { requiresAuth: true, role: 'COMMERCANT' }
+    },
   {
     path: '/prestataire',
     meta: { requiresAuth: true, role: 'PRESTATAIRE' },
@@ -234,6 +246,30 @@ const routes = [
     path: '/admin/documents',
     name: 'admin-documents',
     component: () => import('./views/admin/AdminDocumentsView.vue'),
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/contrats',
+    name: 'admin-contrats',
+    component: () => import('./views/admin/AdminContratListView.vue'),
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/contrats/create',
+    name: 'admin-contrat-create',
+    component: () => import('./views/admin/AdminContratFormView.vue'),
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/contrats/:id/edit',
+    name: 'admin-contrat-edit',
+    component: () => import('./views/admin/AdminContratFormView.vue'),
+    meta: { requiresAuth: true, role: 'ADMIN' }
+  },
+  {
+    path: '/admin/contrats/:id',
+    name: 'admin-contrat-detail',
+    component: () => import('./views/admin/AdminContratDetailView.vue'),
     meta: { requiresAuth: true, role: 'ADMIN' }
   }
 ]

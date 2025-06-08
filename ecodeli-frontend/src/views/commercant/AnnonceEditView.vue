@@ -102,7 +102,6 @@ export default {
           return;
         }
 
-        // Use the merchant-specific endpoint
         const response = await fetch(`/api/commercants/${this.user.idUtilisateur}/annonces/${annonceId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
