@@ -12,11 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ecodeli.ecodeli_backend.models.AuthRequest;
 import com.ecodeli.ecodeli_backend.models.JwtResponse;
 import com.ecodeli.ecodeli_backend.models.Utilisateur;
+import com.ecodeli.ecodeli_backend.models.RegistrationRequest;
 import com.ecodeli.ecodeli_backend.security.JwtUtil;
 import com.ecodeli.ecodeli_backend.services.UtilisateurService;
 import com.ecodeli.ecodeli_backend.services.PasswordSecurityService;
 import com.ecodeli.ecodeli_backend.services.EmailService;
+import com.ecodeli.ecodeli_backend.services.HCaptchaService;
 import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -28,17 +31,29 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final PasswordSecurityService passwordSecurityService;
     private final EmailService emailService;
+    private final HCaptchaService hCaptchaService;
 
-    public AuthController(UtilisateurService utilisateurService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, PasswordSecurityService passwordSecurityService, EmailService emailService) {
+    public AuthController(UtilisateurService utilisateurService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, PasswordSecurityService passwordSecurityService, EmailService emailService, HCaptchaService hCaptchaService) {
         this.utilisateurService = utilisateurService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.passwordSecurityService = passwordSecurityService;
         this.emailService = emailService;
+        this.hCaptchaService = hCaptchaService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Utilisateur utilisateur) {
+    public ResponseEntity<?> register(@RequestBody RegistrationRequest request, HttpServletRequest httpRequest) {
+        String clientIp = getClientIpAddress(httpRequest);
+        if (!hCaptchaService.validateCaptcha(request.getHcaptchaToken(), clientIp)) {
+            return ResponseEntity.badRequest().body("Captcha invalide. Veuillez réessayer.");
+        }
+
+        Utilisateur utilisateur = request.getUtilisateur();
+        if (utilisateur == null) {
+            return ResponseEntity.badRequest().body("Données utilisateur manquantes");
+        }
+
         utilisateur.setMotDePasse(passwordEncoder.encode(utilisateur.getMotDePasse()));
 
         try {
@@ -49,10 +64,20 @@ public class AuthController {
             } catch (Exception emailException) {
                 System.err.println("Erreur lors de l'envoi de l'email de bienvenue : " + emailException.getMessage());
             }
+
             String token = jwtUtil.generateToken(newUser.getEmail(), newUser.getIdUtilisateur(), newUser.getType());
             return ResponseEntity.ok(new JwtResponse(token, newUser));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("L'email existe déjà");
+        }
+    }
+
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedForHeader = request.getHeader("X-Forwarded-For");
+        if (xForwardedForHeader == null) {
+            return request.getRemoteAddr();
+        } else {
+            return xForwardedForHeader.split(",")[0].trim();
         }
     }
 

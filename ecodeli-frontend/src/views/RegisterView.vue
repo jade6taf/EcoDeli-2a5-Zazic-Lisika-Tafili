@@ -39,7 +39,11 @@ export default {
         strength: 0,
         errors: [],
         suggestions: []
-      }
+      },
+      hcaptchaToken: null,
+      hcaptchaSiteKey: import.meta.env.VITE_HCAPTCHA_SITE_KEY,
+      captchaVerified: false,
+      captchaError: null
     }
   },
   computed: {
@@ -111,8 +115,7 @@ export default {
       if (this.step === 1) {
         return !!this.selectedProfile;
       } else if (this.step === 2) {
-        const baseValidation = this.user.nom && this.user.prenom && this.user.email && this.user.motDePasse && this.passwordValidation.valid;
-
+        const baseValidation = this.user.nom && this.user.prenom && this.user.email && this.user.motDePasse && this.passwordValidation.valid && this.captchaVerified;
         if (this.user.type === 'PRESTATAIRE') {
           return baseValidation && this.user.nomEntreprise && this.user.siret && /^[0-9]{14}$/.test(this.user.siret);
         }
@@ -144,24 +147,31 @@ export default {
     async handleRegister() {
       if (!this.stepValid)
         return;
+      if (!this.captchaVerified) {
+        this.error = 'Veuillez compléter la vérification de sécurité';
+        return;
+      }
 
       this.loading = true;
       this.error = null;
 
       try {
-        const userData = { ...this.user };
+        const registrationData = {
+          utilisateur: { ...this.user },
+          hcaptchaToken: this.hcaptchaToken
+        };
 
         const response = await fetch('/api/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(userData)
+          body: JSON.stringify(registrationData)
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.message || this.t('registerview.error-default'));
+          const errorData = await response.text().catch(() => 'Erreur lors de l\'inscription');
+          throw new Error(errorData || 'Erreur lors de l\'inscription');
         }
 
         const data = await response.json();
@@ -178,13 +188,34 @@ export default {
         const redirectPath = userTypeToPath[this.user.type] || '/';
         this.$router.push(redirectPath);
       } catch (err) {
-        this.error = err.message || this.t('registerview.error-generic');
+        this.error = err.message || 'Erreur lors de l\'inscription';
+        this.resetCaptcha();
       } finally {
         this.loading = false;
       }
     },
     handlePasswordValidation(validationResult) {
       this.passwordValidation = validationResult;
+    },
+    onCaptchaVerify(token) {
+      this.hcaptchaToken = token;
+      this.captchaVerified = true;
+      this.captchaError = null;
+    },
+    onCaptchaExpired() {
+      this.hcaptchaToken = null;
+      this.captchaVerified = false;
+      this.captchaError = 'Le captcha a expiré, veuillez le refaire';
+    },
+    onCaptchaError(error) {
+      this.captchaError = 'Erreur lors de la vérification captcha';
+      this.captchaVerified = false;
+      this.hcaptchaToken = null;
+    },
+    resetCaptcha() {
+      this.hcaptchaToken = null;
+      this.captchaVerified = false;
+      this.captchaError = null;
     }
   }
 }
@@ -414,6 +445,24 @@ export default {
                 :title="t('registerview.siret-title')"
               >
             </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h4>
+            <i class="fas fa-shield-alt"></i>
+            Vérification de sécurité
+          </h4>
+          <vue-hcaptcha
+            :sitekey="hcaptchaSiteKey"
+            @verify="onCaptchaVerify"
+            @expired="onCaptchaExpired"
+            @error="onCaptchaError"
+            theme="light"
+          />
+          <div v-if="captchaError" class="captcha-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ captchaError }}
           </div>
         </div>
 
@@ -1107,6 +1156,37 @@ export default {
   
   .password-field-group :deep(.criteria-title) {
     font-size: 0.85rem;
+  }
+}
+
+.captcha-error {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
+  color: var(--error-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  border-left: 4px solid var(--error-color);
+}
+
+.captcha-error i {
+  color: var(--error-color);
+  font-size: 1rem;
+}
+
+[data-theme="dark"] .captcha-error {
+  background: linear-gradient(135deg, #2d1b1b 0%, #3d1a1a 100%);
+  color: #ff8a80;
+  border-left-color: #ff8a80;
+}
+
+@media (max-width: 768px) {
+  .captcha-error {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.8rem;
   }
 }
 </style>
