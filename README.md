@@ -13,7 +13,7 @@ EcoDeli est une plateforme de livraison durable qui connecte commerçants, prest
 ## 📋 Prérequis système
 
 ### Backend
-- JDK 17 ou supérieur
+- JDK 21 ou supérieur
 - Maven 3.6 ou supérieur
 - MariaDB 10.6 ou supérieur
 
@@ -24,8 +24,8 @@ EcoDeli est une plateforme de livraison durable qui connecte commerçants, prest
 - Navigateurs supportés :
   - Chrome
   - Firefox
-  - Safari
   - Edge
+  - Brave
 
 ---
 

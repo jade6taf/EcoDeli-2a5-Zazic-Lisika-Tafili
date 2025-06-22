@@ -42,10 +42,27 @@ const routes = [
     name: 'register',
     component: () => import('./views/RegisterView.vue')
   },
+  // Routes CLIENT
   {
     path: '/client',
     name: 'client-dashboard',
     component: () => import('./views/client/DashboardView.vue'),
+    meta: { requiresAuth: true, role: 'CLIENT' }
+  },
+  {
+    path: '/client/dashboard',
+    redirect: '/client'
+  },
+  {
+    path: '/client/demandes-services/:id/edit',
+    name: 'DemandeServiceEdit',
+    component: () => import('./views/client/DemandeServiceEditView.vue'),
+    meta: { requiresAuth: true, role: 'CLIENT' }
+  },
+  {
+    path: '/client/demandes-services/:id/candidatures',
+    name: 'CandidaturesRecues',
+    component: () => import('./views/client/CandidaturesRecuesView.vue'),
     meta: { requiresAuth: true, role: 'CLIENT' }
   },
   {
@@ -76,6 +93,30 @@ const routes = [
     path: '/client/services-types',
     name: 'services-types',
     component: () => import('./views/client/ServicesTypesView.vue'),
+    meta: { requiresAuth: true, role: 'CLIENT' }
+  },
+  {
+    path: '/client/demandes-services',
+    name: 'client-demandes-services',
+    component: () => import('./views/client/DemandesServicesListView.vue'),
+    meta: { requiresAuth: true, role: 'CLIENT' }
+  },
+  {
+    path: '/client/demandes-services/new',
+    name: 'client-demande-service-create',
+    component: () => import('./views/client/DemandeServiceFormView.vue'),
+    meta: { requiresAuth: true, role: 'CLIENT' }
+  },
+  {
+    path: '/client/demandes-services/:id/edit',
+    name: 'client-demande-service-edit',
+    component: () => import('./views/client/DemandeServiceEditView.vue'),
+    meta: { requiresAuth: true, role: 'CLIENT' }
+  },
+  {
+    path: '/client/demandes-services/:id',
+    name: 'client-demande-service-detail',
+    component: () => import('./views/client/DemandeServiceDetailView.vue'),
     meta: { requiresAuth: true, role: 'CLIENT' }
   },
   {
@@ -191,6 +232,31 @@ const routes = [
         path: 'profil',
         name: 'prestataire-profil',
         component: () => import('./views/prestataire/ProfilPublicView.vue')
+      },
+      {
+        path: 'demandes-disponibles',
+        name: 'prestataire-demandes-disponibles',
+        component: () => import('./views/prestataire/DemandesDisponiblesView.vue')
+      },
+      {
+        path: 'mes-candidatures',
+        name: 'prestataire-mes-candidatures',
+        component: () => import('./views/prestataire/MesCandidaturesView.vue')
+      },
+      {
+        path: 'services-en-cours',
+        name: 'prestataire-services-en-cours',
+        component: () => import('./views/prestataire/ServicesEnCoursView.vue')
+      },
+      {
+        path: 'services-termines',
+        name: 'prestataire-services-termines',
+        component: () => import('./views/prestataire/ServicesTerminesView.vue')
+      },
+      {
+        path: 'demandes/:id',
+        name: 'prestataire-demande-detail',
+        component: () => import('./views/prestataire/DemandeDetailView.vue')
       }
     ]
   },
@@ -198,6 +264,11 @@ const routes = [
     path: '/prestataires/:id',
     name: 'prestataire-voir-profil',
     component: () => import('./views/prestataire/VoirProfilPublicView.vue')
+  },
+  {
+    path: '/prestataires/:id/detail',
+    name: 'prestataire-profil-detail',
+    component: () => import('./views/prestataire/ProfilPublicDetailView.vue')
   }
     ]
   },

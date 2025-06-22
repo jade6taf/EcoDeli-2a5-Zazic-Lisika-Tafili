@@ -63,15 +63,20 @@ export default {
 
       <h3 class="section-title">Services prestataires</h3>
       <div class="dashboard-actions">
-        <div @click="navigateTo('/client/services-types')" class="dashboard-card">
-          <i class="fas fa-concierge-bell"></i>
-          <h3>Découvrir les services</h3>
-          <p>Explorez les services proposés par nos prestataires</p>
-        </div>
-        <div @click="navigateTo('/client/mes-services')" class="dashboard-card">
+        <router-link to="/client/demandes-services/new" class="dashboard-card">
+          <i class="fas fa-plus-circle"></i>
+          <h3>Nouvelle demande de service</h3>
+          <p>Créez une nouvelle demande de service personnalisée</p>
+        </router-link>
+        <router-link to="/client/demandes-services" class="dashboard-card">
           <i class="fas fa-tasks"></i>
           <h3>Mes demandes de service</h3>
           <p>Suivez l'état de vos demandes de services</p>
+        </router-link>
+        <div @click="navigateTo('/client/services-types')" class="dashboard-card">
+          <i class="fas fa-concierge-bell"></i>
+          <h3>Découvrir les prestataires</h3>
+          <p>Explorez les prestataires disponibles par catégorie</p>
         </div>
       </div>
     </div>

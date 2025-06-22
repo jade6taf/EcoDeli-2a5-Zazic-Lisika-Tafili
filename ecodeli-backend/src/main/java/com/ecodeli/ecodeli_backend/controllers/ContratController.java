@@ -3,7 +3,6 @@ package com.ecodeli.ecodeli_backend.controllers;
 import com.ecodeli.ecodeli_backend.models.Contrat;
 import com.ecodeli.ecodeli_backend.models.ContratHistory;
 import com.ecodeli.ecodeli_backend.services.ContratService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
