@@ -27,7 +27,7 @@ export default {
         if (!token) {
           throw new Error('Token non trouvé');
         }
-        const response = await fetch('http://localhost:8080/api/prestataires/profile', {
+        const response = await fetch('/api/prestataires/profile', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

@@ -13,7 +13,7 @@ export default {
           error.value = null
           try {
             const token = localStorage.getItem('token')
-            const res = await fetch('http://localhost:8080/api/admin/utilisateurs/livraisons', {
+            const res = await fetch('/api/admin/utilisateurs/livraisons', {
               headers: {
                 'Authorization': 'Bearer ' + token
               }

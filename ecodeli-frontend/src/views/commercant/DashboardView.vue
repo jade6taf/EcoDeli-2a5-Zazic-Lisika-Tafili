@@ -17,7 +17,7 @@ export default {
 
     const fetchStatistiques = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/commercants/${user.value.idUtilisateur}/statistiques`, {
+        const response = await fetch(`/api/commercants/${user.value.idUtilisateur}/statistiques`, {
           headers: {
             'Authorization': `Bearer ${authStore.token}`,
             'Content-Type': 'application/json'
@@ -37,7 +37,7 @@ export default {
 
     const fetchAnnoncesRecentes = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/commercants/${user.value.idUtilisateur}/annonces`, {
+        const response = await fetch(`/api/commercants/${user.value.idUtilisateur}/annonces`, {
           headers: {
             'Authorization': `Bearer ${authStore.token}`,
             'Content-Type': 'application/json'

@@ -14,7 +14,7 @@ export default {
             headers['Authorization'] = `Bearer ${token}`;
         }
         try {
-            const response = await fetch(`${'http://localhost:8080/api/'}${endpoint}`, {
+            const response = await fetch(`/api/${endpoint}`, {
                 ...options,
                 headers
             });

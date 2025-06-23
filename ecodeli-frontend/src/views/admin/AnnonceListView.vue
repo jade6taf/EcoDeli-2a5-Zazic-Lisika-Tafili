@@ -13,7 +13,7 @@ export default {
         error.value = null
         try {
           const token = localStorage.getItem('token')
-          const res = await fetch('http://localhost:8080/api/admin/utilisateurs/annonces', {
+          const res = await fetch('/api/admin/utilisateurs/annonces', {
             headers: {
               'Authorization': 'Bearer ' + token
             }

@@ -55,7 +55,7 @@ export default {
 
     const loadCommercants = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/admin/utilisateurs?type=COMMERCANT', {
+        const response = await fetch('/api/admin/utilisateurs?type=COMMERCANT', {
           headers: {
             'Authorization': `Bearer ${authStore.token}`,
             'Content-Type': 'application/json'

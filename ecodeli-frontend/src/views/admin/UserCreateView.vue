@@ -26,7 +26,7 @@ export default {
           error.value = null
           try {
             const token = localStorage.getItem('token')
-            const res = await fetch('http://localhost:8080/api/admin/utilisateurs', {
+            const res = await fetch('/api/admin/utilisateurs', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

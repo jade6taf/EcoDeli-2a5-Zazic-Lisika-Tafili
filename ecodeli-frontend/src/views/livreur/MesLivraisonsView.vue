@@ -124,12 +124,28 @@ export default {
     async confirmerParOtp(idLivraison) {
       const otp = this.otpInputs[idLivraison];
       if (!otp || otp.length !== 6) {
-        alert('Veuillez saisir un code OTP à 6 chiffres.');
+        alert('Veuillez saisir un code de validation à 6 chiffres.');
         return;
       }
+
+      const livraison = this.livraisons.find(l => l.idLivraison === idLivraison);
+      if (!livraison) return;
+
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`/api/livraisons/${idLivraison}/confirmer-otp`, {
+        let endpoint, successMessage;
+
+        if (livraison.typeLivraison === 'PARTIELLE' && this.isLivreurSegment1(livraison)) {
+          // Segment 1 : validation du dépôt entrepôt par le livreur
+          endpoint = `/api/livraisons/${idLivraison}/confirmer-depot-segment-1`;
+          successMessage = 'Dépôt à l\'entrepôt confirmé ! Le livreur segment 2 a été notifié.';
+        } else {
+          // Livraison simple ou segment 2 : validation par le client destinataire
+          endpoint = `/api/livraisons/${idLivraison}/confirmer-otp`;
+          successMessage = 'Livraison confirmée avec succès !';
+        }
+
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -137,15 +153,47 @@ export default {
           },
           body: JSON.stringify({ otp })
         });
+
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'OTP incorrect ou expiré.' }));
-          throw new Error(errorData.message || 'OTP incorrect ou expiré.');
+          const errorData = await response.json().catch(() => ({ message: 'Code incorrect ou expiré.' }));
+          throw new Error(errorData.message || 'Code incorrect ou expiré.');
         }
+
         this.otpInputs[idLivraison] = '';
         await this.fetchLivraisons();
-        alert('Livraison confirmée avec succès !');
+        alert(successMessage);
       } catch (err) {
         alert(err.message || 'Une erreur est survenue.');
+      }
+    },
+
+    isLivreurSegment1(livraison) {
+      return livraison.annonce &&
+             livraison.annonce.livreur &&
+             livraison.annonce.livreur.idUtilisateur === this.user.idUtilisateur;
+    },
+
+    getOtpMessage(livraison) {
+      if (livraison.typeLivraison === 'PARTIELLE' && this.isLivreurSegment1(livraison)) {
+        return 'Un code de validation a été envoyé à votre adresse email. Vérifiez votre boîte de réception.';
+      } else {
+        return 'Un code de validation a été envoyé au destinataire. Demandez-lui le code et saisissez-le ci-dessous.';
+      }
+    },
+
+    getOtpPlaceholder(livraison) {
+      if (livraison.typeLivraison === 'PARTIELLE' && this.isLivreurSegment1(livraison)) {
+        return 'Code reçu par email (6 chiffres)';
+      } else {
+        return 'Code du destinataire (6 chiffres)';
+      }
+    },
+
+    getOtpButtonText(livraison) {
+      if (livraison.typeLivraison === 'PARTIELLE' && this.isLivreurSegment1(livraison)) {
+        return 'Confirmer dépôt entrepôt';
+      } else {
+        return 'Confirmer livraison';
       }
     },
     async terminerLivraison(idLivraison) {
@@ -293,7 +341,6 @@ export default {
                 class="btn-action btn-start">
                 <i class="fas fa-play"></i> Démarrer la livraison
             </button>
-            <!-- Nouveau bouton "Je suis arrivé" -->
             <button
                 v-if="livraison.statut === 'EN_COURS'"
                 @click="arriverALivraison(livraison.idLivraison)"
@@ -301,20 +348,24 @@ export default {
                 <i class="fas fa-map-marker-alt"></i> Je suis arrivé
             </button>
 
-            <!-- Section OTP si statut ARRIVED -->
-            <div v-if="livraison.statut === 'ARRIVED'" class="otp-section">
-              <input
-                type="text"
-                v-model="otpInputs[livraison.idLivraison]"
-                placeholder="Code OTP (6 chiffres)"
-                maxlength="6"
-                class="otp-input"
-              />
-              <button
-                @click="confirmerParOtp(livraison.idLivraison)"
-                class="btn-action btn-confirm-otp">
-                <i class="fas fa-key"></i> Confirmer par OTP
-              </button>
+            <div v-if="livraison.statut === 'ARRIVED'" class="validation-section">
+              <p class="validation-message">
+                {{ getOtpMessage(livraison) }}
+              </p>
+              <div class="otp-section">
+                <input
+                  type="text"
+                  v-model="otpInputs[livraison.idLivraison]"
+                  :placeholder="getOtpPlaceholder(livraison)"
+                  maxlength="6"
+                  class="otp-input"
+                />
+                <button
+                  @click="confirmerParOtp(livraison.idLivraison)"
+                  class="btn-action btn-confirm-otp">
+                  <i class="fas fa-key"></i> {{ getOtpButtonText(livraison) }}
+                </button>
+              </div>
             </div>
 
             <button v-if="livraison.statut === 'EN_ATTENTE_VALIDATION'" class="btn-action btn-disabled" disabled>
@@ -572,10 +623,26 @@ export default {
   background-color: #F57C00;
 }
 
+.validation-section {
+  width: 100%;
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  border-left: 4px solid #009688;
+}
+
+.validation-message {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: #555;
+  text-align: center;
+  font-style: italic;
+}
+
 .otp-section {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.5rem;
   align-items: center;
 }
 .otp-input {

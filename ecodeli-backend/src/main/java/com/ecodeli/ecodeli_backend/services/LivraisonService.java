@@ -6,8 +6,6 @@ import com.ecodeli.ecodeli_backend.models.Livraison.StatutLivraison;
 import com.ecodeli.ecodeli_backend.models.Livraison.TypeLivraison;
 import com.ecodeli.ecodeli_backend.repositories.AnnonceRepository;
 import com.ecodeli.ecodeli_backend.repositories.LivraisonRepository;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,16 +18,16 @@ public class LivraisonService {
 
     private final LivraisonRepository livraisonRepository;
     private final AnnonceRepository annonceRepository;
-    private final JavaMailSender mailSender;
+    private final EmailService emailService;
     private final EntrepotUtilService entrepotUtilService;
 
     public LivraisonService(LivraisonRepository livraisonRepository,
                               AnnonceRepository annonceRepository,
-                              JavaMailSender mailSender,
+                              EmailService emailService,
                               EntrepotUtilService entrepotUtilService) {
         this.livraisonRepository = livraisonRepository;
         this.annonceRepository = annonceRepository;
-        this.mailSender = mailSender;
+        this.emailService = emailService;
         this.entrepotUtilService = entrepotUtilService;
     }
 
@@ -68,7 +66,6 @@ public class LivraisonService {
             throw new IllegalStateException("La livraison doit être en cours pour marquer l'arrivée. Statut actuel: " + livraison.getStatut());
         }
 
-        // Générer OTP
         SecureRandom random = new SecureRandom();
         int otpValue = 100000 + random.nextInt(900000);
         String otpCode = String.valueOf(otpValue);
@@ -77,22 +74,10 @@ public class LivraisonService {
         livraison.setOtpTimestamp(LocalDateTime.now());
         livraison.setStatut(StatutLivraison.ARRIVED);
 
-        // Envoyer l'OTP par e-mail au destinataire
         if (livraison.getDestinataire() != null && livraison.getDestinataire().getEmail() != null) {
-            try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setTo(livraison.getDestinataire().getEmail());
-                message.setSubject("Votre code de confirmation EcoDeli pour la livraison N°" + livraison.getIdLivraison());
-                message.setText("Bonjour " + livraison.getDestinataire().getPrenom() + ",\n\n" +
-                                "Votre livreur est arrivé. Veuillez fournir le code suivant pour confirmer la réception de votre colis : " + otpCode + "\n\n" +
-                                "Ce code est valide pendant 15 minutes.\n\n" +
-                                "L'équipe EcoDeli");
-                mailSender.send(message);
-            } catch (Exception e) {
-                // Erreur silencieuse pour l'envoi d'email - la livraison continue
-            }
+            emailService.sendDeliveryCodeToClient(livraison, otpCode);
         } else {
-            throw new IllegalStateException("Email du destinataire non configuré pour la livraison " + idLivraison + ". Impossible d'envoyer l'OTP.");
+            throw new IllegalStateException("Email du destinataire non configuré pour la livraison " + idLivraison + ". Impossible d'envoyer le code de validation.");
         }
         return livraisonRepository.save(livraison);
     }
@@ -183,8 +168,53 @@ public class LivraisonService {
             throw new IllegalStateException("Cette méthode ne peut être utilisée que pour un segment 1 en cours de livraison partielle");
         }
 
+        SecureRandom random = new SecureRandom();
+        int otpValue = 100000 + random.nextInt(900000);
+        String otpCode = String.valueOf(otpValue);
+
+        livraison.setOtpCode(otpCode);
+        livraison.setOtpTimestamp(LocalDateTime.now());
+        livraison.setStatut(StatutLivraison.ARRIVED);
+
+        if (livraison.getAnnonce() != null &&
+            livraison.getAnnonce().getLivreur() != null &&
+            livraison.getAnnonce().getLivreur().getEmail() != null) {
+            emailService.sendDeliveryCodeToDriver(livraison, otpCode);
+        } else {
+            throw new IllegalStateException("Email du livreur non configuré pour la livraison " + idLivraison + ". Impossible d'envoyer le code de validation.");
+        }
+
+        return livraisonRepository.save(livraison);
+    }
+
+    @Transactional
+    public Livraison confirmerDepotSegment1(Integer idLivraison, String otpSoumis) {
+        Livraison livraison = livraisonRepository.findById(idLivraison)
+                .orElseThrow(() -> new IllegalArgumentException("Livraison non trouvée avec l'ID: " + idLivraison));
+
+        if (livraison.getStatut() != StatutLivraison.ARRIVED || livraison.getTypeLivraison() != TypeLivraison.PARTIELLE) {
+            throw new IllegalStateException("La livraison doit être au statut ARRIVED pour un segment 1 partiel. Statut actuel: " + livraison.getStatut());
+        }
+
+        if (livraison.getOtpCode() == null || !livraison.getOtpCode().equals(otpSoumis)) {
+            throw new IllegalArgumentException("Code de validation invalide.");
+        }
+
+        if (livraison.getOtpTimestamp() == null || livraison.getOtpTimestamp().plusMinutes(15).isBefore(LocalDateTime.now())) {
+            livraison.setOtpCode(null);
+            livraison.setOtpTimestamp(null);
+            livraisonRepository.save(livraison);
+            throw new IllegalArgumentException("Code de validation expiré.");
+        }
+
         livraison.setStatut(StatutLivraison.ATTENTE_SEGMENT_2);
         livraison.setDateDepotEntrepot(LocalDateTime.now());
+        livraison.setOtpCode(null);
+        livraison.setOtpTimestamp(null);
+
+        if (livraison.getLivreurSegment2() != null && livraison.getLivreurSegment2().getEmail() != null) {
+            emailService.sendSegment2NotificationToDriver(livraison);
+        }
 
         return livraisonRepository.save(livraison);
     }
@@ -198,8 +228,6 @@ public class LivraisonService {
             throw new IllegalStateException("La livraison doit être en attente du segment 2. Statut actuel: " + livraison.getStatut());
         }
 
-        // Récupérer le livreur segment 2 (on pourrait ajouter une validation ici)
-        // Pour l'instant, on utilise juste l'ID fourni
         livraison.setStatut(StatutLivraison.SEGMENT_2_EN_COURS);
         livraison.setDateCollecteEntrepot(LocalDateTime.now());
 
@@ -215,7 +243,6 @@ public class LivraisonService {
             throw new IllegalStateException("Le segment 2 doit être en cours pour marquer l'arrivée. Statut actuel: " + livraison.getStatut());
         }
 
-        // Générer OTP comme pour une livraison normale
         SecureRandom random = new SecureRandom();
         int otpValue = 100000 + random.nextInt(900000);
         String otpCode = String.valueOf(otpValue);
@@ -224,20 +251,10 @@ public class LivraisonService {
         livraison.setOtpTimestamp(LocalDateTime.now());
         livraison.setStatut(StatutLivraison.ARRIVED);
 
-        // Envoyer l'OTP par e-mail au destinataire
         if (livraison.getDestinataire() != null && livraison.getDestinataire().getEmail() != null) {
-            try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setTo(livraison.getDestinataire().getEmail());
-                message.setSubject("Votre code de confirmation EcoDeli pour la livraison N°" + livraison.getIdLivraison());
-                message.setText("Bonjour " + livraison.getDestinataire().getPrenom() + ",\n\n" +
-                                "Votre livreur est arrivé pour la livraison finale. Veuillez fournir le code suivant pour confirmer la réception de votre colis : " + otpCode + "\n\n" +
-                                "Ce code est valide pendant 15 minutes.\n\n" +
-                                "L'équipe EcoDeli");
-                mailSender.send(message);
-            } catch (Exception e) {
-                // Erreur silencieuse pour l'envoi d'email - la livraison continue
-            }
+            emailService.sendDeliveryCodeToClient(livraison, otpCode);
+        } else {
+            throw new IllegalStateException("Email du destinataire non configuré pour la livraison " + idLivraison + ". Impossible d'envoyer le code de validation.");
         }
         return livraisonRepository.save(livraison);
     }

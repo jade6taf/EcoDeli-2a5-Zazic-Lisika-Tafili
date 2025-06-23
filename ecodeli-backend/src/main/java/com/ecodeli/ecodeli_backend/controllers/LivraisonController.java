@@ -96,6 +96,16 @@ public class LivraisonController {
         }
     }
 
+    @PostMapping("/{id}/confirmer-depot-segment-1")
+    public ResponseEntity<?> confirmerDepotSegment1(@PathVariable Integer id, @RequestBody OtpRequest otpRequest) {
+        try {
+            Livraison livraison = livraisonService.confirmerDepotSegment1(id, otpRequest.getOtp());
+            return ResponseEntity.ok(livraison);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PutMapping("/{id}/demarrer-segment-2/{idLivreur}")
     public ResponseEntity<?> demarrerSegment2(@PathVariable Integer id, @PathVariable Integer idLivreur) {
         try {

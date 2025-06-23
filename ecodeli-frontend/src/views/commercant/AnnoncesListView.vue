@@ -30,7 +30,7 @@ export default {
       error.value = null
 
       try {
-        const response = await fetch(`http://localhost:8080/api/commercants/${user.value.idUtilisateur}/annonces`, {
+        const response = await fetch(`/api/commercants/${user.value.idUtilisateur}/annonces`, {
           headers: {
             'Authorization': `Bearer ${authStore.token}`,
             'Content-Type': 'application/json'
@@ -174,7 +174,7 @@ export default {
       isActionLoading.value = true
 
       try {
-        const response = await fetch(`http://localhost:8080/api/commercants/${user.value.idUtilisateur}/annonces/${selectedAnnonce.value.idAnnonce}/annuler`, {
+        const response = await fetch(`/api/commercants/${user.value.idUtilisateur}/annonces/${selectedAnnonce.value.idAnnonce}/annuler`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${authStore.token}`,
@@ -200,7 +200,7 @@ export default {
       isActionLoading.value = true
 
       try {
-        const response = await fetch(`http://localhost:8080/api/commercants/${user.value.idUtilisateur}/annonces/${selectedAnnonce.value.idAnnonce}`, {
+        const response = await fetch(`/api/commercants/${user.value.idUtilisateur}/annonces/${selectedAnnonce.value.idAnnonce}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${authStore.token}`,

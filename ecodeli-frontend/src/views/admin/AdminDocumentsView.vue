@@ -85,7 +85,7 @@ export default {
     },
     getDocumentUrl(documentId) {
       const token = localStorage.getItem('token');
-      return `http://localhost:8080/api/admin/documents/view/${documentId}?token=${token}`;
+      return `/api/admin/documents/view/${documentId}?token=${token}`;
     },
     downloadDocument(documentId) {
       window.open(this.getDocumentUrl(documentId), '_blank');

@@ -16,7 +16,7 @@ export default {
           error.value = null
           try {
             const token = localStorage.getItem('token')
-            const res = await fetch(`http://localhost:8080/api/admin/utilisateurs/${route.params.id}`, {
+            const res = await fetch(`/api/admin/utilisateurs/${route.params.id}`, {
               headers: {
                 'Authorization': 'Bearer ' + token
               }
@@ -35,7 +35,7 @@ export default {
           error.value = null
           try {
             const token = localStorage.getItem('token')
-            const res = await fetch(`http://localhost:8080/api/admin/utilisateurs/${route.params.id}`, {
+            const res = await fetch(`/api/admin/utilisateurs/${route.params.id}`, {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
