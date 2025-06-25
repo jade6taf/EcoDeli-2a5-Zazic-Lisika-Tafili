@@ -19,7 +19,6 @@ public class LivraisonService {
     private final LivraisonRepository livraisonRepository;
     private final AnnonceRepository annonceRepository;
     private final EmailService emailService;
-    private final EntrepotUtilService entrepotUtilService;
 
     public LivraisonService(LivraisonRepository livraisonRepository,
                               AnnonceRepository annonceRepository,
@@ -28,7 +27,6 @@ public class LivraisonService {
         this.livraisonRepository = livraisonRepository;
         this.annonceRepository = annonceRepository;
         this.emailService = emailService;
-        this.entrepotUtilService = entrepotUtilService;
     }
 
     public List<Livraison> getAllLivraisons() {

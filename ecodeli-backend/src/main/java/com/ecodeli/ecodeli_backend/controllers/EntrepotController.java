@@ -30,4 +30,12 @@ public class EntrepotController {
         String entrepot = entrepotUtilService.getEntrepotLePlusProche(latitude, longitude);
         return ResponseEntity.ok(entrepot);
     }
+
+    @GetMapping("/optimal")
+    public ResponseEntity<String> getEntrepotOptimal(
+            @RequestParam String origin,
+            @RequestParam String destination) {
+        String entrepotOptimal = entrepotUtilService.findOptimalWarehouse(origin, destination);
+        return ResponseEntity.ok(entrepotOptimal);
+    }
 }

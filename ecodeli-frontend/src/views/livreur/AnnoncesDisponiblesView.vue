@@ -12,6 +12,8 @@ export default {
       selectedAnnonce: null,
       selectedEntrepot: '',
       selectedSegment: 1,
+      entrepotOptimalCalcule: '',
+      loadingEntrepotOptimal: false,
       filtres: {
         adresse: '',
         minPrix: '',
@@ -174,32 +176,67 @@ export default {
     canTakeSegment2(annonce) {
       return annonce.livraisonPartielleAutorisee && !annonce.livreurSegment2;
     },
-    openSegmentModal(annonce, segment) {
+    async openSegmentModal(annonce, segment) {
       this.selectedAnnonce = annonce;
       this.selectedSegment = segment;
       this.selectedEntrepot = annonce.entrepotIntermediaire || '';
+      this.entrepotOptimalCalcule = '';
+      this.loadingEntrepotOptimal = false;
+
+      if (segment === 1) {
+        this.loadingEntrepotOptimal = true;
+        try {
+          const token = localStorage.getItem('token');
+          const response = await fetch(`/api/entrepots/optimal?origin=${encodeURIComponent(annonce.adresseDepart)}&destination=${encodeURIComponent(annonce.adresseFin)}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (response.ok) {
+            this.entrepotOptimalCalcule = await response.text();
+            this.selectedEntrepot = this.entrepotOptimalCalcule;
+          } else {
+            this.entrepotOptimalCalcule = 'Paris'; // Fallback
+            this.selectedEntrepot = 'Paris';
+          }
+        } catch (error) {
+          console.error('Erreur lors du calcul de l\'entrepôt optimal:', error);
+          this.entrepotOptimalCalcule = 'Paris'; // Fallback
+          this.selectedEntrepot = 'Paris';
+        } finally {
+          this.loadingEntrepotOptimal = false;
+        }
+      }
+
       this.showPartialModal = true;
     },
     async confirmerSegment() {
-      if (this.selectedSegment === 2 && this.selectedAnnonce.entrepotIntermediaire) {
-        this.selectedEntrepot = this.selectedAnnonce.entrepotIntermediaire;
-      } else if (!this.selectedEntrepot) {
-        alert('Veuillez sélectionner un entrepôt');
-        return;
-      }
-
       try {
         const token = localStorage.getItem('token');
-        const endpoint = this.selectedSegment === 1
-          ? `/api/annonces/${this.selectedAnnonce.idAnnonce}/demande-validation-segment1`
-          : `/api/annonces/${this.selectedAnnonce.idAnnonce}/demande-validation-segment2`;
+        let endpoint, params;
 
-        const params = new URLSearchParams({
-          idLivreur: this.user.idUtilisateur
-        });
+        if (this.selectedSegment === 1) {
+          endpoint = `/api/annonces/${this.selectedAnnonce.idAnnonce}/demande-validation-segment1-optimal`;
+          params = new URLSearchParams({
+            idLivreur: this.user.idUtilisateur
+          });
+        } else {
+          if (this.selectedAnnonce.entrepotIntermediaire) {
+            this.selectedEntrepot = this.selectedAnnonce.entrepotIntermediaire;
+          } else if (!this.selectedEntrepot) {
+            alert('Veuillez sélectionner un entrepôt');
+            return;
+          }
 
-        if (this.selectedSegment === 1 || !this.selectedAnnonce.entrepotIntermediaire) {
-          params.append('entrepotVille', this.selectedEntrepot);
+          endpoint = `/api/annonces/${this.selectedAnnonce.idAnnonce}/demande-validation-segment2`;
+          params = new URLSearchParams({
+            idLivreur: this.user.idUtilisateur
+          });
+
+          if (!this.selectedAnnonce.entrepotIntermediaire) {
+            params.append('entrepotVille', this.selectedEntrepot);
+          }
         }
 
         const response = await fetch(`${endpoint}?${params}`, {
@@ -214,7 +251,12 @@ export default {
           throw new Error(errorData || 'Erreur lors de la prise en charge du segment');
         }
 
-        alert(`Vous avez pris en charge le segment ${this.selectedSegment} avec succès!`);
+        if (this.selectedSegment === 1) {
+          alert(`Vous avez pris en charge le segment 1 avec succès!\nEntrepôt optimal assigné: ${this.entrepotOptimalCalcule}`);
+        } else {
+          alert(`Vous avez pris en charge le segment ${this.selectedSegment} avec succès!`);
+        }
+
         this.closePartialModal();
         this.fetchAnnonces();
       } catch (err) {
@@ -446,9 +488,35 @@ export default {
             </div>
           </div>
 
-          <div class="entrepot-selection" v-if="selectedSegment === 1 || !selectedAnnonce?.entrepotIntermediaire">
+          <!-- Affichage pour segment 1 -->
+          <div v-if="selectedSegment === 1" class="entrepot-optimal-info">
+            <h4>🎯 Entrepôt optimal calculé automatiquement</h4>
+
+            <div v-if="loadingEntrepotOptimal" class="optimal-loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>Calcul de l'entrepôt optimal en cours...</span>
+            </div>
+
+            <div v-else class="optimal-warehouse-display">
+              <div class="warehouse-card">
+                <i class="fas fa-warehouse"></i>
+                <div class="warehouse-info">
+                  <strong>{{ entrepotOptimalCalcule || 'Paris' }}</strong>
+                  <span class="optimal-badge">Optimal</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-text">
+              <i class="fas fa-info-circle"></i>
+              <p>L'entrepôt le plus efficient a été sélectionné automatiquement en fonction de votre trajet pour optimiser la livraison et réduire les distances.</p>
+            </div>
+          </div>
+
+          <!-- Sélecteur pour segment 2 -->
+          <div v-else-if="selectedSegment === 2 && !selectedAnnonce?.entrepotIntermediaire" class="entrepot-selection">
             <label for="entrepot-select">
-              {{ selectedSegment === 1 ? 'Sélectionnez l\'entrepôt de dépôt :' : 'Sélectionnez l\'entrepôt de récupération :' }}
+              Sélectionnez l'entrepôt de récupération :
             </label>
             <select id="entrepot-select" v-model="selectedEntrepot" required>
               <option value="">-- Choisir un entrepôt --</option>
@@ -471,7 +539,7 @@ export default {
           <button
             @click="confirmerSegment"
             class="btn-confirm"
-            :disabled="(selectedSegment === 1 || !selectedAnnonce?.entrepotIntermediaire) && !selectedEntrepot">
+            :disabled="selectedSegment === 2 && !selectedAnnonce?.entrepotIntermediaire && !selectedEntrepot">
             <i class="fas fa-check"></i> Confirmer le segment {{ selectedSegment }}
           </button>
         </div>
@@ -959,6 +1027,103 @@ export default {
   font-size: 0.9rem;
   color: #666;
   font-style: italic;
+}
+
+/* Styles pour l'entrepôt optimal */
+.entrepot-optimal-info {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+  border-radius: 12px;
+  border-left: 4px solid #28a745;
+}
+
+.entrepot-optimal-info h4 {
+  margin: 0 0 1rem 0;
+  color: #155724;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.optimal-loading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  color: #28a745;
+  font-weight: 500;
+}
+
+.optimal-loading i {
+  font-size: 1.2rem;
+}
+
+.optimal-warehouse-display {
+  margin-bottom: 1rem;
+}
+
+.warehouse-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border: 2px solid #28a745;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+.warehouse-card i {
+  font-size: 1.5rem;
+  color: #28a745;
+}
+
+.warehouse-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.warehouse-info strong {
+  font-size: 1.1rem;
+  color: #155724;
+}
+
+.optimal-badge {
+  background: #28a745;
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.entrepot-optimal-info .info-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #20c997;
+}
+
+.entrepot-optimal-info .info-text i {
+  color: #20c997;
+  font-size: 1.1rem;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}
+
+.entrepot-optimal-info .info-text p {
+  margin: 0;
+  color: #155724;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .modal-footer {

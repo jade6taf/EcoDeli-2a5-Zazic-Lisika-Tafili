@@ -75,5 +75,29 @@ export default {
         } catch (error) {
             throw error;
         }
-    }
+    },
+
+    async calculateDeliveryPrice(data) {
+        try {
+            const response = await this.post('maps/calculate-price', data);
+            if (!response.ok) {
+                throw new Error(`Erreur lors du calcul du prix: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async getAvailableWarehouses() {
+        try {
+            const response = await this.get('maps/warehouses');
+            if (!response.ok) {
+                throw new Error(`Erreur lors de la récupération des entrepôts: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
+    },
 };

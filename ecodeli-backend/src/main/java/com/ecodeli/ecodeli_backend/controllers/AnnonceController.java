@@ -142,6 +142,20 @@ public class AnnonceController {
         }
     }
 
+    @PutMapping("/{id}/demande-validation-segment1-optimal")
+    public ResponseEntity<?> demanderValidationSegment1Optimal(
+            @PathVariable Integer id,
+            @RequestParam Integer idLivreur) {
+        try {
+            Annonce annonce = annonceService.demanderValidationSegment1Optimal(id, idLivreur);
+            return ResponseEntity.ok(annonce);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erreur interne du serveur");
+        }
+    }
+
     @PutMapping("/{id}/demande-validation-segment2")
     public ResponseEntity<?> demanderValidationSegment2(
             @PathVariable Integer id,

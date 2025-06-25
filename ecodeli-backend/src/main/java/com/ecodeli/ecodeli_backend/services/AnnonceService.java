@@ -13,7 +13,7 @@ import com.ecodeli.ecodeli_backend.repositories.AnnonceRepository;
 import com.ecodeli.ecodeli_backend.repositories.ColisRepository;
 import com.ecodeli.ecodeli_backend.repositories.LivraisonRepository;
 import com.ecodeli.ecodeli_backend.repositories.UtilisateurRepository;
-import com.ecodeli.ecodeli_backend.models.Coordinates; // Ajout
+import com.ecodeli.ecodeli_backend.models.Coordinates;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +39,9 @@ public class AnnonceService {
                          LivraisonRepository livraisonRepository,
                          ColisRepository colisRepository,
                          GeocodingService geocodingService,
-                         EntrepotUtilService entrepotUtilService) {
+                         EntrepotUtilService entrepotUtilService,
+                         GoogleMapsService googleMapsService,
+                         TarificationService tarificationService) {
         this.annonceRepository = annonceRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.livraisonRepository = livraisonRepository;
@@ -280,7 +282,6 @@ public class AnnonceService {
                 livraison.setPrix(savedAnnonce.getPrixUnitaire().intValue());
             }
 
-            // Géocodage de l'adresse de départ
             Optional<Coordinates> departCoordsOpt = geocodingService.geocodeAddress(
                 savedAnnonce.getAdresseDepart(),
                 null,
@@ -294,7 +295,6 @@ public class AnnonceService {
                 throw new IllegalArgumentException("Adresse de départ invalide ou non géocodable: " + savedAnnonce.getAdresseDepart());
             }
 
-            // Géocodage de l'adresse d'arrivée
             Optional<Coordinates> arriveeCoordsOpt = geocodingService.geocodeAddress(
                 savedAnnonce.getAdresseFin(),
                 null,
@@ -338,7 +338,6 @@ public class AnnonceService {
             throw new IllegalArgumentException("Cette annonce n'autorise pas la livraison partielle");
         }
 
-        // Vérifier que l'entrepôt existe
         try {
             if (!entrepotUtilService.getEntrepotsDisponibles().contains(entrepotVille)) {
                 throw new IllegalArgumentException("Entrepôt non disponible: " + entrepotVille);
@@ -347,7 +346,6 @@ public class AnnonceService {
             // Continuer sans vérification pour le moment
         }
 
-        // Vérifier les conditions selon le segment choisi
         if (numeroSegment == 1) {
             if (annonce.getStatut() != StatutAnnonce.PUBLIEE && annonce.getStatut() != StatutAnnonce.SEGMENT_2_PRIS) {
                 throw new IllegalArgumentException("Le segment 1 n'est pas disponible");
@@ -373,7 +371,6 @@ public class AnnonceService {
                 throw new IllegalArgumentException("Le segment 2 est déjà pris");
             }
 
-            // Pour le segment 2, on doit avoir un entrepôt déjà défini
             if (annonce.getStatut() == StatutAnnonce.SEGMENT_1_PRIS && annonce.getEntrepotIntermediaire() != null) {
                 entrepotVille = annonce.getEntrepotIntermediaire();
             } else {
@@ -405,7 +402,6 @@ public class AnnonceService {
             livraison.setDateFin(savedAnnonce.getDateFin());
             livraison.setAdresseEnvoi(savedAnnonce.getAdresseDepart());
 
-            // Pour une livraison partielle, l'adresse de livraison est l'entrepôt pour le segment 1
             Double[] coordsEntrepot = entrepotUtilService.getCoordonneesEntrepot(entrepotVille);
             if (coordsEntrepot != null) {
                 livraison.setAdresseDeLivraison("Entrepôt " + entrepotVille);
@@ -418,11 +414,9 @@ public class AnnonceService {
             livraison.setColis(savedAnnonce.getColis());
 
             if (savedAnnonce.getPrixUnitaire() != null) {
-                // Diviser le prix par 2 pour le segment 1
                 livraison.setPrix(savedAnnonce.getPrixUnitaire().intValue() / 2);
             }
 
-            // Géocodage de l'adresse de départ
             Optional<Coordinates> departCoordsOpt = geocodingService.geocodeAddress(
                 savedAnnonce.getAdresseDepart(),
                 null,
@@ -452,6 +446,103 @@ public class AnnonceService {
         return savedAnnonce;
     }
 
+    @Transactional
+    public Annonce demanderValidationSegment1Optimal(Integer id, Integer idLivreur) {
+        Annonce annonce = annonceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Annonce non trouvée avec l'ID: " + id));
+        Utilisateur utilisateur = utilisateurRepository.findById(idLivreur)
+                .orElseThrow(() -> new IllegalArgumentException("Livreur non trouvé avec l'ID: " + idLivreur));
+
+        if (!(utilisateur instanceof Livreur)) {
+            throw new IllegalArgumentException("L'utilisateur n'est pas un livreur");
+        }
+        Livreur livreur = (Livreur) utilisateur;
+
+        if (!annonce.getLivraisonPartielleAutorisee()) {
+            throw new IllegalArgumentException("Cette annonce n'autorise pas la livraison partielle");
+        }
+
+        if (annonce.getStatut() != StatutAnnonce.PUBLIEE && annonce.getStatut() != StatutAnnonce.SEGMENT_2_PRIS) {
+            throw new IllegalArgumentException("Le segment 1 n'est pas disponible");
+        }
+        if (annonce.getLivreurSegment1() != null) {
+            throw new IllegalArgumentException("Le segment 1 est déjà pris");
+        }
+
+        String entrepotOptimal;
+        try {
+            entrepotOptimal = entrepotUtilService.findOptimalWarehouse(
+                annonce.getAdresseDepart(),
+                annonce.getAdresseFin()
+            );
+        } catch (Exception e) {
+            entrepotOptimal = "Paris";
+        }
+
+        annonce.setLivreurSegment1(livreur);
+        annonce.setStatutSegment1(Annonce.StatutSegment.PRIS);
+        annonce.setEntrepotIntermediaire(entrepotOptimal);
+
+        if (annonce.getStatut() == StatutAnnonce.SEGMENT_2_PRIS) {
+            annonce.setStatut(StatutAnnonce.SEGMENTS_COMPLETS);
+        } else {
+            annonce.setStatut(StatutAnnonce.SEGMENT_1_PRIS);
+        }
+
+        Annonce savedAnnonce = annonceRepository.save(annonce);
+
+        try {
+            Livraison livraison = new Livraison();
+            livraison.setAnnonce(savedAnnonce);
+            livraison.setStatut(Livraison.StatutLivraison.VALIDEE);
+            livraison.setTypeLivraison(TypeLivraison.PARTIELLE);
+            livraison.setEntrepotVille(entrepotOptimal);
+            livraison.setLivreurSegment1(livreur);
+            livraison.setDateDebut(savedAnnonce.getDateDebut());
+            livraison.setDateFin(savedAnnonce.getDateFin());
+            livraison.setAdresseEnvoi(savedAnnonce.getAdresseDepart());
+
+            Double[] coordsEntrepot = entrepotUtilService.getCoordonneesEntrepot(entrepotOptimal);
+            if (coordsEntrepot != null) {
+                livraison.setAdresseDeLivraison("Entrepôt " + entrepotOptimal);
+                livraison.setLatitudeLivraison(coordsEntrepot[0]);
+                livraison.setLongitudeLivraison(coordsEntrepot[1]);
+            }
+
+            livraison.setExpediteur(savedAnnonce.getExpediteur());
+            livraison.setDestinataire(savedAnnonce.getDestinataire());
+            livraison.setColis(savedAnnonce.getColis());
+
+            if (savedAnnonce.getPrixUnitaire() != null) {
+                livraison.setPrix(savedAnnonce.getPrixUnitaire().intValue() / 2);
+            }
+
+            Optional<Coordinates> departCoordsOpt = geocodingService.geocodeAddress(
+                savedAnnonce.getAdresseDepart(),
+                null,
+                null
+            ).block();
+
+            if (departCoordsOpt.isPresent()) {
+                livraison.setLatitudeEnvoi(departCoordsOpt.get().getLatitude());
+                livraison.setLongitudeEnvoi(departCoordsOpt.get().getLongitude());
+            }
+
+            if (livraison.getCodePostalEnvoi() == null || livraison.getCodePostalEnvoi().isEmpty()) {
+                livraison.setCodePostalEnvoi("00000");
+            }
+            if (livraison.getCodePostalLivraison() == null || livraison.getCodePostalLivraison().isEmpty()) {
+                livraison.setCodePostalLivraison("00000");
+            }
+
+            livraisonRepository.save(livraison);
+        } catch (Exception e) {
+            // Erreur silencieuse lors de la création de la livraison partielle
+        }
+
+        return savedAnnonce;
+    }
+
     public List<Annonce> getAnnoncesAvecLivraisonPartielleAutorisee() {
         return annonceRepository.findByLivraisonPartielleAutoriseeAndStatut(true, StatutAnnonce.PUBLIEE);
     }
@@ -472,13 +563,10 @@ public class AnnonceService {
         return annonceRepository.findAnnoncesAvecSegmentsComplets();
     }
 
-    // Méthode pour obtenir les annonces visibles selon les critères corrects
     public List<Annonce> getAnnoncesDisponiblesPourLivreurs() {
-        // Retourne les annonces publiées ET celles avec des segments partiels disponibles
         List<Annonce> annoncesPubliees = annonceRepository.findByStatut(StatutAnnonce.PUBLIEE);
         List<Annonce> annoncesAvecSegments = annonceRepository.findAnnoncesAvecSegmentsDisponibles();
 
-        // Combiner les deux listes en évitant les doublons
         annoncesPubliees.addAll(annoncesAvecSegments.stream()
             .filter(a -> !annoncesPubliees.contains(a))
             .toList());

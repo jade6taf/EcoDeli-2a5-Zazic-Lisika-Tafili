@@ -74,7 +74,7 @@ const routes = [
   {
     path: '/client/annonces/new',
     name: 'client-annonce-create',
-    component: () => import('./views/client/AnnonceCreateView.vue'),
+    component: () => import('./views/client/AnnonceCreateProfessionalView.vue'),
     meta: { requiresAuth: true, role: 'CLIENT' }
   },
   {
