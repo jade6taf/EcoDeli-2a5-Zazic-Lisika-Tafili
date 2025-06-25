@@ -76,53 +76,28 @@ public class EmailService {
         }
     }
 
-    public void sendDeliveryCodeToDriver(Livraison livraison, String code) {
+    public void sendDeliveryConfirmationToSender(Livraison livraison) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(fromEmail, "EcoDeli");
-            helper.setTo(livraison.getAnnonce().getLivreur().getEmail());
-            helper.setSubject("Code de validation EcoDeli - Dépôt entrepôt #" + livraison.getIdLivraison());
+            helper.setTo(livraison.getExpediteur().getEmail());
+            helper.setSubject("EcoDeli - Livraison terminée - Livraison #" + livraison.getIdLivraison());
 
-            String htmlContent = buildDeliveryCodeDriverEmailContent(livraison, code);
+            String htmlContent = buildDeliveryConfirmationSenderEmailContent(livraison);
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
-            logger.info("Code de validation envoyé au livreur {} pour la livraison #{}",
-                       livraison.getAnnonce().getLivreur().getEmail(), livraison.getIdLivraison());
+            logger.info("Confirmation de livraison envoyée à l'expéditeur {} pour la livraison #{}",
+                       livraison.getExpediteur().getEmail(), livraison.getIdLivraison());
 
         } catch (MessagingException e) {
-            logger.error("Erreur lors de l'envoi du code de validation au livreur {} : {}",
-                        livraison.getAnnonce().getLivreur().getEmail(), e.getMessage());
+            logger.error("Erreur lors de l'envoi de la confirmation à l'expéditeur {} : {}",
+                        livraison.getExpediteur().getEmail(), e.getMessage());
         } catch (Exception e) {
-            logger.error("Erreur inattendue lors de l'envoi du code de validation au livreur {} : {}",
-                        livraison.getAnnonce().getLivreur().getEmail(), e.getMessage());
-        }
-    }
-
-    public void sendSegment2NotificationToDriver(Livraison livraison) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(fromEmail, "EcoDeli");
-            helper.setTo(livraison.getLivreurSegment2().getEmail());
-            helper.setSubject("EcoDeli - Colis prêt pour collecte - Livraison #" + livraison.getIdLivraison());
-
-            String htmlContent = buildSegment2NotificationEmailContent(livraison);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
-            logger.info("Notification segment 2 envoyée au livreur {} pour la livraison #{}",
-                       livraison.getLivreurSegment2().getEmail(), livraison.getIdLivraison());
-
-        } catch (MessagingException e) {
-            logger.error("Erreur lors de l'envoi de la notification segment 2 au livreur {} : {}",
-                        livraison.getLivreurSegment2().getEmail(), e.getMessage());
-        } catch (Exception e) {
-            logger.error("Erreur inattendue lors de l'envoi de la notification segment 2 au livreur {} : {}",
-                        livraison.getLivreurSegment2().getEmail(), e.getMessage());
+            logger.error("Erreur inattendue lors de l'envoi de la confirmation à l'expéditeur {} : {}",
+                        livraison.getExpediteur().getEmail(), e.getMessage());
         }
     }
 
@@ -392,157 +367,14 @@ public class EmailService {
             );
     }
 
-    private String buildDeliveryCodeDriverEmailContent(Livraison livraison, String code) {
+    private String buildDeliveryConfirmationSenderEmailContent(Livraison livraison) {
         return """
             <!DOCTYPE html>
             <html lang="fr">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Code de validation EcoDeli - Dépôt entrepôt</title>
-                <style>
-                    body {
-                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                        line-height: 1.6;
-                        color: #333;
-                        max-width: 600px;
-                        margin: 0 auto;
-                        padding: 20px;
-                        background-color: #f9f9f9;
-                    }
-                    .container {
-                        background-color: #ffffff;
-                        padding: 30px;
-                        border-radius: 10px;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                    }
-                    .header {
-                        text-align: center;
-                        padding-bottom: 20px;
-                        border-bottom: 2px solid #2196F3;
-                        margin-bottom: 30px;
-                    }
-                    .logo {
-                        font-size: 32px;
-                        font-weight: bold;
-                        color: #4CAF50;
-                        margin-bottom: 10px;
-                    }
-                    .code-section {
-                        background: linear-gradient(135deg, #2196F3, #1976D2);
-                        color: white;
-                        padding: 25px;
-                        border-radius: 10px;
-                        text-align: center;
-                        margin: 25px 0;
-                    }
-                    .code {
-                        font-size: 36px;
-                        font-weight: bold;
-                        letter-spacing: 8px;
-                        margin: 15px 0;
-                        background-color: rgba(255,255,255,0.2);
-                        padding: 15px;
-                        border-radius: 8px;
-                    }
-                    .content {
-                        font-size: 16px;
-                        margin-bottom: 20px;
-                    }
-                    .delivery-info {
-                        background-color: #E3F2FD;
-                        padding: 20px;
-                        border-radius: 8px;
-                        border-left: 4px solid #2196F3;
-                        margin: 20px 0;
-                    }
-                    .footer {
-                        margin-top: 30px;
-                        padding-top: 20px;
-                        border-top: 1px solid #e0e0e0;
-                        font-size: 14px;
-                        color: #666;
-                        text-align: center;
-                    }
-                    .emoji {
-                        font-size: 20px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <div class="logo">🌱 EcoDeli</div>
-                        <p style="color: #666; margin: 0;">Espace livreur</p>
-                    </div>
-
-                    <h1 style="color: #1565C0; font-size: 24px; margin-bottom: 20px;">
-                        Validation dépôt entrepôt <span class="emoji">🏢</span>
-                    </h1>
-
-                    <div class="content">
-                        <p>Bonjour <strong>%s</strong>,</p>
-
-                        <p>Vous êtes arrivé à l'entrepôt pour déposer le colis. Voici votre code de validation 
-                        pour confirmer le dépôt du segment 1 :</p>
-                    </div>
-
-                    <div class="code-section">
-                        <p style="margin: 0; font-size: 18px;">🔑 CODE DE VALIDATION</p>
-                        <div class="code">%s</div>
-                        <p style="margin: 0; font-size: 14px; opacity: 0.9;">Saisissez ce code dans votre application</p>
-                    </div>
-
-                    <div class="delivery-info">
-                        <h3 style="color: #1565C0; margin-top: 0;">📦 Détails du segment 1</h3>
-                        <p><strong>Livraison :</strong> #%d</p>
-                        <p><strong>Entrepôt :</strong> %s</p>
-                        <p><strong>Destinataire final :</strong> %s %s</p>
-                        <p><strong>Adresse finale :</strong> %s, %s</p>
-                        %s
-                    </div>
-
-                    <div class="content">
-                        <p><strong>✅ Prochaine étape :</strong> Une fois le code saisi, le livreur du segment 2 
-                        sera automatiquement notifié pour collecter le colis.</p>
-                    </div>
-
-                    <div class="footer">
-                        <p>Merci de votre engagement pour des livraisons éco-responsables !</p>
-                        <p style="margin-top: 15px;">
-                            <strong>L'équipe EcoDeli</strong> 🌱
-                        </p>
-                        <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
-                        <p style="font-size: 12px; color: #999;">
-                            Cet email a été envoyé automatiquement, merci de ne pas y répondre.<br>
-                            © 2025 EcoDeli - Tous droits réservés
-                        </p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """.formatted(
-                livraison.getAnnonce().getLivreur().getPrenom(),
-                code,
-                livraison.getIdLivraison(),
-                livraison.getEntrepotVille(),
-                livraison.getDestinataire().getPrenom(),
-                livraison.getDestinataire().getNom(),
-                livraison.getAdresseDeLivraison(),
-                livraison.getCodePostalLivraison(),
-                livraison.getColis() != null ?
-                    "<p><strong>Colis :</strong> " + livraison.getColis().getDescription() + "</p>" : ""
-            );
-    }
-
-    private String buildSegment2NotificationEmailContent(Livraison livraison) {
-        return """
-            <!DOCTYPE html>
-            <html lang="fr">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>EcoDeli - Colis prêt pour collecte</title>
+                <title>EcoDeli - Confirmation de livraison</title>
                 <style>
                     body {
                         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -571,13 +403,17 @@ public class EmailService {
                         color: #4CAF50;
                         margin-bottom: 10px;
                     }
-                    .notification-section {
+                    .success-section {
                         background: linear-gradient(135deg, #4CAF50, #388E3C);
                         color: white;
                         padding: 25px;
                         border-radius: 10px;
                         text-align: center;
                         margin: 25px 0;
+                    }
+                    .success-icon {
+                        font-size: 48px;
+                        margin-bottom: 15px;
                     }
                     .content {
                         font-size: 16px;
@@ -588,16 +424,6 @@ public class EmailService {
                         padding: 20px;
                         border-radius: 8px;
                         border-left: 4px solid #4CAF50;
-                        margin: 20px 0;
-                    }
-                    .cta-button {
-                        display: inline-block;
-                        background-color: #4CAF50;
-                        color: white;
-                        padding: 15px 30px;
-                        border-radius: 8px;
-                        text-decoration: none;
-                        font-weight: bold;
                         margin: 20px 0;
                     }
                     .footer {
@@ -611,57 +437,68 @@ public class EmailService {
                     .emoji {
                         font-size: 20px;
                     }
+                    .rating-section {
+                        background-color: #FFF9C4;
+                        padding: 20px;
+                        border-radius: 8px;
+                        border-left: 4px solid #FFC107;
+                        margin: 20px 0;
+                        text-align: center;
+                    }
                 </style>
             </head>
             <body>
                 <div class="container">
                     <div class="header">
                         <div class="logo">🌱 EcoDeli</div>
-                        <p style="color: #666; margin: 0;">Espace livreur</p>
+                        <p style="color: #666; margin: 0;">Livraison éco-responsable</p>
                     </div>
 
                     <h1 style="color: #2E7D32; font-size: 24px; margin-bottom: 20px;">
-                        Colis prêt pour collecte ! <span class="emoji">📦</span>
+                        Bonjour %s ! <span class="emoji">👋</span>
                     </h1>
 
-                    <div class="content">
-                        <p>Bonjour <strong>%s</strong>,</p>
-
-                        <p>Excellente nouvelle ! Un colis est maintenant disponible pour collecte et livraison finale.</p>
-                    </div>
-
-                    <div class="notification-section">
-                        <h2 style="margin: 0; font-size: 20px;">🎯 Segment 2 disponible</h2>
+                    <div class="success-section">
+                        <div class="success-icon">✅</div>
+                        <h2 style="margin: 0; font-size: 24px;">Livraison terminée avec succès !</h2>
                         <p style="margin: 10px 0; font-size: 16px; opacity: 0.9;">
-                            Le segment 1 a été complété avec succès
+                            Livraison #%d
                         </p>
                     </div>
 
+                    <div class="content">
+                        <p>Votre colis a été livré avec succès chez le destinataire.</p>
+                    </div>
+
                     <div class="delivery-info">
-                        <h3 style="color: #2E7D32; margin-top: 0;">📋 Détails de la livraison</h3>
+                        <h3 style="color: #2E7D32; margin-top: 0;">📋 Récapitulatif de votre livraison</h3>
                         <p><strong>Livraison :</strong> #%d</p>
-                        <p><strong>À collecter :</strong> Entrepôt %s</p>
-                        <p><strong>À livrer chez :</strong> %s %s</p>
+                        <p><strong>Destinataire :</strong> %s %s</p>
                         <p><strong>Adresse de livraison :</strong> %s, %s</p>
-                        <p><strong>Rémunération segment 2 :</strong> %d €</p>
+                        <p><strong>Type de livraison :</strong> Livraison directe</p>
+                        %s
                         %s
                     </div>
 
                     <div class="content">
-                        <p><strong>🚀 Prochaines étapes :</strong></p>
-                        <ol>
-                            <li>Connectez-vous à votre espace livreur EcoDeli</li>
-                            <li>Accédez à la section "Mes Segments"</li>
-                            <li>Démarrez le segment 2 quand vous êtes prêt</li>
-                        </ol>
+                        <p>Votre livraison est maintenant complètement terminée. Merci d'avoir choisi EcoDeli !</p>
                     </div>
 
-                    <div style="text-align: center;">
-                        <a href="#" class="cta-button">Accéder à mon espace livreur</a>
+                    <div class="rating-section">
+                        <h3 style="color: #F57C00; margin-top: 0;">⭐ Votre avis nous intéresse</h3>
+                        <p>Comment s'est passée votre expérience EcoDeli ? Votre retour nous aide à améliorer nos services.</p>
+                        <p style="margin-top: 15px;">
+                            <a href="#" style="color: #4CAF50; text-decoration: none; font-weight: bold;">Donner mon avis →</a>
+                        </p>
+                    </div>
+
+                    <div class="content">
+                        <p>Merci d'avoir choisi <strong>EcoDeli</strong> pour cette livraison éco-responsable ! 
+                        Ensemble, nous contribuons à un avenir plus durable.</p>
                     </div>
 
                     <div class="footer">
-                        <p>Merci de contribuer à des livraisons plus durables !</p>
+                        <p>Vos livraisons vertes font la différence ! 🌍</p>
                         <p style="margin-top: 15px;">
                             <strong>L'équipe EcoDeli</strong> 🌱
                         </p>
@@ -675,16 +512,17 @@ public class EmailService {
             </body>
             </html>
             """.formatted(
-                livraison.getLivreurSegment2().getPrenom(),
+                livraison.getExpediteur().getPrenom(),
                 livraison.getIdLivraison(),
-                livraison.getEntrepotVille(),
+                livraison.getIdLivraison(),
                 livraison.getDestinataire().getPrenom(),
                 livraison.getDestinataire().getNom(),
                 livraison.getAdresseDeLivraison(),
                 livraison.getCodePostalLivraison(),
-                livraison.getPrix() / 2,
                 livraison.getColis() != null ?
-                    "<p><strong>Colis :</strong> " + livraison.getColis().getDescription() + "</p>" : ""
+                    "<p><strong>Colis :</strong> " + livraison.getColis().getDescription() + "</p>" : "",
+                livraison.getDateFin() != null ?
+                    "<p><strong>Date de livraison :</strong> " + livraison.getDateFin().toString() + "</p>" : ""
             );
     }
 }

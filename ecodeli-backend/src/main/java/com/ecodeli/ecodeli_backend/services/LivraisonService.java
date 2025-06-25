@@ -109,6 +109,11 @@ public class LivraisonService {
             annonce.setStatut(Annonce.StatutAnnonce.TERMINEE);
             annonceRepository.save(annonce);
         }
+
+        if (livraison.getExpediteur() != null && livraison.getExpediteur().getEmail() != null) {
+            emailService.sendDeliveryConfirmationToSender(livraison);
+        }
+
         return livraisonRepository.save(livraison);
     }
 
@@ -174,14 +179,6 @@ public class LivraisonService {
         livraison.setOtpTimestamp(LocalDateTime.now());
         livraison.setStatut(StatutLivraison.ARRIVED);
 
-        if (livraison.getAnnonce() != null &&
-            livraison.getAnnonce().getLivreur() != null &&
-            livraison.getAnnonce().getLivreur().getEmail() != null) {
-            emailService.sendDeliveryCodeToDriver(livraison, otpCode);
-        } else {
-            throw new IllegalStateException("Email du livreur non configuré pour la livraison " + idLivraison + ". Impossible d'envoyer le code de validation.");
-        }
-
         return livraisonRepository.save(livraison);
     }
 
@@ -209,10 +206,6 @@ public class LivraisonService {
         livraison.setDateDepotEntrepot(LocalDateTime.now());
         livraison.setOtpCode(null);
         livraison.setOtpTimestamp(null);
-
-        if (livraison.getLivreurSegment2() != null && livraison.getLivreurSegment2().getEmail() != null) {
-            emailService.sendSegment2NotificationToDriver(livraison);
-        }
 
         return livraisonRepository.save(livraison);
     }
