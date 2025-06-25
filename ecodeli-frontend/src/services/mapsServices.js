@@ -321,7 +321,7 @@ export const addressAutocompleteService = {
 
     this.loadingPromise = new Promise(async (resolve, reject) => {
       try {
-        const apiKey = import.meta.env.VUE_APP_GOOGLE_MAPS_API_KEY ||  'AIzaSyAY-wmkZ0l4h3IgZVFDg2_VGT7SlygZF7w'
+        const apiKey = import.meta.env.VUE_APP_GOOGLE_MAPS_API_KEY
         if (!apiKey) {
           console.warn('Clé API Google Maps non configurée')
           resolve(false)
