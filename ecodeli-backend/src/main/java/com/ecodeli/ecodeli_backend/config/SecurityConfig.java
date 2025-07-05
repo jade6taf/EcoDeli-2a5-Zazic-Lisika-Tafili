@@ -2,6 +2,7 @@ package com.ecodeli.ecodeli_backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,6 +18,7 @@ import com.ecodeli.ecodeli_backend.security.JwtRequestFilter;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
@@ -39,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/addresses/**").permitAll()
                 .requestMatchers("/api/admin/documents/view/**").hasRole("ADMIN")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/planning/**").hasRole("PRESTATAIRE")
                 .requestMatchers("/api/documents/upload").authenticated()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

@@ -90,9 +90,9 @@ const routes = [
     meta: { requiresAuth: true, role: 'CLIENT' }
   },
   {
-    path: '/client/services-types',
-    name: 'services-types',
-    component: () => import('./views/client/ServicesTypesView.vue'),
+    path: '/client/annonces/:id/payment',
+    name: 'client-annonce-payment',
+    component: () => import('./views/client/AnnoncePaymentView.vue'),
     meta: { requiresAuth: true, role: 'CLIENT' }
   },
   {
@@ -161,6 +161,12 @@ const routes = [
     component: () => import('./views/livreur/MesSegmentsView.vue'),
     meta: { requiresAuth: true, role: 'LIVREUR' }
   },
+  {
+    path: '/livreur/wallet',
+    name: 'livreur-wallet',
+    component: () => import('./views/livreur/WalletView.vue'),
+    meta: { requiresAuth: true, role: 'LIVREUR' }
+  },
     {
       path: '/commercant',
       name: 'commercant-dashboard',
@@ -211,10 +217,6 @@ const routes = [
     },
   {
     path: '/prestataire',
-    meta: { requiresAuth: true, role: 'PRESTATAIRE' },
-    children: [
-  {
-    path: '/prestataire',
     component: () => import('./views/prestataire/PrestataireLayout.vue'),
     meta: { requiresAuth: true, role: 'PRESTATAIRE' },
     children: [
@@ -232,6 +234,11 @@ const routes = [
         path: 'profil',
         name: 'prestataire-profil',
         component: () => import('./views/prestataire/ProfilPublicView.vue')
+      },
+      {
+        path: 'planning',
+        name: 'prestataire-planning',
+        component: () => import('./views/prestataire/PlanningView.vue')
       },
       {
         path: 'demandes-disponibles',
@@ -269,8 +276,6 @@ const routes = [
     path: '/prestataires/:id/detail',
     name: 'prestataire-profil-detail',
     component: () => import('./views/prestataire/ProfilPublicDetailView.vue')
-  }
-    ]
   },
   {
     path: '/prestataire/:id/public',

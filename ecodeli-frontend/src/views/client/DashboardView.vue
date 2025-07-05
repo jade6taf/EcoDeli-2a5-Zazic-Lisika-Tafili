@@ -73,11 +73,6 @@ export default {
           <h3>Mes demandes de service</h3>
           <p>Suivez l'état de vos demandes de services</p>
         </router-link>
-        <div @click="navigateTo('/client/services-types')" class="dashboard-card">
-          <i class="fas fa-concierge-bell"></i>
-          <h3>Découvrir les prestataires</h3>
-          <p>Explorez les prestataires disponibles par catégorie</p>
-        </div>
       </div>
     </div>
 

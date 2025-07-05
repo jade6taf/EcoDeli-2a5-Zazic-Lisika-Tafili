@@ -156,12 +156,21 @@ export default {
       this.error = null;
 
       try {
+        const userData = { ...this.user };
+
+        if (userData.type !== 'PRESTATAIRE') {
+          delete userData.nomEntreprise;
+        }
+        if (userData.type !== 'PRESTATAIRE' && userData.type !== 'COMMERCANT') {
+          delete userData.siret;
+        }
+
         const registrationData = {
-          utilisateur: { ...this.user },
+          utilisateur: userData,
           hcaptchaToken: this.hcaptchaToken
         };
 
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('http://localhost:8080/api/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

@@ -51,4 +51,7 @@ public class Prestataire extends Utilisateur {
 
     @OneToMany(mappedBy = "prestataire")
     private List<Evaluation> evaluations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "prestataire", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DisponibilitePrestataire> planningDisponibilites = new ArrayList<>();
 }

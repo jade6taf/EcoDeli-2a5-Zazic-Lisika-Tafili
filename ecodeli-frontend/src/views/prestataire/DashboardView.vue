@@ -1,4 +1,6 @@
 <script>
+import planningService from '@/services/planningService'
+
 export default {
   name: 'PrestataireDashboard',
   data() {
@@ -10,7 +12,13 @@ export default {
       disponible: true,
       nouveauxServices: 0,
       servicesEnCours: 0,
-      moyenneEvaluations: '4.5'
+      moyenneEvaluations: '4.5',
+      planningStats: {
+        prochainsCreneaux: 0,
+        heuresDisponibles: 0,
+        tauxOccupation: 0,
+        prochainCreneau: null
+      }
     }
   },
   async mounted() {
@@ -28,6 +36,7 @@ export default {
 
         await this.loadStatistiques();
         await this.loadCandidaturesRecentes();
+        await this.loadPlanningStats();
         this.nouveauxServices = 1;
         this.servicesEnCours = 1;
         this.disponible = true;
@@ -71,6 +80,19 @@ export default {
       } catch (error) {
         console.error('Erreur lors du chargement des candidatures:', error);
       }
+    },
+
+    async loadPlanningStats() {
+      try {
+        const stats = await planningService.getStatistiques()
+        this.planningStats = stats
+      } catch (error) {
+        console.error('Erreur lors du chargement des stats planning:', error)
+      }
+    },
+
+    ajouterCreneauRapide() {
+      this.$router.push('/prestataire/planning?action=add')
     },
 
     async updateDisponibilite() {
@@ -236,6 +258,56 @@ export default {
             <i class="fas fa-chevron-right"></i>
           </div>
         </router-link>
+      </div>
+
+      <div class="planning-section">
+        <h3 class="section-title">
+          <i class="fas fa-calendar-alt"></i>
+          Mon calendrier
+        </h3>
+
+        <div class="planning-overview">
+          <div class="planning-card" @click="$router.push('/prestataire/planning')">
+            <div class="planning-content">
+              <div class="planning-stats">
+                <div class="stat-item">
+                  <span class="stat-number">{{ planningStats.prochainsCreneaux || 0 }}</span>
+                  <span class="stat-label">Prochains créneaux</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ planningStats.heuresDisponibles || 0 }}h</span>
+                  <span class="stat-label">Cette semaine</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">{{ Math.round(planningStats.tauxOccupation || 0) }}%</span>
+                  <span class="stat-label">Taux d'occupation</span>
+                </div>
+              </div>
+
+              <div class="planning-preview">
+                <div class="next-availability" v-if="planningStats.prochainCreneau">
+                  <i class="fas fa-clock"></i>
+                  <span>Prochain créneau : {{ formatDate(planningStats.prochainCreneau) }}</span>
+                </div>
+                <div class="no-availability" v-else>
+                  <i class="fas fa-calendar-plus"></i>
+                  <span>Aucun créneau disponible planifié</span>
+                </div>
+              </div>
+
+              <div class="planning-actions">
+                <button @click.stop="ajouterCreneauRapide" class="quick-add-btn">
+                  <i class="fas fa-plus"></i>
+                  Ajouter un créneau
+                </button>
+              </div>
+            </div>
+
+            <div class="planning-arrow">
+              <i class="fas fa-chevron-right"></i>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="secondary-actions">
@@ -651,5 +723,154 @@ input:checked + .slider:before {
 .activity-amount {
   color: var(--text-primary);
   font-weight: 600;
+}
+
+/* Styles pour la section planning */
+.planning-section {
+  margin-bottom: 3rem;
+}
+
+.planning-overview {
+  display: flex;
+  flex-direction: column;
+}
+
+.planning-card {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 4px solid var(--primary-color);
+}
+
+.planning-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.planning-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.planning-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background: var(--background-color);
+  border-radius: 6px;
+}
+
+.stat-item .stat-number {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.stat-item .stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.planning-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--background-color);
+  border-radius: 6px;
+}
+
+.next-availability {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--success-color);
+}
+
+.next-availability i {
+  font-size: 1.1rem;
+}
+
+.no-availability {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.no-availability i {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+.planning-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.quick-add-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.quick-add-btn:hover {
+  background: var(--primary-color-dark);
+  transform: translateY(-1px);
+}
+
+.planning-arrow {
+  position: absolute;
+  top: 50%;
+  right: 1.5rem;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+}
+
+.planning-card {
+  position: relative;
+}
+
+/* Responsive pour la section planning */
+@media (max-width: 768px) {
+  .planning-stats {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+  
+  .stat-item .stat-number {
+    font-size: 1.25rem;
+  }
+  
+  .planning-arrow {
+    display: none;
+  }
+  
+  .planning-preview {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: center;
+  }
 }
 </style>

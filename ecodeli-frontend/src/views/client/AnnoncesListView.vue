@@ -6,13 +6,16 @@ export default {
       annonces: [],
       user: null,
       isLoading: true,
-      error: null
+      error: null,
+      successMessage: null
     }
   },
   computed: {
     statutLabels() {
       return {
         'PUBLIEE': { text: 'Publiée', class: 'status-published' },
+        'DRAFT': { text: 'En attente de paiement', class: 'status-draft' },
+        'PAYEE': { text: 'Payée', class: 'status-paid' },
         'EN_ATTENTE_VALIDATION': { text: 'En attente', class: 'status-pending' },
         'VALIDEE': { text: 'Validée', class: 'status-validated' },
         'EN_COURS': { text: 'En cours', class: 'status-in-progress' },
@@ -23,6 +26,11 @@ export default {
     canModifyAnnonce() {
       return (annonce) => {
         return annonce.statut === 'PUBLIEE';
+      }
+    },
+    needsPayment() {
+      return (annonce) => {
+        return annonce.statut === 'PUBLIEE' && !annonce.payee;
       }
     }
   },
@@ -80,15 +88,23 @@ export default {
     },
 
     formatDate(dateString) {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(date);
+      if (!dateString) return 'Non défini';
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+          return 'Date invalide';
+        }
+        return new Intl.DateTimeFormat('fr-FR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(date);
+      } catch (error) {
+        console.warn('Erreur lors du formatage de la date:', dateString, error);
+        return 'Format invalide';
+      }
     },
     getColisDetails(annonce) {
       if (!annonce.colis)
@@ -98,10 +114,23 @@ export default {
       const poids = `${annonce.colis.poids || 0} kg`;
 
       return `${dimensions}, ${poids}${annonce.colis.fragile ? ', Fragile' : ''}`;
+    },
+
+    payAnnonce(annonce) {
+      this.$router.push(`/client/annonces/${annonce.idAnnonce}/payment`);
     }
   },
   mounted() {
     this.fetchAnnonces();
+
+    if (this.$route.query.paymentSuccess === 'true') {
+      this.successMessage = 'Paiement effectué avec succès ! Votre annonce est maintenant visible par les livreurs.';
+
+      setTimeout(() => {
+        this.successMessage = null;
+        this.$router.replace({ query: {} });
+      }, 5000);
+    }
   }
 }
 </script>
@@ -114,6 +143,11 @@ export default {
                 <i class="fas fa-plus"></i> Créer une annonce
             </router-link>
         </div>
+        <div v-if="successMessage" class="success-message">
+            <i class="fas fa-check-circle"></i>
+            {{ successMessage }}
+        </div>
+
         <div v-if="isLoading" class="loading">
             Chargement des annonces...
         </div>
@@ -173,6 +207,14 @@ export default {
                 </div>
 
                 <div class="annonce-actions">
+                    <!-- Bouton de paiement prioritaire pour les annonces non payées -->
+                    <button
+                        v-if="needsPayment(annonce)"
+                        @click="payAnnonce(annonce)"
+                        class="btn-pay">
+                        <i class="fas fa-credit-card"></i> Payer maintenant
+                    </button>
+
                     <router-link :to="`/client/annonces/${annonce.idAnnonce}`" class="btn-view">
                         <i class="fas fa-eye"></i> Voir détails
                     </router-link>
@@ -301,6 +343,16 @@ export default {
   color: #c62828;
 }
 
+.status-draft {
+  background-color: #fff8e1;
+  color: #f57c00;
+}
+
+.status-paid {
+  background-color: #e8f5e9;
+  color: #4caf50;
+}
+
 .annonce-details {
   padding: 1.5rem;
 }
@@ -341,7 +393,7 @@ export default {
   border-top: 1px solid var(--border-color);
 }
 
-.btn-view, .btn-edit, .btn-cancel {
+.btn-view, .btn-edit, .btn-cancel, .btn-pay {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   display: inline-flex;
@@ -349,6 +401,7 @@ export default {
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s;
+  border: none;
 }
 
 .btn-view {
@@ -383,7 +436,19 @@ export default {
   background-color: #ffcdd2;
 }
 
-.btn-view i, .btn-edit i, .btn-cancel i {
+.btn-pay {
+  background-color: #4caf50;
+  color: white;
+  font-weight: 600;
+}
+
+.btn-pay:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.btn-view i, .btn-edit i, .btn-cancel i, .btn-pay i {
   margin-right: 0.5rem;
 }
 
@@ -434,6 +499,34 @@ export default {
 
 .error-message {
   color: var(--error-color);
+}
+
+.success-message {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  border: 1px solid #4caf50;
+  animation: slideIn 0.3s ease-out;
+}
+
+.success-message i {
+  margin-right: 0.75rem;
+  font-size: 1.2rem;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {

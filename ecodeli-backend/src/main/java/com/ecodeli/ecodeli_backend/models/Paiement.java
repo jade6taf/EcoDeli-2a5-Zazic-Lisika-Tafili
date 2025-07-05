@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "PAIEMENT")
@@ -31,7 +32,37 @@ public class Paiement {
     @Column(name = "mode_de_paiement")
     private ModeDePaiement modeDePaiement;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "statut")
+    private StatutPaiement statut = StatutPaiement.PENDING;
+
+    @Column(name = "stripe_payment_intent_id")
+    private String stripePaymentIntentId;
+
+    @Column(name = "date_creation")
+    private LocalDateTime dateCreation = LocalDateTime.now();
+
+    @Column(name = "date_completion")
+    private LocalDateTime dateCompletion;
+
+    @ManyToOne
+    @JoinColumn(name = "id_annonce")
+    private Annonce annonce;
+
+    @ManyToOne
+    @JoinColumn(name = "id_client")
+    private Client client;
+
     public enum ModeDePaiement {
-        CB, PayPal, Espèces, Virement, Chèque
+        STRIPE, PayPal, Espèces, Virement, Chèque
+    }
+
+    public enum StatutPaiement {
+        PENDING,     // Paiement en attente
+        HELD,        // Fonds bloqués (escrow)
+        COMPLETED,   // Paiement complété
+        FAILED,      // Échec du paiement
+        REFUNDED,    // Remboursé
+        CANCELLED    // Annulé
     }
 }

@@ -48,6 +48,11 @@ export default {
           <h3>Mes segments</h3>
           <p>Gérez vos segments de livraison partielle</p>
         </router-link>
+        <router-link to="/livreur/wallet" class="dashboard-card">
+          <i class="fas fa-wallet"></i>
+          <h3>💰 Mon Portefeuille</h3>
+          <p>Consultez vos gains et gérez vos retraits</p>
+        </router-link>
       </div>
     </div>
 

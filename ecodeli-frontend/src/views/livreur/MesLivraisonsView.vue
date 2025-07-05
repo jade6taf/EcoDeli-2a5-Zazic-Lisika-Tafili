@@ -74,15 +74,23 @@ export default {
       this.activeTab = tab;
     },
     formatDate(dateString) {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(date);
+      if (!dateString) return 'Non défini';
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+          return 'Date invalide';
+        }
+        return new Intl.DateTimeFormat('fr-FR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(date);
+      } catch (error) {
+        console.warn('Erreur lors du formatage de la date:', dateString, error);
+        return 'Format invalide';
+      }
     },
 
     async demarrerLivraison(idLivraison) {

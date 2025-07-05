@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -54,6 +55,10 @@ public class Annonce {
     @ManyToOne
     @JoinColumn(name = "id_expediteur", nullable = false)
     private Utilisateur expediteur;
+
+    @JsonIgnore
+    @Transient
+    private Integer idExpediteur;
 
     @ManyToOne
     @JoinColumn(name = "id_livreur", nullable = true)

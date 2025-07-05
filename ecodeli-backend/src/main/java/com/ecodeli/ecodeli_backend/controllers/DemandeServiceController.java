@@ -6,6 +6,7 @@ import com.ecodeli.ecodeli_backend.models.ServiceType;
 import com.ecodeli.ecodeli_backend.models.Client;
 import com.ecodeli.ecodeli_backend.models.Utilisateur;
 import com.ecodeli.ecodeli_backend.services.DemandeServiceService;
+import com.ecodeli.ecodeli_backend.services.DemandeServiceValidationService;
 import com.ecodeli.ecodeli_backend.services.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,9 @@ public class DemandeServiceController {
     private DemandeServiceService demandeServiceService;
 
     @Autowired
+    private DemandeServiceValidationService validationService;
+
+    @Autowired
     private UtilisateurService utilisateurService;
 
     @PostMapping
@@ -43,6 +47,25 @@ public class DemandeServiceController {
             if (!demandeServiceService.peutCreerNouvelleDemande(client)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "Vous avez atteint le nombre maximum de demandes actives (5)"));
+            }
+
+            if (demande.hasDetailsSpecifiques()) {
+                List<String> validationErrors = validationService.validateDetailsSpecifiques(
+                    demande.getCategorieService(),
+                    demande.getDetailsSpecifiquesAsMap()
+                );
+
+                if (!validationErrors.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Erreurs de validation des détails spécifiques",
+                                   "details", validationErrors));
+                }
+            }
+
+            List<String> coherenceErrors = validationService.validateCoherence(demande);
+            if (!coherenceErrors.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Erreurs de cohérence", "details", coherenceErrors));
             }
 
             demande.setClient(client);

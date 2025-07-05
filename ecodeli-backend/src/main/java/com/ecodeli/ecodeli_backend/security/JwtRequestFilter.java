@@ -43,21 +43,30 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (jwt != null) {
             try {
                 email = jwtUtil.extractEmail(jwt);
+                logger.info("JWT trouvé pour email: " + email);
             } catch (Exception e) {
                 logger.error("Erreur lors de l'extraction du JWT", e);
             }
+        } else {
+            logger.info("Aucun JWT trouvé dans la requête: " + request.getRequestURI());
         }
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtUtil.validateToken(jwt)) {
                 String userType = jwtUtil.extractUserType(jwt);
+                logger.info("Token valide pour email: " + email + ", userType: " + userType + ", role créé: ROLE_" + userType);
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + userType))
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                logger.info("Authentification réussie pour: " + email + " avec rôle: ROLE_" + userType);
             } else {
+                logger.warn("Token JWT invalide ou expiré pour email: " + email);
             }
+        } else if (email == null) {
+            logger.info("Email null, pas d'authentification pour: " + request.getRequestURI());
         } else {
+            logger.info("Authentification déjà présente pour: " + email);
         }
         chain.doFilter(request, response);
     }

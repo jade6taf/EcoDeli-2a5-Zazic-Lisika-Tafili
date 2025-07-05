@@ -40,14 +40,8 @@ export default {
     },
 
     async postFormData(endpoint, formData) {
-        const token = authService.getToken();
-        const headers = {};
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
         return this.fetch(endpoint, {
             method: 'POST',
-            headers,
             body: formData
         });
     },
@@ -56,6 +50,13 @@ export default {
         return this.fetch(endpoint, {
         method: 'PUT',
         body: JSON.stringify(data)
+        });
+    },
+
+    async patch(endpoint, data) {
+        return this.fetch(endpoint, {
+            method: 'PATCH',
+            body: JSON.stringify(data)
         });
     },
 

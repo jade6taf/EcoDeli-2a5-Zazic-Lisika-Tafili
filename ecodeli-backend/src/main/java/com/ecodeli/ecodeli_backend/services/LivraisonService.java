@@ -19,14 +19,17 @@ public class LivraisonService {
     private final LivraisonRepository livraisonRepository;
     private final AnnonceRepository annonceRepository;
     private final EmailService emailService;
+    private final PaymentService paymentService;
 
     public LivraisonService(LivraisonRepository livraisonRepository,
                               AnnonceRepository annonceRepository,
                               EmailService emailService,
+                              PaymentService paymentService,
                               EntrepotUtilService entrepotUtilService) {
         this.livraisonRepository = livraisonRepository;
         this.annonceRepository = annonceRepository;
         this.emailService = emailService;
+        this.paymentService = paymentService;
     }
 
     public List<Livraison> getAllLivraisons() {
@@ -99,6 +102,7 @@ public class LivraisonService {
             livraisonRepository.save(livraison);
             throw new IllegalArgumentException("Code OTP expiré.");
         }
+
         livraison.setStatut(StatutLivraison.TERMINEE);
         livraison.setOtpCode(null);
         livraison.setOtpTimestamp(null);
@@ -108,6 +112,26 @@ public class LivraisonService {
         if (annonce != null) {
             annonce.setStatut(Annonce.StatutAnnonce.TERMINEE);
             annonceRepository.save(annonce);
+            try {
+                if (livraison.getTypeLivraison() == TypeLivraison.DIRECTE) {
+                    paymentService.releaseFundsToDelivery(
+                        annonce.getIdAnnonce(),
+                        annonce.getLivreur().getIdUtilisateur(),
+                        null
+                    );
+                } else {
+                    paymentService.releaseFundsToDelivery(
+                        annonce.getIdAnnonce(),
+                        livraison.getLivreurSegment2().getIdUtilisateur(),
+                        2
+                    );
+                }
+                System.out.println("✅ Paiement automatique réussi pour la livraison " + idLivraison);
+            } catch (Exception e) {
+                System.err.println("❌ Erreur lors du paiement automatique pour la livraison " + idLivraison + ": " + e.getMessage());
+                e.printStackTrace();
+                System.err.println("⚠️ La livraison est confirmée mais le paiement automatique a échoué. Intervention manuelle requise.");
+            }
         }
 
         if (livraison.getExpediteur() != null && livraison.getExpediteur().getEmail() != null) {
@@ -206,6 +230,19 @@ public class LivraisonService {
         livraison.setDateDepotEntrepot(LocalDateTime.now());
         livraison.setOtpCode(null);
         livraison.setOtpTimestamp(null);
+
+        Annonce annonce = livraison.getAnnonce();
+        if (annonce != null) {
+            try {
+                paymentService.releaseFundsToDelivery(
+                    annonce.getIdAnnonce(),
+                    livraison.getLivreurSegment1().getIdUtilisateur(),
+                    1
+                );
+            } catch (Exception e) {
+                System.err.println("Erreur lors du paiement automatique segment 1 pour la livraison " + idLivraison + ": " + e.getMessage());
+            }
+        }
 
         return livraisonRepository.save(livraison);
     }

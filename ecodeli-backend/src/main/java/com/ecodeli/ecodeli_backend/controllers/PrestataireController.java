@@ -7,7 +7,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -100,5 +106,91 @@ public class PrestataireController {
         }
 
         return new ResponseEntity<>(prestataires, HttpStatus.OK);
+    }
+
+    @PostMapping("/upload-photo")
+    public ResponseEntity<?> uploadPhoto(@RequestParam("photo") MultipartFile file) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return utilisateurService.getUtilisateurByEmail(email)
+                .map(user -> {
+                    if (!(user instanceof Prestataire)) {
+                        return new ResponseEntity<>("Utilisateur non autorisé", HttpStatus.FORBIDDEN);
+                    }
+                    Prestataire prestataire = (Prestataire) user;
+                    if (file.isEmpty()) {
+                        return new ResponseEntity<>("Fichier vide", HttpStatus.BAD_REQUEST);
+                    }
+                    String contentType = file.getContentType();
+                    if (contentType == null || !contentType.startsWith("image/")) {
+                        return new ResponseEntity<>("Le fichier doit être une image", HttpStatus.BAD_REQUEST);
+                    }
+                    if (file.getSize() > 5 * 1024 * 1024) {
+                        return new ResponseEntity<>("Le fichier ne doit pas dépasser 5MB", HttpStatus.BAD_REQUEST);
+                    }
+                    try {
+                        Path uploadDir = Paths.get("uploads/profile-photos");
+                        if (!Files.exists(uploadDir)) {
+                            Files.createDirectories(uploadDir);
+                        }
+                        String originalFileName = file.getOriginalFilename();
+                        String fileExtension = originalFileName != null && originalFileName.contains(".")
+                            ? originalFileName.substring(originalFileName.lastIndexOf("."))
+                            : ".jpg";
+                        String fileName = "prestataire_" + prestataire.getIdUtilisateur() + "_" +
+                                         System.currentTimeMillis() + fileExtension;
+
+                        Path filePath = uploadDir.resolve(fileName);
+                        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                        String imageUrl = "/uploads/profile-photos/" + fileName;
+
+                        prestataire.setImageUrl(imageUrl);
+                        Prestataire updated = (Prestataire) utilisateurService.updateUtilisateur(
+                            prestataire.getIdUtilisateur(), prestataire);
+
+                        Map<String, String> response = new HashMap<>();
+                        response.put("imageUrl", imageUrl);
+                        response.put("message", "Photo de profil mise à jour avec succès");
+
+                        return new ResponseEntity<>(response, HttpStatus.OK);
+
+                    } catch (IOException e) {
+                        return new ResponseEntity<>("Erreur lors de la sauvegarde du fichier", 
+                                                  HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
+                })
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @PatchMapping("/disponibilite")
+    public ResponseEntity<?> updateDisponibilite(@RequestBody Map<String, Boolean> requestBody) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Boolean disponible = requestBody.get("disponible");
+
+        if (disponible == null) {
+            return new ResponseEntity<>("Le paramètre 'disponible' est requis", HttpStatus.BAD_REQUEST);
+        }
+
+        return utilisateurService.getUtilisateurByEmail(email)
+                .map(user -> {
+                    if (!(user instanceof Prestataire)) {
+                        return new ResponseEntity<>("Utilisateur non autorisé", HttpStatus.FORBIDDEN);
+                    }
+
+                    Prestataire prestataire = (Prestataire) user;
+                    prestataire.setDisponible(disponible);
+
+                    Prestataire updated = (Prestataire) utilisateurService.updateUtilisateur(
+                        prestataire.getIdUtilisateur(), prestataire);
+
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("disponible", updated.getDisponible());
+                    response.put("message", disponible ? "Vous êtes maintenant disponible" : 
+                                          "Vous êtes maintenant indisponible");
+
+                    return new ResponseEntity<>(response, HttpStatus.OK);
+                })
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }

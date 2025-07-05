@@ -1,6 +1,9 @@
 package com.ecodeli.ecodeli_backend.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -9,7 +12,9 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "DEMANDE_SERVICE")
@@ -66,6 +71,9 @@ public class DemandeService {
     @Column(name = "photo_url")
     private List<String> photosUrls = new ArrayList<>();
 
+    @Column(name = "details_specifiques", columnDefinition = "JSON")
+    private String detailsSpecifiques;
+
     @NotNull(message = "Le statut est obligatoire")
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", nullable = false)
@@ -115,7 +123,6 @@ public class DemandeService {
         }
     }
 
-    // Méthodes utilitaires
     public boolean peutRecevoirCandidatures() {
         return statut == StatutDemande.PUBLIEE || statut == StatutDemande.CANDIDATURES_RECUES;
     }
@@ -130,5 +137,34 @@ public class DemandeService {
 
     public int getNombreCandidatures() {
         return candidatures != null ? candidatures.size() : 0;
+    }
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    public Map<String, Object> getDetailsSpecifiquesAsMap() {
+        if (detailsSpecifiques == null || detailsSpecifiques.trim().isEmpty()) {
+            return new HashMap<>();
+        }
+        try {
+            return objectMapper.readValue(detailsSpecifiques, new TypeReference<Map<String, Object>>() {});
+        } catch (JsonProcessingException e) {
+            return new HashMap<>();
+        }
+    }
+
+    public void setDetailsSpecifiquesFromMap(Map<String, Object> details) {
+        if (details == null || details.isEmpty()) {
+            this.detailsSpecifiques = null;
+            return;
+        }
+        try {
+            this.detailsSpecifiques = objectMapper.writeValueAsString(details);
+        } catch (JsonProcessingException e) {
+            this.detailsSpecifiques = null;
+        }
+    }
+
+    public boolean hasDetailsSpecifiques() {
+        return detailsSpecifiques != null && !detailsSpecifiques.trim().isEmpty();
     }
 }

@@ -1,2 +1,10 @@
 server:
     port: 8080
+
+stripe:
+    publishable:
+        key: ${STRIPE_PUBLISHABLE_KEY}
+    secret:
+        key: ${STRIPE_SECRET_KEY}
+    webhook:
+        secret: ${STRIPE_WEBHOOK_SECRET}

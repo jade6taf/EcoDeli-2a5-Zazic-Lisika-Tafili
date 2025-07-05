@@ -23,7 +23,7 @@ public class MapsController {
     private final TarificationService tarificationService;
     private final EntrepotUtilService entrepotUtilService;
 
-    public MapsController(GoogleMapsService googleMapsService, 
+    public MapsController(GoogleMapsService googleMapsService,
                          TarificationService tarificationService,
                          EntrepotUtilService entrepotUtilService) {
         this.googleMapsService = googleMapsService;
