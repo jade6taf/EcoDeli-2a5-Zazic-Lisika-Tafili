@@ -1,0 +1,329 @@
+/* CSS Admin EcoDeli - Style Sakai inspired */
+
+/* Variables EcoDeli */
+:root {
+  --ecodeli-green: #10b981;
+  --ecodeli-green-dark: #047857;
+  --ecodeli-green-light: #ecfdf5;
+  --admin-sidebar-bg: #1f2937;
+  --admin-sidebar-hover: #374151;
+  --admin-topbar-bg: #ffffff;
+  --admin-content-bg: #f9fafb;
+}
+
+/* Reset et normalisation */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--admin-content-bg);
+  color: var(--surface-900);
+}
+
+#app {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Layout Admin Sakai-style */
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.admin-sidebar {
+  width: 280px;
+  background: var(--admin-sidebar-bg);
+  color: white;
+  transition: all 0.3s ease;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.admin-sidebar.collapsed {
+  width: 80px;
+}
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-topbar {
+  background: var(--admin-topbar-bg);
+  border-bottom: 1px solid var(--surface-200);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  background: var(--admin-content-bg);
+}
+
+/* Sidebar Navigation */
+.sidebar-logo {
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+}
+
+.sidebar-logo h2 {
+  color: var(--ecodeli-green);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.sidebar-menu {
+  padding: 1rem 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background: var(--admin-sidebar-hover);
+  color: var(--ecodeli-green);
+}
+
+.menu-item i {
+  margin-right: 0.75rem;
+  width: 20px;
+  text-align: center;
+}
+
+.menu-item span {
+  transition: opacity 0.3s ease;
+}
+
+.admin-sidebar.collapsed .menu-item span {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+/* Topbar */
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.breadcrumb {
+  color: var(--surface-600);
+  font-size: 0.875rem;
+}
+
+/* Dashboard Cards */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border-left: 4px solid var(--ecodeli-green);
+}
+
+.stat-card .stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ecodeli-green);
+  margin-bottom: 0.5rem;
+}
+
+.stat-card .stat-label {
+  color: var(--surface-600);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* DataTable personnalisé */
+.admin-datatable {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.admin-datatable .p-datatable-header {
+  background: var(--ecodeli-green-light);
+  border-bottom: 2px solid var(--ecodeli-green);
+  padding: 1rem 1.5rem;
+}
+
+.admin-datatable .p-datatable-thead > tr > th {
+  background: var(--surface-50);
+  color: var(--surface-700);
+  font-weight: 600;
+  border-bottom: 2px solid var(--surface-200);
+}
+
+/* Boutons admin */
+.btn-primary {
+  background: var(--ecodeli-green) !important;
+  border-color: var(--ecodeli-green) !important;
+}
+
+.btn-primary:hover {
+  background: var(--ecodeli-green-dark) !important;
+  border-color: var(--ecodeli-green-dark) !important;
+}
+
+/* Auth pages */
+.auth-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--ecodeli-green-light) 0%, #dcfce7 50%, #ecfdf5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  border: none;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 450px;
+  width: 100%;
+}
+
+.auth-header {
+  text-align: center;
+  padding: 2rem 2rem 1rem;
+}
+
+.auth-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--ecodeli-green-dark);
+}
+
+.auth-header .admin-badge {
+  background: var(--ecodeli-green);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 280px;
+    transform: translateX(-100%);
+    position: absolute;
+    z-index: 1000;
+    height: 100vh;
+  }
+  
+  .admin-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Utilitaires */
+.flex {
+  display: flex;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-primary {
+  color: var(--ecodeli-green);
+}
+
+.text-primary:hover {
+  color: var(--ecodeli-green-dark);
+}
+
+.border-0 {
+  border: none;
+}

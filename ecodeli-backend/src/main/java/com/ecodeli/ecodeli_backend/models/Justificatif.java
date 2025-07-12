@@ -18,7 +18,7 @@ public class Justificatif {
     @Column(name = "id_justificatif")
     private Integer idJustificatif;
 
-    // Amélioration: Utiliser une énumération pour le type
+    // Utiliser plutot une énumération pour le type <-> à faire
     @Column(name = "type_justificatif", length = 100)
     private String typeJustificatif;
 

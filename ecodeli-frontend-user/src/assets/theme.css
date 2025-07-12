@@ -1,0 +1,170 @@
+/* Thème vert EcoDeli personnalisé */
+:root {
+    /* Couleurs principales */
+    --primary-50: #f0fdf4;
+    --primary-100: #dcfce7;
+    --primary-200: #bbf7d0;
+    --primary-300: #86efac;
+    --primary-400: #4ade80;
+    --primary-500: #10b981;
+    --primary-600: #059669;
+    --primary-700: #047857;
+    --primary-800: #065f46;
+    --primary-900: #064e3b;
+    --primary-950: #022c22;
+
+    /* Surface colors pour cohérence */
+    --surface-0: #ffffff;
+    --surface-50: #f8fafc;
+    --surface-100: #f1f5f9;
+    --surface-200: #e2e8f0;
+    --surface-300: #cbd5e1;
+    --surface-400: #94a3b8;
+    --surface-500: #64748b;
+    --surface-600: #475569;
+    --surface-700: #334155;
+    --surface-800: #1e293b;
+    --surface-900: #0f172a;
+    --surface-950: #020617;
+
+    /* Couleurs EcoDeli spécifiques */
+    --ecodeli-green: #10b981;
+    --ecodeli-green-dark: #047857;
+    --ecodeli-green-light: #ecfdf5;
+    --ecodeli-success: #059669;
+    --ecodeli-warning: #f59e0b;
+    --ecodeli-danger: #ef4444;
+}
+
+/* Override des couleurs PrimeVue pour le thème vert */
+.p-button {
+    background: var(--ecodeli-green);
+    border-color: var(--ecodeli-green);
+}
+
+.p-button:hover {
+    background: var(--ecodeli-green-dark);
+    border-color: var(--ecodeli-green-dark);
+}
+
+.p-button-outlined {
+    color: var(--ecodeli-green);
+    border-color: var(--ecodeli-green);
+}
+
+.p-button-outlined:hover {
+    background: var(--ecodeli-green);
+    color: white;
+}
+
+.p-menubar {
+    background: var(--surface-0);
+    border-bottom: 1px solid var(--surface-200);
+}
+
+.p-menubar .p-menuitem-link:hover {
+    background: var(--ecodeli-green-light);
+    color: var(--ecodeli-green-dark);
+}
+
+.p-card {
+    background: var(--surface-0);
+    border: 1px solid var(--surface-200);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.p-inputtext:focus {
+    border-color: var(--ecodeli-green);
+    box-shadow: 0 0 0 1px var(--ecodeli-green);
+}
+
+.p-sidebar {
+    background: var(--surface-0);
+    border-right: 1px solid var(--surface-200);
+}
+
+/* Couleurs d'état */
+.text-success {
+    color: var(--ecodeli-success) !important;
+}
+
+.text-warning {
+    color: var(--ecodeli-warning) !important;
+}
+
+.text-danger {
+    color: var(--ecodeli-danger) !important;
+}
+
+.bg-primary {
+    background: var(--ecodeli-green) !important;
+}
+
+.bg-success {
+    background: var(--ecodeli-success) !important;
+}
+
+/* Typographie EcoDeli */
+.ecodeli-title {
+    color: var(--ecodeli-green-dark);
+    font-weight: 600;
+}
+
+.ecodeli-subtitle {
+    color: var(--surface-600);
+    font-weight: 500;
+}
+
+/* Layout personnalisé */
+.ecodeli-layout {
+    min-height: 100vh;
+    background: var(--surface-50);
+}
+
+.ecodeli-header {
+    background: var(--surface-0);
+    border-bottom: 1px solid var(--surface-200);
+    padding: 1rem 0;
+}
+
+.ecodeli-content {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.ecodeli-sidebar {
+    background: var(--surface-0);
+    border-right: 1px solid var(--surface-200);
+    min-height: 100vh;
+}
+
+/* Animations douces */
+.p-button,
+.p-inputtext,
+.p-card {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Badge personnalisé */
+.ecodeli-badge {
+    background: var(--ecodeli-green);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.ecodeli-badge.success {
+    background: var(--ecodeli-success);
+}
+
+.ecodeli-badge.warning {
+    background: var(--ecodeli-warning);
+}
+
+.ecodeli-badge.danger {
+    background: var(--ecodeli-danger);
+}

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue sur EcoDeli</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .header .subtitle {
+            margin: 5px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .welcome-message {
+            background-color: #f8f9fa;
+            border-left: 4px solid #4CAF50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .role-badge {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 10px 0;
+        }
+        .features {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .features h3 {
+            color: #4CAF50;
+            margin-top: 0;
+        }
+        .features ul {
+            padding-left: 20px;
+        }
+        .features li {
+            margin: 8px 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        .social-links {
+            margin: 15px 0;
+        }
+        .social-links a {
+            color: #4CAF50;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 EcoDeli</h1>
+            <p class="subtitle">Livraisons écologiques et services durables</p>
+        </div>
+
+        <div class="content">
+            <h2>Bienvenue {{prenom}} !</h2>
+
+            <div class="welcome-message">
+                <p><strong>Félicitations !</strong> Votre inscription sur EcoDeli a été confirmée avec succès.</p>
+                <p>Vous êtes maintenant enregistré(e) en tant que :</p>
+                <div class="role-badge">{{role}}</div>
+            </div>
+
+            <p style="margin-top: 30px;">
+                <strong>Informations de votre compte :</strong><br>
+                📧 Email : {{email}}<br>
+                📅 Date d'inscription : {{dateInscription}}<br>
+                🆔 Profil : {{role}}
+            </p>
+
+            <p style="color: #666; font-size: 14px;">
+                <em>Gardez vos identifiants en sécurité et n'hésitez pas à nous contacter si vous avez des questions.</em>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p><strong>EcoDeli</strong> - Plateforme de services écologiques</p>
+            <div class="social-links">
+                <a href="#">🌐 Site web</a> |
+                <a href="#">📞 Support</a> |
+                <a href="#">❓ FAQ</a>
+            </div>
+            <p style="font-size: 12px; color: #999;">
+                Cet email a été envoyé automatiquement. Merci de ne pas répondre à cette adresse.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const roleFeatures = {
+            'CLIENT': [
+                '📦 Créer des demandes de livraison',
+                '👀 Voir les candidatures des livreurs',
+                '📊 Suivre vos commandes en temps réel',
+                '⭐ Évaluer les services reçus'
+            ],
+            'LIVREUR': [
+                '🚚 Consulter les annonces disponibles',
+                '✋ Postuler pour des livraisons',
+                '📍 Gérer vos trajets et livraisons',
+                '💰 Suivre vos revenus'
+            ],
+            'PRESTATAIRE': [
+                '🔧 Proposer vos services',
+                '📋 Gérer vos prestations',
+                '👥 Répondre aux demandes clients',
+                '📈 Développer votre activité'
+            ],
+            'COMMERCANT': [
+                '🏪 Gérer votre boutique',
+                '📦 Organiser vos livraisons',
+                '🤝 Collaborer avec des livreurs',
+                '📊 Suivre vos ventes'
+            ]
+        };
+
+    </script>
+</body>
+</html>

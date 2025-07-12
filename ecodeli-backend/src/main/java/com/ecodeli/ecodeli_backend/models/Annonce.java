@@ -72,6 +72,16 @@ public class Annonce {
     @JoinColumn(name = "id_destinataire", nullable = true)
     private Utilisateur destinataire;
 
+    @Email(message = "L'email du destinataire doit être valide")
+    @Column(name = "email_destinataire", length = 150)
+    private String emailDestinataire;
+
+    @Column(name = "code_validation", length = 6)
+    private String codeValidation;
+
+    @Column(name = "code_expiration")
+    private LocalDateTime codeExpiration;
+
     @Column(name = "livraison_partielle_autorisee")
     private Boolean livraisonPartielleAutorisee = false;
 

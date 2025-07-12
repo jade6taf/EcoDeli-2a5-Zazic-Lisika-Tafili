@@ -18,13 +18,11 @@ public class PasswordSecurityValidator implements ConstraintValidator<PasswordSe
     private static final Pattern DIGIT_PATTERN = Pattern.compile("[0-9]");
     private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]");
 
-    // Séquences communes à éviter
     private static final List<String> COMMON_SEQUENCES = Arrays.asList(
         "123456", "654321", "abcdef", "qwerty", "azerty", "password", "123123",
         "111111", "000000", "987654", "abcd", "1234", "asdf", "zxcv"
     );
 
-    // Mots de passe couramment utilisés (blacklist)
     private static final List<String> COMMON_PASSWORDS = Arrays.asList(
         "password", "password123", "123456", "123456789", "qwerty", "azerty",
         "admin", "letmein", "welcome", "monkey", "dragon", "master", "shadow",

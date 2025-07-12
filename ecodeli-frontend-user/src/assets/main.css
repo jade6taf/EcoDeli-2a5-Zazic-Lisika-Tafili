@@ -1,0 +1,189 @@
+/* CSS global EcoDeli */
+
+/* Reset et normalisation */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--surface-50);
+  color: var(--surface-900);
+}
+
+#app {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Styles utilitaires */
+.text-center {
+  text-align: center;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.flex {
+  display: flex;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.pt-4 {
+  padding-top: 1rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.text-600 {
+  color: var(--surface-600);
+}
+
+.text-right {
+  text-align: right;
+}
+
+.border-0 {
+  border: none;
+}
+
+.border-round {
+  border-radius: 6px;
+}
+
+/* Couleurs d'arrière-plan */
+.bg-green-50 {
+  background-color: #f0fdf4;
+}
+
+.bg-blue-50 {
+  background-color: #eff6ff;
+}
+
+.bg-orange-50 {
+  background-color: #fff7ed;
+}
+
+/* Couleurs de texte */
+.text-orange-500 {
+  color: #f97316;
+}
+
+.text-green-500 {
+  color: #22c55e;
+}
+
+.text-blue-500 {
+  color: #3b82f6;
+}
+
+/* Transitions */
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Responsive helpers */
+@media (min-width: 768px) {
+  .md\:col-3 { grid-column: span 3; }
+  .md\:col-6 { grid-column: span 6; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:col-6 { grid-column: span 6; }
+}

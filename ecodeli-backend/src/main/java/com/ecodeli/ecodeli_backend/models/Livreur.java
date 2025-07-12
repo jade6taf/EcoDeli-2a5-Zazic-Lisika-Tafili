@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 
 @Entity
 @DiscriminatorValue("LIVREUR")
@@ -21,4 +22,13 @@ public class Livreur extends Utilisateur {
 
     @Column(name = "disponible")
     private Boolean disponible;
+
+    @Column(name = "solde_portefeuille", precision = 10, scale = 2)
+    private BigDecimal soldePortefeuille = BigDecimal.ZERO;
+
+    @Column(name = "total_gagnes", precision = 10, scale = 2)
+    private BigDecimal totalGagnes = BigDecimal.ZERO;
+
+    @Column(name = "iban_livreur", length = 34)
+    private String ibanLivreur;
 }

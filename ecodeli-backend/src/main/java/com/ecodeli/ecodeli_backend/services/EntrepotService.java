@@ -1,131 +1,58 @@
 package com.ecodeli.ecodeli_backend.services;
 
-import com.ecodeli.ecodeli_backend.models.Entrepot;
-import com.ecodeli.ecodeli_backend.models.Entrepot.StatutEntrepot;
-import com.ecodeli.ecodeli_backend.repositories.EntrepotRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class EntrepotService {
 
-    private final EntrepotRepository entrepotRepository;
+    private static final Map<String, String> ENTREPOTS = Map.of(
+        "Paris", "110, rue de Flandre, 19ème arrondissement",
+        "Marseille", "Entrepôt EcoDeli Marseille",
+        "Lyon", "Entrepôt EcoDeli Lyon",
+        "Lille", "Entrepôt EcoDeli Lille",
+        "Montpellier", "Entrepôt EcoDeli Montpellier",
+        "Rennes", "Entrepôt EcoDeli Rennes"
+    );
 
-    public EntrepotService(EntrepotRepository entrepotRepository) {
-        this.entrepotRepository = entrepotRepository;
+    public List<EntrepotDTO> getEntrepotsDisponibles() {
+        return ENTREPOTS.entrySet().stream()
+            .map(entry -> new EntrepotDTO(entry.getKey(), entry.getValue()))
+            .sorted(Comparator.comparing(EntrepotDTO::getVille))
+            .toList();
     }
 
-    public List<Entrepot> getAllEntrepots() {
-        return entrepotRepository.findAll();
+    public String getAdresseEntrepot(String ville) {
+        return ENTREPOTS.get(ville);
     }
 
-    public Optional<Entrepot> getEntrepotById(Integer id) {
-        return entrepotRepository.findById(id);
+    public boolean entrepotExiste(String ville) {
+        return ENTREPOTS.containsKey(ville);
     }
 
-    public List<Entrepot> getEntrepotsByStatut(StatutEntrepot statut) {
-        return entrepotRepository.findByStatut(statut);
-    }
+    public static class EntrepotDTO {
+        private String ville;
+        private String adresse;
 
-    public List<Entrepot> getEntrepotsByVille(String ville) {
-        return entrepotRepository.findByVille(ville);
-    }
-
-    public List<Entrepot> getActiveEntrepotsByVille(String ville) {
-        return entrepotRepository.findActiveEntrepotsByCity(ville);
-    }
-
-    public List<Entrepot> searchEntrepotsByPlacesRange(Integer min, Integer max) {
-        return entrepotRepository.findByPlacesRange(min, max);
-    }
-
-    public Integer calculateTotalAvailablePlaces() {
-        return entrepotRepository.calculateTotalAvailablePlaces();
-    }
-
-    @Transactional
-    public Entrepot createEntrepot(Entrepot entrepot) {
-        if (entrepot.getNombreDePlaces() == null || entrepot.getNombreDePlaces() <= 0) {
-            throw new IllegalArgumentException("Le nombre de places doit être positif");
-        }
-        if (entrepot.getVille() == null || entrepot.getVille().trim().isEmpty()) {
-            throw new IllegalArgumentException("La ville est obligatoire");
-        }
-        if (entrepot.getStatut() == null) {
-            entrepot.setStatut(StatutEntrepot.ACTIF);
-        }
-        return entrepotRepository.save(entrepot);
-    }
-
-    @Transactional
-    public Entrepot updateEntrepot(Integer id, Entrepot entrepotDetails) {
-
-        Entrepot entrepot = entrepotRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Entrepôt non trouvé avec l'ID: " + id));
-
-        if (entrepotDetails.getNombreDePlaces() != null) {
-            if (entrepotDetails.getNombreDePlaces() <= 0) {
-                throw new IllegalArgumentException("Le nombre de places doit être positif");
-            }
-            entrepot.setNombreDePlaces(entrepotDetails.getNombreDePlaces());
-        }
-        if (entrepotDetails.getVille() != null) {
-            if (entrepotDetails.getVille().trim().isEmpty()) {
-                throw new IllegalArgumentException("La ville ne peut pas être vide");
-            }
-            entrepot.setVille(entrepotDetails.getVille());
-        }
-        if (entrepotDetails.getStatut() != null) {
-            entrepot.setStatut(entrepotDetails.getStatut());
-        }
-        return entrepotRepository.save(entrepot);
-    }
-
-    @Transactional
-    public Entrepot changeStatut(Integer id, StatutEntrepot nouveauStatut) {
-        Entrepot entrepot = entrepotRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Entrepôt non trouvé avec l'ID: " + id));
-
-        entrepot.setStatut(nouveauStatut);
-        return entrepotRepository.save(entrepot);
-    }
-
-    @Transactional
-    public Entrepot augmenterCapacite(Integer id, Integer placesSupplementaires) {
-        if (placesSupplementaires <= 0) {
-            throw new IllegalArgumentException("Le nombre de places supplémentaires doit être positif");
-        }
-        Entrepot entrepot = entrepotRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Entrepôt non trouvé avec l'ID: " + id));
-
-        entrepot.setNombreDePlaces(entrepot.getNombreDePlaces() + placesSupplementaires);
-        return entrepotRepository.save(entrepot);
-    }
-
-    @Transactional
-    public Entrepot diminuerCapacite(Integer id, Integer placesARetirer) {
-        if (placesARetirer <= 0) {
-            throw new IllegalArgumentException("Le nombre de places à retirer doit être positif");
+        public EntrepotDTO(String ville, String adresse) {
+            this.ville = ville;
+            this.adresse = adresse;
         }
 
-        Entrepot entrepot = entrepotRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Entrepôt non trouvé avec l'ID: " + id));
-
-        if (entrepot.getNombreDePlaces() < placesARetirer) {
-            throw new IllegalArgumentException("Le nombre de places à retirer ne peut pas excéder le nombre de places actuelles");
+        public String getVille() {
+            return ville;
         }
-        entrepot.setNombreDePlaces(entrepot.getNombreDePlaces() - placesARetirer);
-        return entrepotRepository.save(entrepot);
-    }
 
-    @Transactional
-    public void deleteEntrepot(Integer id) {
-        if (!entrepotRepository.existsById(id)) {
-            throw new IllegalArgumentException("Entrepôt non trouvé avec l'ID: " + id);
+        public void setVille(String ville) {
+            this.ville = ville;
         }
-        entrepotRepository.deleteById(id);
+
+        public String getAdresse() {
+            return adresse;
+        }
+
+        public void setAdresse(String adresse) {
+            this.adresse = adresse;
+        }
     }
 }

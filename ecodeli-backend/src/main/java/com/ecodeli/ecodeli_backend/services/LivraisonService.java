@@ -1,289 +1,359 @@
 package com.ecodeli.ecodeli_backend.services;
 
-import com.ecodeli.ecodeli_backend.models.Annonce;
+import com.ecodeli.ecodeli_backend.exceptions.ResourceNotFoundException;
 import com.ecodeli.ecodeli_backend.models.Livraison;
-import com.ecodeli.ecodeli_backend.models.Livraison.StatutLivraison;
-import com.ecodeli.ecodeli_backend.models.Livraison.TypeLivraison;
-import com.ecodeli.ecodeli_backend.repositories.AnnonceRepository;
+import com.ecodeli.ecodeli_backend.models.Livreur;
+import com.ecodeli.ecodeli_backend.models.Annonce;
 import com.ecodeli.ecodeli_backend.repositories.LivraisonRepository;
+import com.ecodeli.ecodeli_backend.repositories.LivreurRepository;
+import com.ecodeli.ecodeli_backend.repositories.UtilisateurRepository;
+import com.ecodeli.ecodeli_backend.repositories.AnnonceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class LivraisonService {
 
-    private final LivraisonRepository livraisonRepository;
-    private final AnnonceRepository annonceRepository;
-    private final EmailService emailService;
-    private final PaymentService paymentService;
+    @Autowired
+    private LivraisonRepository livraisonRepository;
 
-    public LivraisonService(LivraisonRepository livraisonRepository,
-                              AnnonceRepository annonceRepository,
-                              EmailService emailService,
-                              PaymentService paymentService,
-                              EntrepotUtilService entrepotUtilService) {
-        this.livraisonRepository = livraisonRepository;
-        this.annonceRepository = annonceRepository;
-        this.emailService = emailService;
-        this.paymentService = paymentService;
+    @Autowired
+    private LivreurRepository livreurRepository;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
+
+    @Autowired
+    private AnnonceRepository annonceRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private PortefeuilleService portefeuilleService;
+
+    private final Random random = new Random();
+
+    public List<Livraison> getLivraisonsByLivreur(Integer livreurId) {
+        return livraisonRepository.findAll().stream()
+            .filter(livraison -> {
+                if (livraison.getTypeLivraison() == Livraison.TypeLivraison.DIRECTE) {
+                    return livraison.getAnnonce() != null &&
+                           livraison.getAnnonce().getLivreur() != null &&
+                           livraison.getAnnonce().getLivreur().getIdUtilisateur().equals(livreurId);
+                }
+
+                if (livraison.getTypeLivraison() == Livraison.TypeLivraison.PARTIELLE) {
+                    return (livraison.getLivreurSegment1() != null &&
+                            livraison.getLivreurSegment1().getIdUtilisateur().equals(livreurId)) ||
+                           (livraison.getLivreurSegment2() != null &&
+                            livraison.getLivreurSegment2().getIdUtilisateur().equals(livreurId));
+                }
+
+                return false;
+            })
+            .toList();
+    }
+
+    public void startLivraison(Integer livraisonId, Integer livreurId) {
+        Livraison livraison = livraisonRepository.findById(livraisonId)
+            .orElseThrow(() -> new ResourceNotFoundException("Livraison non trouvée"));
+
+        if (!canStartLivraison(livraison, livreurId)) {
+            throw new RuntimeException("Vous ne pouvez pas démarrer cette livraison pour le moment");
+        }
+
+        if (livraison.getTypeLivraison() == Livraison.TypeLivraison.DIRECTE) {
+            if (livraison.getStatut() != Livraison.StatutLivraison.VALIDEE) {
+                throw new RuntimeException("Cette livraison ne peut pas être démarrée");
+            }
+
+            livraison.setStatut(Livraison.StatutLivraison.EN_COURS);
+            livraison.setDateDebut(LocalDateTime.now());
+
+        } else if (livraison.getTypeLivraison() == Livraison.TypeLivraison.PARTIELLE) {
+            if (isLivreurSegment1(livraison, livreurId)) {
+                if (livraison.getStatut() != Livraison.StatutLivraison.VALIDEE) {
+                    throw new RuntimeException("Le segment 1 ne peut pas être démarré");
+                }
+
+                livraison.setStatut(Livraison.StatutLivraison.EN_COURS);
+                livraison.setDateDebut(LocalDateTime.now());
+
+            } else if (isLivreurSegment2(livraison, livreurId)) {
+                if (livraison.getStatut() != Livraison.StatutLivraison.ATTENTE_SEGMENT_2) {
+                    throw new RuntimeException("Le segment 2 ne peut pas encore être démarré");
+                }
+
+                livraison.setStatut(Livraison.StatutLivraison.SEGMENT_2_EN_COURS);
+                livraison.setDateCollecteEntrepot(LocalDateTime.now());
+            }
+        }
+
+        livraisonRepository.save(livraison);
+    }
+
+    public void completeLivraison(Integer livraisonId, Integer livreurId) {
+        Livraison livraison = livraisonRepository.findById(livraisonId)
+            .orElseThrow(() -> new ResourceNotFoundException("Livraison non trouvée"));
+
+        if (livraison.getTypeLivraison() == Livraison.TypeLivraison.DIRECTE) {
+            if (livraison.getStatut() != Livraison.StatutLivraison.EN_COURS) {
+                throw new RuntimeException("Cette livraison ne peut pas être terminée");
+            }
+
+            generateAndSendOTP(livraison);
+            livraison.setStatut(Livraison.StatutLivraison.ARRIVED);
+
+        } else if (livraison.getTypeLivraison() == Livraison.TypeLivraison.PARTIELLE) {
+
+            if (isLivreurSegment1(livraison, livreurId)) {
+                if (livraison.getStatut() != Livraison.StatutLivraison.EN_COURS) {
+                    throw new RuntimeException("Le segment 1 ne peut pas être terminé");
+                }
+
+                livraison.setStatut(Livraison.StatutLivraison.ATTENTE_SEGMENT_2);
+                livraison.setDateDepotEntrepot(LocalDateTime.now());
+
+                if (livraison.getLivreurSegment2() != null) {
+                    emailService.sendSegment2Notification(
+                        getLivreurEmail(livraison.getLivreurSegment2()),
+                        livraison.getAnnonce().getTitre(),
+                        livraison.getEntrepotVille()
+                    );
+                }
+
+            } else if (isLivreurSegment2(livraison, livreurId)) {
+                if (livraison.getStatut() != Livraison.StatutLivraison.SEGMENT_2_EN_COURS) {
+                    throw new RuntimeException("Le segment 2 ne peut pas être terminé");
+                }
+
+                generateAndSendOTP(livraison);
+                livraison.setStatut(Livraison.StatutLivraison.ARRIVED);
+            }
+        }
+
+        livraisonRepository.save(livraison);
+    }
+
+    public boolean validateOTP(Integer livraisonId, String otp) {
+        Livraison livraison = livraisonRepository.findById(livraisonId)
+            .orElseThrow(() -> new ResourceNotFoundException("Livraison non trouvée"));
+
+        if (livraison.getStatut() != Livraison.StatutLivraison.ARRIVED) {
+            throw new RuntimeException("Cette livraison n'est pas en attente de validation OTP");
+        }
+
+        if (livraison.getOtpCode() == null ||
+            !livraison.getOtpCode().equals(otp) ||
+            livraison.getOtpTimestamp() == null ||
+            LocalDateTime.now().isAfter(livraison.getOtpTimestamp().plusMinutes(5))) {
+            return false;
+        }
+
+        livraison.setStatut(Livraison.StatutLivraison.TERMINEE);
+        livraison.setDateFin(LocalDateTime.now());
+        livraison.setValidation(true);
+        livraison.setOtpCode(null);
+        livraison.setOtpTimestamp(null);
+
+        livraisonRepository.save(livraison);
+
+        if (livraison.getAnnonce() != null) {
+            Annonce annonce = livraison.getAnnonce();
+            annonce.setStatut(Annonce.StatutAnnonce.TERMINEE);
+            annonceRepository.save(annonce);
+
+            crediterLivreurs(livraison, annonce);
+        }
+
+        return true;
+    }
+
+    private boolean canStartLivraison(Livraison livraison, Integer livreurId) {
+        if (livraison.getTypeLivraison() == Livraison.TypeLivraison.DIRECTE) {
+            return livraison.getAnnonce() != null &&
+                   livraison.getAnnonce().getLivreur() != null &&
+                   livraison.getAnnonce().getLivreur().getIdUtilisateur().equals(livreurId);
+        }
+
+        if (livraison.getTypeLivraison() == Livraison.TypeLivraison.PARTIELLE) {
+            if (isLivreurSegment1(livraison, livreurId)) {
+                return livraison.getStatut() == Livraison.StatutLivraison.VALIDEE;
+            }
+
+            if (isLivreurSegment2(livraison, livreurId)) {
+                return livraison.getStatut() == Livraison.StatutLivraison.ATTENTE_SEGMENT_2;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isLivreurSegment1(Livraison livraison, Integer livreurId) {
+        return livraison.getLivreurSegment1() != null &&
+               livraison.getLivreurSegment1().getIdUtilisateur().equals(livreurId);
+    }
+
+    private boolean isLivreurSegment2(Livraison livraison, Integer livreurId) {
+        return livraison.getLivreurSegment2() != null &&
+               livraison.getLivreurSegment2().getIdUtilisateur().equals(livreurId);
+    }
+
+    private void generateAndSendOTP(Livraison livraison) {
+        String otp = String.format("%06d", random.nextInt(1000000));
+        livraison.setOtpCode(otp);
+        livraison.setOtpTimestamp(LocalDateTime.now());
+
+        if (livraison.getAnnonce() != null &&
+            livraison.getAnnonce().getEmailDestinataire() != null) {
+            emailService.sendDeliveryOTP(
+                livraison.getAnnonce().getEmailDestinataire(),
+                otp,
+                livraison.getAnnonce().getTitre()
+            );
+        }
+    }
+
+    private String getLivreurEmail(Livreur livreur) {
+        return utilisateurRepository.findById(livreur.getIdUtilisateur())
+            .map(utilisateur -> utilisateur.getEmail())
+            .orElse("email.inconnu@ecodeli.com");
+    }
+
+    public Livraison getLivraisonById(Integer livraisonId) {
+        return livraisonRepository.findById(livraisonId)
+            .orElseThrow(() -> new ResourceNotFoundException("Livraison non trouvée"));
+    }
+
+    public String getSegmentForLivreur(Livraison livraison, Integer livreurId) {
+        if (isLivreurSegment1(livraison, livreurId)) {
+            return "SEGMENT_1";
+        } else if (isLivreurSegment2(livraison, livreurId)) {
+            return "SEGMENT_2";
+        }
+        return "NONE";
+    }
+
+    private void crediterLivreurs(Livraison livraison, Annonce annonce) {
+        try {
+            if (livraison.getTypeLivraison() == Livraison.TypeLivraison.DIRECTE) {
+                if (annonce.getLivreur() != null) {
+                    portefeuilleService.ajouterGains(
+                        annonce.getLivreur().getIdUtilisateur(),
+                        annonce.getPrixUnitaire()
+                    );
+                }
+
+            } else if (livraison.getTypeLivraison() == Livraison.TypeLivraison.PARTIELLE) {
+                if (livraison.getLivreurSegment1() != null && livraison.getLivreurSegment2() != null) {
+                    java.math.BigDecimal montantParLivreur = annonce.getPrixUnitaire()
+                        .divide(java.math.BigDecimal.valueOf(2));
+
+                    portefeuilleService.ajouterGains(
+                        livraison.getLivreurSegment1().getIdUtilisateur(),
+                        montantParLivreur
+                    );
+
+                    portefeuilleService.ajouterGains(
+                        livraison.getLivreurSegment2().getIdUtilisateur(),
+                        montantParLivreur
+                    );
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors du crédit des gains: " + e.getMessage());
+        }
     }
 
     public List<Livraison> getAllLivraisons() {
         return livraisonRepository.findAll();
     }
 
-    public List<Livraison> getLivraisonsByLivreur(Integer idLivreur) {
-        return livraisonRepository.findByAnnonce_Livreur_IdUtilisateur(idLivreur);
-    }
+    public Livraison updateStatutLivraison(Integer livraisonId, Livraison.StatutLivraison nouveauStatut) {
+        Livraison livraison = livraisonRepository.findById(livraisonId)
+            .orElseThrow(() -> new ResourceNotFoundException("Livraison non trouvée"));
 
-    @Transactional
-    public Livraison demarrerLivraison(Integer id) {
-
-        Livraison livraison = livraisonRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Livraison non trouvée avec l'ID: " + id));
-
-        if (livraison.getStatut() != StatutLivraison.VALIDEE) {
-            throw new IllegalArgumentException("Seule une livraison validée peut être démarrée");
-        }
-        livraison.setStatut(StatutLivraison.EN_COURS);
-        Annonce annonce = livraison.getAnnonce();
-        if (annonce != null) {
-            annonce.setStatut(Annonce.StatutAnnonce.EN_COURS);
-            annonceRepository.save(annonce);
-        }
-        return livraisonRepository.save(livraison);
-    }
-
-    @Transactional
-    public Livraison arriverALivraison(Integer idLivraison) {
-        Livraison livraison = livraisonRepository.findById(idLivraison)
-                .orElseThrow(() -> new IllegalArgumentException("Livraison non trouvée avec l'ID: " + idLivraison));
-
-        if (livraison.getStatut() != StatutLivraison.EN_COURS) {
-            throw new IllegalStateException("La livraison doit être en cours pour marquer l'arrivée. Statut actuel: " + livraison.getStatut());
+        if (!isValidStatusTransition(livraison.getStatut(), nouveauStatut)) {
+            throw new RuntimeException("Transition de statut invalide de " +
+                                     livraison.getStatut() + " vers " + nouveauStatut);
         }
 
-        SecureRandom random = new SecureRandom();
-        int otpValue = 100000 + random.nextInt(900000);
-        String otpCode = String.valueOf(otpValue);
+        livraison.setStatut(nouveauStatut);
 
-        livraison.setOtpCode(otpCode);
-        livraison.setOtpTimestamp(LocalDateTime.now());
-        livraison.setStatut(StatutLivraison.ARRIVED);
-
-        if (livraison.getDestinataire() != null && livraison.getDestinataire().getEmail() != null) {
-            emailService.sendDeliveryCodeToClient(livraison, otpCode);
-        } else {
-            throw new IllegalStateException("Email du destinataire non configuré pour la livraison " + idLivraison + ". Impossible d'envoyer le code de validation.");
-        }
-        return livraisonRepository.save(livraison);
-    }
-
-    @Transactional
-    public Livraison confirmerLivraisonParOtp(Integer idLivraison, String otpSoumis) {
-        Livraison livraison = livraisonRepository.findById(idLivraison)
-                .orElseThrow(() -> new IllegalArgumentException("Livraison non trouvée avec l'ID: " + idLivraison));
-
-        if (livraison.getStatut() != StatutLivraison.ARRIVED) {
-            throw new IllegalStateException("La livraison doit être au statut ARRIVED pour confirmer avec OTP. Statut actuel: " + livraison.getStatut());
-        }
-
-        if (livraison.getOtpCode() == null || !livraison.getOtpCode().equals(otpSoumis)) {
-            throw new IllegalArgumentException("Code OTP invalide.");
-        }
-
-        if (livraison.getOtpTimestamp() == null || livraison.getOtpTimestamp().plusMinutes(15).isBefore(LocalDateTime.now())) {
-            livraison.setOtpCode(null);
-            livraison.setOtpTimestamp(null);
-            livraisonRepository.save(livraison);
-            throw new IllegalArgumentException("Code OTP expiré.");
-        }
-
-        livraison.setStatut(StatutLivraison.TERMINEE);
-        livraison.setOtpCode(null);
-        livraison.setOtpTimestamp(null);
-        livraison.setDateFin(LocalDateTime.now());
-
-        Annonce annonce = livraison.getAnnonce();
-        if (annonce != null) {
-            annonce.setStatut(Annonce.StatutAnnonce.TERMINEE);
-            annonceRepository.save(annonce);
-            try {
-                if (livraison.getTypeLivraison() == TypeLivraison.DIRECTE) {
-                    paymentService.releaseFundsToDelivery(
-                        annonce.getIdAnnonce(),
-                        annonce.getLivreur().getIdUtilisateur(),
-                        null
-                    );
-                } else {
-                    paymentService.releaseFundsToDelivery(
-                        annonce.getIdAnnonce(),
-                        livraison.getLivreurSegment2().getIdUtilisateur(),
-                        2
-                    );
+        switch (nouveauStatut) {
+            case TERMINEE:
+                if (livraison.getDateFin() == null) {
+                    livraison.setDateFin(LocalDateTime.now());
                 }
-                System.out.println("✅ Paiement automatique réussi pour la livraison " + idLivraison);
-            } catch (Exception e) {
-                System.err.println("❌ Erreur lors du paiement automatique pour la livraison " + idLivraison + ": " + e.getMessage());
-                e.printStackTrace();
-                System.err.println("⚠️ La livraison est confirmée mais le paiement automatique a échoué. Intervention manuelle requise.");
-            }
-        }
+                livraison.setValidation(true);
+                if (livraison.getAnnonce() != null) {
+                    Annonce annonce = livraison.getAnnonce();
+                    annonce.setStatut(Annonce.StatutAnnonce.TERMINEE);
+                    annonceRepository.save(annonce);
+                    crediterLivreurs(livraison, annonce);
+                }
+                break;
 
-        if (livraison.getExpediteur() != null && livraison.getExpediteur().getEmail() != null) {
-            emailService.sendDeliveryConfirmationToSender(livraison);
-        }
+            case ANNULEE:
+                livraison.setDateFin(LocalDateTime.now());
+                livraison.setValidation(false);
+                if (livraison.getAnnonce() != null) {
+                    Annonce annonce = livraison.getAnnonce();
+                    annonce.setStatut(Annonce.StatutAnnonce.PUBLIEE);
+                    annonceRepository.save(annonce);
+                }
+                break;
 
-        return livraisonRepository.save(livraison);
-    }
-
-    @Transactional
-    public Livraison terminerLivraison(Integer id) {
-
-        Livraison livraison = livraisonRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Livraison non trouvée avec l'ID: " + id));
-
-        if (livraison.getStatut() != StatutLivraison.EN_COURS && livraison.getStatut() != StatutLivraison.ARRIVED) {
-            throw new IllegalArgumentException("La livraison ne peut être terminée que si elle est EN_COURS ou ARRIVED (pour admin/fallback). Statut actuel: " + livraison.getStatut());
-        }
-        livraison.setStatut(StatutLivraison.TERMINEE);
-        livraison.setDateFin(LocalDateTime.now());
-        Annonce annonce = livraison.getAnnonce();
-        if (annonce != null) {
-            annonce.setStatut(Annonce.StatutAnnonce.TERMINEE);
-            annonceRepository.save(annonce);
-        }
-        return livraisonRepository.save(livraison);
-    }
-
-    @Transactional
-    public Livraison annulerLivraison(Integer id) {
-
-        Livraison livraison = livraisonRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Livraison non trouvée avec l'ID: " + id));
-
-        if (livraison.getStatut() == StatutLivraison.TERMINEE) {
-            throw new IllegalArgumentException("Une livraison terminée ne peut pas être annulée");
-        }
-        livraison.setStatut(StatutLivraison.ANNULEE);
-        Annonce annonce = livraison.getAnnonce();
-        if (annonce != null) {
-            annonce.setStatut(Annonce.StatutAnnonce.ANNULEE);
-            annonceRepository.save(annonce);
-        }
-        return livraisonRepository.save(livraison);
-    }
-
-    public List<Livraison> getLivraisonsEnAttenteSegment2() {
-        return livraisonRepository.findByStatut(StatutLivraison.ATTENTE_SEGMENT_2);
-    }
-
-    public List<Livraison> getLivraisonsEnAttenteSegment2ParVille(String ville) {
-        return livraisonRepository.findByStatutAndEntrepotVille(StatutLivraison.ATTENTE_SEGMENT_2, ville);
-    }
-
-    @Transactional
-    public Livraison terminerSegment1(Integer idLivraison) {
-        Livraison livraison = livraisonRepository.findById(idLivraison)
-                .orElseThrow(() -> new IllegalArgumentException("Livraison non trouvée avec l'ID: " + idLivraison));
-
-        if (livraison.getStatut() != StatutLivraison.EN_COURS || livraison.getTypeLivraison() != TypeLivraison.PARTIELLE) {
-            throw new IllegalStateException("Cette méthode ne peut être utilisée que pour un segment 1 en cours de livraison partielle");
-        }
-
-        SecureRandom random = new SecureRandom();
-        int otpValue = 100000 + random.nextInt(900000);
-        String otpCode = String.valueOf(otpValue);
-
-        livraison.setOtpCode(otpCode);
-        livraison.setOtpTimestamp(LocalDateTime.now());
-        livraison.setStatut(StatutLivraison.ARRIVED);
-
-        return livraisonRepository.save(livraison);
-    }
-
-    @Transactional
-    public Livraison confirmerDepotSegment1(Integer idLivraison, String otpSoumis) {
-        Livraison livraison = livraisonRepository.findById(idLivraison)
-                .orElseThrow(() -> new IllegalArgumentException("Livraison non trouvée avec l'ID: " + idLivraison));
-
-        if (livraison.getStatut() != StatutLivraison.ARRIVED || livraison.getTypeLivraison() != TypeLivraison.PARTIELLE) {
-            throw new IllegalStateException("La livraison doit être au statut ARRIVED pour un segment 1 partiel. Statut actuel: " + livraison.getStatut());
-        }
-
-        if (livraison.getOtpCode() == null || !livraison.getOtpCode().equals(otpSoumis)) {
-            throw new IllegalArgumentException("Code de validation invalide.");
-        }
-
-        if (livraison.getOtpTimestamp() == null || livraison.getOtpTimestamp().plusMinutes(15).isBefore(LocalDateTime.now())) {
-            livraison.setOtpCode(null);
-            livraison.setOtpTimestamp(null);
-            livraisonRepository.save(livraison);
-            throw new IllegalArgumentException("Code de validation expiré.");
-        }
-
-        livraison.setStatut(StatutLivraison.ATTENTE_SEGMENT_2);
-        livraison.setDateDepotEntrepot(LocalDateTime.now());
-        livraison.setOtpCode(null);
-        livraison.setOtpTimestamp(null);
-
-        Annonce annonce = livraison.getAnnonce();
-        if (annonce != null) {
-            try {
-                paymentService.releaseFundsToDelivery(
-                    annonce.getIdAnnonce(),
-                    livraison.getLivreurSegment1().getIdUtilisateur(),
-                    1
-                );
-            } catch (Exception e) {
-                System.err.println("Erreur lors du paiement automatique segment 1 pour la livraison " + idLivraison + ": " + e.getMessage());
-            }
+            case EN_COURS:
+                if (livraison.getDateDebut() == null) {
+                    livraison.setDateDebut(LocalDateTime.now());
+                }
+                break;
         }
 
         return livraisonRepository.save(livraison);
     }
 
-    @Transactional
-    public Livraison demarrerSegment2(Integer idLivraison, Integer idLivreurSegment2) {
-        Livraison livraison = livraisonRepository.findById(idLivraison)
-                .orElseThrow(() -> new IllegalArgumentException("Livraison non trouvée avec l'ID: " + idLivraison));
+    public Livraison annulerLivraison(Integer livraisonId) {
+        Livraison livraison = livraisonRepository.findById(livraisonId)
+            .orElseThrow(() -> new ResourceNotFoundException("Livraison non trouvée"));
 
-        if (livraison.getStatut() != StatutLivraison.ATTENTE_SEGMENT_2) {
-            throw new IllegalStateException("La livraison doit être en attente du segment 2. Statut actuel: " + livraison.getStatut());
+        if (livraison.getStatut() == Livraison.StatutLivraison.TERMINEE) {
+            throw new RuntimeException("Impossible d'annuler une livraison terminée");
         }
 
-        livraison.setStatut(StatutLivraison.SEGMENT_2_EN_COURS);
-        livraison.setDateCollecteEntrepot(LocalDateTime.now());
-
-        return livraisonRepository.save(livraison);
+        return updateStatutLivraison(livraisonId, Livraison.StatutLivraison.ANNULEE);
     }
 
-    @Transactional
-    public Livraison arriverSegment2(Integer idLivraison) {
-        Livraison livraison = livraisonRepository.findById(idLivraison)
-                .orElseThrow(() -> new IllegalArgumentException("Livraison non trouvée avec l'ID: " + idLivraison));
-
-        if (livraison.getStatut() != StatutLivraison.SEGMENT_2_EN_COURS) {
-            throw new IllegalStateException("Le segment 2 doit être en cours pour marquer l'arrivée. Statut actuel: " + livraison.getStatut());
+    private boolean isValidStatusTransition(Livraison.StatutLivraison currentStatus,
+                                          Livraison.StatutLivraison newStatus) {
+        if (newStatus == Livraison.StatutLivraison.ANNULEE) {
+            return currentStatus != Livraison.StatutLivraison.TERMINEE;
         }
 
-        SecureRandom random = new SecureRandom();
-        int otpValue = 100000 + random.nextInt(900000);
-        String otpCode = String.valueOf(otpValue);
+        return switch (currentStatus) {
+            case VALIDEE -> newStatus == Livraison.StatutLivraison.EN_COURS ||
+                          newStatus == Livraison.StatutLivraison.TERMINEE;
 
-        livraison.setOtpCode(otpCode);
-        livraison.setOtpTimestamp(LocalDateTime.now());
-        livraison.setStatut(StatutLivraison.ARRIVED);
+            case EN_COURS -> newStatus == Livraison.StatutLivraison.ATTENTE_SEGMENT_2 ||
+                            newStatus == Livraison.StatutLivraison.ARRIVED ||
+                            newStatus == Livraison.StatutLivraison.TERMINEE;
 
-        if (livraison.getDestinataire() != null && livraison.getDestinataire().getEmail() != null) {
-            emailService.sendDeliveryCodeToClient(livraison, otpCode);
-        } else {
-            throw new IllegalStateException("Email du destinataire non configuré pour la livraison " + idLivraison + ". Impossible d'envoyer le code de validation.");
-        }
-        return livraisonRepository.save(livraison);
+            case ATTENTE_SEGMENT_2 -> newStatus == Livraison.StatutLivraison.SEGMENT_2_EN_COURS;
+
+            case SEGMENT_2_EN_COURS -> newStatus == Livraison.StatutLivraison.ARRIVED ||
+                                      newStatus == Livraison.StatutLivraison.TERMINEE;
+
+            case ARRIVED -> newStatus == Livraison.StatutLivraison.TERMINEE;
+
+            case TERMINEE -> false;
+
+            case ANNULEE -> newStatus == Livraison.StatutLivraison.VALIDEE;
+        };
     }
 }

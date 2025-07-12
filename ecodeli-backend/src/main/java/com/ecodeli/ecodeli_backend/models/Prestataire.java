@@ -6,9 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -48,10 +46,4 @@ public class Prestataire extends Utilisateur {
     @CollectionTable(name = "disponibilites_prestataire",
         joinColumns = @JoinColumn(name = "id_prestataire"))
     private Set<LocalDateTime> disponibilites = new HashSet<>();
-
-    @OneToMany(mappedBy = "prestataire")
-    private List<Evaluation> evaluations = new ArrayList<>();
-
-    @OneToMany(mappedBy = "prestataire", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<DisponibilitePrestataire> planningDisponibilites = new ArrayList<>();
 }
