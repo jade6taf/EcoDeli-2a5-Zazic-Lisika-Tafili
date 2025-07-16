@@ -394,7 +394,6 @@ const goBack = () => {
   color: #16a34a;
 }
 
-/* Style pour l'élément Stripe */
 #card-element {
   background: white;
 }

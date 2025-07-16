@@ -1,0 +1,80 @@
+{
+  "id": "COURSES_ACHATS",
+  "nom": "Courses & Achats",
+  "icon": "🛒",
+  "description": "Courses alimentaires, achats divers, recherche de produits spécifiques",
+  "couleur": "#9C27B0",
+  "champsSpecifiques": [
+    {
+      "id": "typeCourses",
+      "label": "Type de courses",
+      "type": "checkbox-multiple",
+      "obligatoire": true,
+      "options": [
+        { "value": "alimentaire", "label": "Courses alimentaires" },
+        { "value": "pharmacie", "label": "Pharmacie" },
+        { "value": "vetements", "label": "Vêtements" },
+        { "value": "electromenager", "label": "Électroménager" },
+        { "value": "produits_specialises", "label": "Produits spécialisés" },
+        { "value": "autres", "label": "Autres" }
+      ]
+    },
+    {
+      "id": "magasinsPreferes",
+      "label": "Magasins préférés",
+      "type": "text",
+      "obligatoire": false,
+      "placeholder": "ex: Carrefour République, Pharmacie du Centre..."
+    },
+    {
+      "id": "budgetApproxmatif",
+      "label": "Budget approximatif (€)",
+      "type": "number",
+      "obligatoire": false,
+      "placeholder": "ex: 80",
+      "min": 5,
+      "max": 1000
+    },
+    {
+      "id": "listeFournie",
+      "label": "Liste de courses",
+      "type": "radio",
+      "obligatoire": true,
+      "options": [
+        { "value": "oui", "label": "Oui, j'ai une liste précise" },
+        { "value": "non", "label": "Non, conseil du prestataire" },
+        { "value": "partielle", "label": "Liste partielle, à compléter" }
+      ]
+    },
+    {
+      "id": "modePaiement",
+      "label": "Mode de paiement en magasin",
+      "type": "radio",
+      "obligatoire": true,
+      "options": [
+        { "value": "carte_client", "label": "Carte bancaire du client" },
+        { "value": "especes", "label": "Espèces données au prestataire" },
+        { "value": "remboursement", "label": "Prestataire avance, remboursement après" }
+      ]
+    },
+    {
+      "id": "frequence",
+      "label": "Fréquence souhaitée",
+      "type": "select",
+      "obligatoire": true,
+      "options": [
+        { "value": "ponctuel", "label": "Ponctuel" },
+        { "value": "hebdomadaire", "label": "Hebdomadaire" },
+        { "value": "bi_hebdomadaire", "label": "2 fois par semaine" },
+        { "value": "mensuel", "label": "Mensuel" }
+      ]
+    },
+    {
+      "id": "produitsSpeciaux",
+      "label": "Produits spéciaux ou contraintes",
+      "type": "text",
+      "obligatoire": false,
+      "placeholder": "ex: Bio uniquement, sans gluten, marques spécifiques..."
+    }
+  ]
+}

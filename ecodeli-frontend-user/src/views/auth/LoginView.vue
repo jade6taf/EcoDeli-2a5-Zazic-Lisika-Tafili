@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'primevue/usetoast'
@@ -59,10 +59,30 @@ const handleLogin = async () => {
     loginError.value = 'Une erreur inattendue s\'est produite'
   }
 }
+
+const goToHome = () => {
+  router.push('/')
+}
+
+// Déconnexion automatique si l'utilisateur était connecté
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+    authStore.logout()
+  }
+})
 </script>
 
 <template>
   <div class="login-container">
+    <div class="back-to-home">
+      <Button
+        icon="pi pi-arrow-left"
+        label="Retour à l'accueil"
+        text
+        @click="goToHome"
+        class="back-button"
+      />
+    </div>
     <div class="login-wrapper">
       <Card class="login-card">
         <template #header>
@@ -235,5 +255,33 @@ const handleLogin = async () => {
 
 .text-center {
   text-align: center;
+}
+
+.back-to-home {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  z-index: 10;
+}
+
+.back-button {
+  color: var(--ecodeli-green);
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  color: var(--ecodeli-green-dark);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+@media (max-width: 768px) {
+  .back-to-home {
+    top: 1rem;
+    left: 1rem;
+  }
+  
+  .back-button .p-button-label {
+    display: none;
+  }
 }
 </style>

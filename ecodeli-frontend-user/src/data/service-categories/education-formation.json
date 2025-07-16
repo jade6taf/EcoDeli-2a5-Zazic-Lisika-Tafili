@@ -1,0 +1,107 @@
+{
+  "id": "EDUCATION_FORMATION",
+  "nom": "Éducation & Formation",
+  "icon": "🎓",
+  "description": "Cours particuliers, formation professionnelle, coaching, soutien scolaire",
+  "couleur": "#3F51B5",
+  "champsSpecifiques": [
+    {
+      "id": "typeFormation",
+      "label": "Type de formation",
+      "type": "checkbox-multiple",
+      "obligatoire": true,
+      "options": [
+        { "value": "cours_particuliers", "label": "Cours particuliers" },
+        { "value": "soutien_scolaire", "label": "Soutien scolaire" },
+        { "value": "formation_professionnelle", "label": "Formation professionnelle" },
+        { "value": "coaching", "label": "Coaching personnel/professionnel" },
+        { "value": "langue_etrangere", "label": "Langue étrangère" },
+        { "value": "informatique", "label": "Informatique/Numérique" }
+      ]
+    },
+    {
+      "id": "matiere",
+      "label": "Matière(s) ou domaine(s)",
+      "type": "text",
+      "obligatoire": true,
+      "placeholder": "ex: Mathématiques, Anglais, Piano, Programmation..."
+    },
+    {
+      "id": "niveauEleve",
+      "label": "Niveau de l'élève",
+      "type": "select",
+      "obligatoire": true,
+      "options": [
+        { "value": "primaire", "label": "Primaire (CP-CM2)" },
+        { "value": "college", "label": "Collège (6ème-3ème)" },
+        { "value": "lycee", "label": "Lycée (2nde-Terminale)" },
+        { "value": "superieur", "label": "Études supérieures" },
+        { "value": "adulte_debutant", "label": "Adulte débutant" },
+        { "value": "adulte_intermediaire", "label": "Adulte intermédiaire" },
+        { "value": "adulte_avance", "label": "Adulte avancé" }
+      ]
+    },
+    {
+      "id": "objectifFormation",
+      "label": "Objectif de la formation",
+      "type": "text",
+      "obligatoire": true,
+      "placeholder": "ex: Préparer le bac, améliorer conversation anglaise..."
+    },
+    {
+      "id": "modalitesCours",
+      "label": "Modalités des cours",
+      "type": "radio",
+      "obligatoire": true,
+      "options": [
+        { "value": "domicile_eleve", "label": "À domicile (chez l'élève)" },
+        { "value": "domicile_professeur", "label": "Chez le professeur" },
+        { "value": "lieu_public", "label": "Lieu public (bibliothèque, café...)" },
+        { "value": "en_ligne", "label": "En ligne (visioconférence)" },
+        { "value": "mixte", "label": "Mixte (à définir)" }
+      ]
+    },
+    {
+      "id": "frequenceCours",
+      "label": "Fréquence souhaitée",
+      "type": "select",
+      "obligatoire": true,
+      "options": [
+        { "value": "ponctuel", "label": "Ponctuel (quelques cours)" },
+        { "value": "hebdomadaire", "label": "1 fois par semaine" },
+        { "value": "bi_hebdomadaire", "label": "2 fois par semaine" },
+        { "value": "tri_hebdomadaire", "label": "3 fois par semaine" },
+        { "value": "intensif", "label": "Stage intensif" }
+      ]
+    },
+    {
+      "id": "dureeCours",
+      "label": "Durée par cours (heures)",
+      "type": "number",
+      "obligatoire": true,
+      "placeholder": "ex: 1.5",
+      "min": 0.5,
+      "max": 4,
+      "step": 0.5
+    },
+    {
+      "id": "periodeFormation",
+      "label": "Période de formation souhaitée",
+      "type": "select",
+      "obligatoire": false,
+      "options": [
+        { "value": "semaine", "label": "En semaine uniquement" },
+        { "value": "weekend", "label": "Week-end uniquement" },
+        { "value": "vacances", "label": "Pendant les vacances" },
+        { "value": "flexible", "label": "Flexible" }
+      ]
+    },
+    {
+      "id": "materielNecessaire",
+      "label": "Matériel nécessaire",
+      "type": "text",
+      "obligatoire": false,
+      "placeholder": "ex: Manuel scolaire, ordinateur, instrument de musique..."
+    }
+  ]
+}

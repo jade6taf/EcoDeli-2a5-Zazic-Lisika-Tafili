@@ -43,10 +43,23 @@ cd ecodeli-backend
 ./mvnw spring-boot:run
 ```
 
-### 2. Frontend
+### 2. Frontend User
 
 ```bash
-cd ecodeli-frontend
+cd ecodeli-frontend-user
+
+# Installer les dépendances
+npm install
+
+# Lancer en mode développement
+npm run dev
+
+```
+
+### 3. Frontend Admin
+
+```bash
+cd ecodeli-frontend-admin
 
 # Installer les dépendances
 npm install

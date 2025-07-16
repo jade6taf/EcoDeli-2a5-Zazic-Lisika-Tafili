@@ -1,0 +1,97 @@
+{
+  "id": "SERVICES_PERSONNELS",
+  "nom": "Services Personnels",
+  "icon": "👥",
+  "description": "Assistance administrative, organisation d'événements, secrétariat, conciergerie",
+  "couleur": "#E91E63",
+  "champsSpecifiques": [
+    {
+      "id": "typeService",
+      "label": "Type de service personnel",
+      "type": "checkbox-multiple",
+      "obligatoire": true,
+      "options": [
+        { "value": "assistance_administrative", "label": "Assistance administrative" },
+        { "value": "organisation_evenements", "label": "Organisation d'événements" },
+        { "value": "secretariat", "label": "Secrétariat" },
+        { "value": "conciergerie", "label": "Conciergerie" },
+        { "value": "accompagnement_demarches", "label": "Accompagnement démarches" },
+        { "value": "classement_documents", "label": "Classement de documents" }
+      ]
+    },
+    {
+      "id": "typeEvenement",
+      "label": "Type d'événement",
+      "type": "select",
+      "obligatoire": false,
+      "conditionAffichage": { "typeService": ["organisation_evenements"] },
+      "options": [
+        { "value": "anniversaire", "label": "Anniversaire" },
+        { "value": "mariage", "label": "Mariage" },
+        { "value": "reunion_professionnelle", "label": "Réunion professionnelle" },
+        { "value": "fete_famille", "label": "Fête de famille" },
+        { "value": "reception", "label": "Réception" },
+        { "value": "autre", "label": "Autre" }
+      ]
+    },
+    {
+      "id": "nombreInvites",
+      "label": "Nombre d'invités",
+      "type": "number",
+      "obligatoire": false,
+      "conditionAffichage": { "typeService": ["organisation_evenements"] },
+      "placeholder": "ex: 25",
+      "min": 1,
+      "max": 500
+    },
+    {
+      "id": "budgetEvenement",
+      "label": "Budget événement (€)",
+      "type": "number",
+      "obligatoire": false,
+      "conditionAffichage": { "typeService": ["organisation_evenements"] },
+      "placeholder": "ex: 1500"
+    },
+    {
+      "id": "typeDemarches",
+      "label": "Type de démarches",
+      "type": "text",
+      "obligatoire": false,
+      "conditionAffichage": { "typeService": ["accompagnement_demarches"] },
+      "placeholder": "ex: Déclaration d'impôts, demande de visa..."
+    },
+    {
+      "id": "urgence",
+      "label": "Délai souhaité",
+      "type": "radio",
+      "obligatoire": true,
+      "options": [
+        { "value": "flexible", "label": "Flexible (dans le mois)" },
+        { "value": "moyen", "label": "Moyen (sous 2 semaines)" },
+        { "value": "urgent", "label": "Urgent (sous 1 semaine)" },
+        { "value": "immediat", "label": "Immédiat (sous 48h)" }
+      ]
+    },
+    {
+      "id": "lieuIntervention",
+      "label": "Lieu d'intervention",
+      "type": "radio",
+      "obligatoire": true,
+      "options": [
+        { "value": "domicile", "label": "À domicile" },
+        { "value": "bureau_prestataire", "label": "Bureau du prestataire" },
+        { "value": "lieu_externe", "label": "Lieu externe (à préciser)" },
+        { "value": "distance", "label": "À distance (en ligne)" }
+      ]
+    },
+    {
+      "id": "dureeEstimee",
+      "label": "Durée estimée (heures)",
+      "type": "number",
+      "obligatoire": false,
+      "placeholder": "ex: 5",
+      "min": 1,
+      "max": 50
+    }
+  ]
+}

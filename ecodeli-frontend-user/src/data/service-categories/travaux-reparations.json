@@ -1,0 +1,69 @@
+{
+  "id": "TRAVAUX_REPARATIONS",
+  "nom": "Travaux & Réparations",
+  "icon": "🔧",
+  "description": "Bricolage, plomberie, électricité, rénovation, assemblage de meubles",
+  "couleur": "#FF9800",
+  "champsSpecifiques": [
+    {
+      "id": "typeTravaux",
+      "label": "Type de travaux",
+      "type": "checkbox-multiple",
+      "obligatoire": true,
+      "options": [
+        { "value": "bricolage", "label": "Bricolage général" },
+        { "value": "plomberie", "label": "Plomberie" },
+        { "value": "electricite", "label": "Électricité" },
+        { "value": "peinture", "label": "Peinture" },
+        { "value": "assemblage", "label": "Assemblage de meubles" },
+        { "value": "renovation", "label": "Rénovation" }
+      ]
+    },
+    {
+      "id": "urgence",
+      "label": "Niveau d'urgence",
+      "type": "radio",
+      "obligatoire": true,
+      "options": [
+        { "value": "normal", "label": "Normal (sous 1 semaine)" },
+        { "value": "urgent", "label": "Urgent (sous 48h)" },
+        { "value": "immediat", "label": "Immédiat (même jour)" }
+      ]
+    },
+    {
+      "id": "surfaceTravaux",
+      "label": "Surface concernée (m²)",
+      "type": "number",
+      "obligatoire": false,
+      "conditionAffichage": { "typeTravaux": ["peinture", "renovation"] },
+      "placeholder": "ex: 25"
+    },
+    {
+      "id": "materielFourni",
+      "label": "Matériel et outils",
+      "type": "radio",
+      "obligatoire": true,
+      "options": [
+        { "value": "client", "label": "Fourni par le client" },
+        { "value": "prestataire", "label": "Fourni par le prestataire" },
+        { "value": "partage", "label": "Partagé (à définir)" }
+      ]
+    },
+    {
+      "id": "dureeEstimee",
+      "label": "Durée estimée (heures)",
+      "type": "number",
+      "obligatoire": false,
+      "placeholder": "ex: 4",
+      "min": 1,
+      "max": 40
+    },
+    {
+      "id": "competenceSpeciale",
+      "label": "Compétence spéciale requise",
+      "type": "text",
+      "obligatoire": false,
+      "placeholder": "ex: Habilitation électrique, certification..."
+    }
+  ]
+}

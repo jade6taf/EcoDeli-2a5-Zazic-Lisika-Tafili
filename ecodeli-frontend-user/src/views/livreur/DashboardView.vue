@@ -57,7 +57,6 @@ const userInitials = computed(() => {
   return (prenom.charAt(0) + nom.charAt(0)).toUpperCase()
 })
 
-// Stats calculées
 const livraisonsEnCours = computed(() => {
   return myDeliveries.value.filter(livraison =>
     livraison.statut === 'VALIDEE' ||

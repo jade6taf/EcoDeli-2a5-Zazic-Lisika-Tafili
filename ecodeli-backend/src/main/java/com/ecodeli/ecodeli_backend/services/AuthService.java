@@ -111,7 +111,14 @@ public class AuthService {
                 utilisateur = prestataire;
                 break;
             case "COMMERCANT":
-                utilisateur = new Commercant();
+                Commercant commercant = new Commercant();
+                if (request.getNomEntreprise() != null && !request.getNomEntreprise().trim().isEmpty()) {
+                    commercant.setNomCommerce(request.getNomEntreprise());
+                } else {
+                    commercant.setNomCommerce(request.getPrenom() + " " + request.getNom() + " Commerce");
+                }
+                commercant.setSiret(request.getSiret());
+                utilisateur = commercant;
                 break;
             case "ADMIN":
                 utilisateur = new Admin();

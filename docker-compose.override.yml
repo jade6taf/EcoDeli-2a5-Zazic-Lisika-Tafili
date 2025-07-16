@@ -1,0 +1,75 @@
+# Development environment overrides
+# This file is automatically loaded by docker-compose for development
+version: '3.8'
+
+services:
+  # Database - expose port for development tools
+  database:
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: EcoDeli
+      MYSQL_USER: ecodeli
+      MYSQL_PASSWORD: password
+
+  # Backend - expose port for direct access and enable hot reload
+  backend:
+    ports:
+      - "8080:8080"
+    environment:
+      # Development database settings
+      DB_URL: jdbc:mariadb://database:3306/EcoDeli
+      DB_USERNAME: ecodeli
+      DB_PASSWORD: password
+      
+      # Development JPA settings
+      JPA_SHOW_SQL: true
+      JPA_HIBERNATE_DDL_AUTO: update
+      
+      # Development mail settings (use fake SMTP for testing)
+      MAIL_HOST: localhost
+      MAIL_PORT: 1025
+      MAIL_USERNAME: test@ecodeli.com
+      MAIL_PASSWORD: testpassword
+      MAIL_SMTP_AUTH: false
+      MAIL_SMTP_STARTTLS: false
+      MAIL_FROM: test@ecodeli.com
+      
+      # Development JWT secret (base64 encoded)
+      JWT_SECRET: F4DRp67JsYShSAcYkBEKlVevAb477RWlnAz7czPv8cY=
+      
+      # Development API keys (use test keys)
+      GOOGLE_MAPS_API_KEY: test-google-maps-key
+      STRIPE_PUBLISHABLE_KEY: pk_test_development
+      STRIPE_SECRET_KEY: sk_test_development
+      STRIPE_WEBHOOK_SECRET: whsec_test_development
+    volumes:
+      # Mount source code for hot reload (if using Spring Boot DevTools)
+      - ./ecodeli-backend/src:/app/src:ro
+      - ./ecodeli-backend/target:/app/target
+
+  # User frontend - expose port for direct access
+  user-frontend:
+    ports:
+      - "5173:8080"
+    volumes:
+      # Mount source code for development
+      - ./ecodeli-frontend-user/src:/app/src:ro
+      - ./ecodeli-frontend-user/public:/app/public:ro
+
+  # Admin frontend - expose port for direct access
+  admin-frontend:
+    ports:
+      - "5174:8080"
+    volumes:
+      # Mount source code for development
+      - ./ecodeli-frontend-admin/src:/app/src:ro
+      - ./ecodeli-frontend-admin/public:/app/public:ro
+
+  # Nginx - development configuration
+  nginx:
+    ports:
+      - "8000:80"
+    environment:
+      - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.template

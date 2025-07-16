@@ -5,7 +5,6 @@
 </template>
 
 <script setup>
-// App EcoDeli - Interface utilisateur
 </script>
 
 <style>

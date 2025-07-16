@@ -14,7 +14,6 @@ const userInitials = computed(() => {
 })
 
 const toggleUserMenu = () => {
-  // TODO: Implémenter le menu utilisateur
 }
 </script>
 

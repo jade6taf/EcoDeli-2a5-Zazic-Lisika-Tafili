@@ -1,5 +1,4 @@
 <script setup>
-// Page de paramètres - TODO
 </script>
 
 <template>
@@ -17,7 +16,7 @@
         <div class="text-center p-4">
           <i class="pi pi-cog text-4xl text-600 mb-3"></i>
           <h3>Configuration système</h3>
-          <p class="text-600">Les paramètres de configuration seront bientôt disponibles.</p>
+          <p class="text-600"></p>
           <Button
             label="Retour au Dashboard"
             icon="pi pi-arrow-left"

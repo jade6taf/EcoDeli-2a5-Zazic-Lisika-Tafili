@@ -76,15 +76,87 @@ const router = createRouter({
       meta: { requiresAuth: true, role: 'CLIENT' }
     },
     {
+      path: '/client/demande-service',
+      name: 'client-demande-service',
+      component: () => import('../views/client/DemandeService.vue'),
+      meta: { requiresAuth: true, role: 'CLIENT' }
+    },
+    {
+      path: '/client/demandes-services',
+      name: 'client-demandes-services',
+      component: () => import('../views/client/DemandesServicesList.vue'),
+      meta: { requiresAuth: true, role: 'CLIENT' }
+    },
+    {
+      path: '/client/demandes-services/:id/candidatures',
+      name: 'client-candidatures-recues',
+      component: () => import('../views/client/CandidaturesRecues.vue'),
+      meta: { requiresAuth: true, role: 'CLIENT' }
+    },
+    {
+      path: '/client/services',
+      name: 'client-mes-services',
+      component: () => import('../views/client/MesServices.vue'),
+      meta: { requiresAuth: true, role: 'CLIENT' }
+    },
+    {
+      path: '/client/mission/:id/validation',
+      name: 'client-validation-mission',
+      component: () => import('../views/client/ValidationMission.vue'),
+      meta: { requiresAuth: true, role: 'CLIENT' }
+    },
+    {
       path: '/livreur',
       name: 'livreur',
       component: () => import('../views/livreur/DashboardView.vue'),
       meta: { requiresAuth: true, role: 'LIVREUR' }
     },
     {
+      path: '/commercant',
+      name: 'commercant',
+      component: () => import('../views/commercant/DashboardView.vue'),
+      meta: { requiresAuth: true, role: 'COMMERCANT' }
+    },
+    {
       path: '/prestataire',
       name: 'prestataire',
       component: () => import('../views/prestataire/DashboardView.vue'),
+      meta: { requiresAuth: true, role: 'PRESTATAIRE' }
+    },
+    {
+      path: '/prestataire/profil',
+      name: 'prestataire-profil',
+      component: () => import('../views/prestataire/ConfigurationProfil.vue'),
+      meta: { requiresAuth: true, role: 'PRESTATAIRE' }
+    },
+    {
+      path: '/prestataire/demandes',
+      name: 'prestataire-demandes',
+      component: () => import('../views/prestataire/DemandesDisponibles.vue'),
+      meta: { requiresAuth: true, role: 'PRESTATAIRE' }
+    },
+    {
+      path: '/prestataire/candidatures',
+      name: 'prestataire-candidatures',
+      component: () => import('../views/prestataire/MesCandidatures.vue'),
+      meta: { requiresAuth: true, role: 'PRESTATAIRE' }
+    },
+    {
+      path: '/prestataire/missions',
+      name: 'prestataire-missions',
+      component: () => import('../views/prestataire/MesMissions.vue'),
+      meta: { requiresAuth: true, role: 'PRESTATAIRE' }
+    },
+    {
+      path: '/prestataire/evaluations',
+      name: 'prestataire-evaluations',
+      component: () => import('../views/prestataire/MesEvaluations.vue'),
+      meta: { requiresAuth: true, role: 'PRESTATAIRE' }
+    },
+    {
+      path: '/prestataire/portefeuille',
+      name: 'prestataire-portefeuille',
+      component: () => import('../views/prestataire/PortefeuillePrestataire.vue'),
       meta: { requiresAuth: true, role: 'PRESTATAIRE' }
     },
         {

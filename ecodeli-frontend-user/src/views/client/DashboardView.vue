@@ -20,6 +20,8 @@ const loadingAnnonces = ref(false)
 const candidaturesByAnnonce = ref({})
 const loadingCandidatures = ref(false)
 
+const totalServicesDepenses = ref(0)
+
 const menuItems = [
   {
     label: 'Accueil',
@@ -33,19 +35,23 @@ const menuItems = [
       {
         label: 'Livraisons',
         icon: 'pi pi-truck',
-        command: () => toast.add({ severity: 'info', summary: 'À venir', detail: 'Fonctionnalité en développement' })
+        command: () => router.push('/client/annonces')
       },
       {
         label: 'Services',
         icon: 'pi pi-wrench',
-        command: () => toast.add({ severity: 'info', summary: 'À venir', detail: 'Fonctionnalité en développement' })
+        command: () => router.push('/client/demandes-services')
       }
     ]
   },
   {
+    label: 'Mes Services',
+    icon: 'pi pi-cog',
+    command: () => router.push('/client/services')
+  },
+  {
     label: 'Historique',
     icon: 'pi pi-history',
-    command: () => toast.add({ severity: 'info', summary: 'À venir', detail: 'Fonctionnalité en développement' })
   },
   {
     label: 'Profil',
@@ -82,10 +88,13 @@ const annoncesTerminees = computed(() => {
 })
 
 const totalDepense = computed(() => {
-  return userAnnonces.value
+  const totalLivraisons = userAnnonces.value
     .filter(annonce => annonce.statut === 'TERMINEE')
     .reduce((total, annonce) => total + (parseFloat(annonce.prixUnitaire) || 0), 0)
-    .toFixed(2)
+  
+  const totalServices = totalServicesDepenses.value || 0
+  
+  return (totalLivraisons + totalServices).toFixed(2)
 })
 
 const getStatutLabel = (statut) => {
@@ -188,16 +197,15 @@ const newDeliveryRequest = () => {
 }
 
 const newServiceRequest = () => {
-  toast.add({
-    severity: 'info',
-    summary: 'Nouveau service',
-    detail: 'Fonctionnalité en développement',
-    life: 3000
-  })
+  router.push('/client/demande-service')
 }
 
 const viewOrders = () => {
   router.push('/client/annonces')
+}
+
+const viewServicesRequests = () => {
+  router.push('/client/demandes-services')
 }
 
 const hasCandidatures = computed(() => {
@@ -267,6 +275,30 @@ const loadCandidatures = async () => {
     console.error('Erreur lors du chargement des candidatures:', error)
   } finally {
     loadingCandidatures.value = false
+  }
+}
+
+const loadTotalServicesDepenses = async () => {
+  try {
+    const clientId = authStore.user?.id || authStore.user?.idUtilisateur
+    
+    if (!clientId) {
+      console.warn('ID utilisateur non trouvé pour le calcul des dépenses services')
+      return
+    }
+    
+    const response = await fetch(`http://localhost:8080/api/paiement/client/${clientId}/total-depense`)
+    
+    if (response.ok) {
+      const data = await response.json()
+      totalServicesDepenses.value = parseFloat(data.totalServicesPayes) || 0
+      
+      console.log('Total services dépensés:', totalServicesDepenses.value, '€')
+    } else {
+      console.warn('Erreur récupération total services:', response.statusText)
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement du total services:', error)
   }
 }
 
@@ -348,6 +380,7 @@ const handleRefuseCandidature = (candidature) => {
 onMounted(async () => {
   await loadUserAnnonces()
   await loadCandidatures()
+  await loadTotalServicesDepenses()
 })
 </script>
 
@@ -492,6 +525,23 @@ onMounted(async () => {
                     icon="pi pi-list"
                     class="w-full p-button-outlined"
                     @click="viewOrders"
+                  />
+                </div>
+                <div class="col-12">
+                  <Button
+                    label="Mes demandes de services"
+                    icon="pi pi-clipboard-list"
+                    class="w-full p-button-outlined"
+                    @click="viewServicesRequests"
+                  />
+                </div>
+                <div class="col-12">
+                  <Button
+                    label="Mes Services & Validations"
+                    icon="pi pi-cog"
+                    class="w-full p-button-outlined"
+                    severity="info"
+                    @click="router.push('/client/services')"
                   />
                 </div>
               </div>

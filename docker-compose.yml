@@ -1,0 +1,145 @@
+version: '3.8'
+
+services:
+  # Database service
+  database:
+    image: mariadb:11.4
+    container_name: ecodeli-database
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-EcoDeli}
+      MYSQL_USER: ${DB_USERNAME:-ecodeli}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - ecodeli-db-data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - ecodeli-network
+    healthcheck:
+      test: ["CMD", "mariadb", "-h", "localhost", "-u", "root", "-prootpassword", "-e", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Backend service
+  backend:
+    build:
+      context: ./ecodeli-backend
+      dockerfile: Dockerfile
+    container_name: ecodeli-backend
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      # Database configuration
+      DB_URL: jdbc:mariadb://database:3306/${DB_NAME:-EcoDeli}
+      DB_USERNAME: ${DB_USERNAME:-ecodeli}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      
+      # Server configuration
+      SERVER_PORT: 8080
+      
+      # JPA configuration
+      JPA_SHOW_SQL: ${JPA_SHOW_SQL:-false}
+      JPA_HIBERNATE_DDL_AUTO: ${JPA_HIBERNATE_DDL_AUTO:-update}
+      
+      # Mail configuration
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-true}
+      MAIL_SMTP_STARTTLS: ${MAIL_SMTP_STARTTLS:-true}
+      MAIL_FROM: ${MAIL_FROM}
+      
+      # JWT configuration
+      JWT_SECRET: ${JWT_SECRET:-F4DRp67JsYShSAcYkBEKlVevAb477RWlnAz7czPv8cY=}
+      
+      # External APIs
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+    volumes:
+      - ecodeli-uploads:/app/uploads
+    networks:
+      - ecodeli-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # User frontend service
+  user-frontend:
+    build:
+      context: ./ecodeli-frontend-user
+      dockerfile: Dockerfile
+    container_name: ecodeli-user-frontend
+    restart: unless-stopped
+    networks:
+      - ecodeli-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Admin frontend service
+  admin-frontend:
+    build:
+      context: ./ecodeli-frontend-admin
+      dockerfile: Dockerfile
+    container_name: ecodeli-admin-frontend
+    restart: unless-stopped
+    networks:
+      - ecodeli-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Nginx reverse proxy
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: ecodeli-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - user-frontend
+      - admin-frontend
+    volumes:
+      - ecodeli-uploads:/usr/share/nginx/html/uploads:ro
+    networks:
+      - ecodeli-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+# Networks
+networks:
+  ecodeli-network:
+    driver: bridge
+    name: ecodeli-network
+
+# Volumes
+volumes:
+  ecodeli-db-data:
+    name: ecodeli-db-data
+  ecodeli-uploads:
+    name: ecodeli-uploads

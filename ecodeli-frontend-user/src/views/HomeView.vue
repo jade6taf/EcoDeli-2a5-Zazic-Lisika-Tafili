@@ -635,7 +635,6 @@ const registerAs = (profileType) => {
   .lg\:col-3 { grid-column: span 3; }
 }
 
-/* Responsive Design */
 @media (max-width: 1024px) {
   .app-showcase {
     grid-template-columns: 1fr;

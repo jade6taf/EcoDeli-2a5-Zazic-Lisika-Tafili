@@ -1,0 +1,64 @@
+{
+  "id": "TRANSPORT_LIVRAISON",
+  "nom": "Transport & Livraison",
+  "icon": "🚚",
+  "description": "Transport de personnes, livraison de colis, déménagement, courses urgentes",
+  "couleur": "#2196F3",
+  "champsSpecifiques": [
+    {
+      "id": "typeTransport",
+      "label": "Type de transport/livraison",
+      "type": "checkbox-multiple",
+      "obligatoire": true,
+      "options": [
+        { "value": "transport_personne", "label": "Transport de personne" },
+        { "value": "livraison_colis", "label": "Livraison de colis" },
+        { "value": "demenagement", "label": "Déménagement" },
+        { "value": "courses_urgentes", "label": "Courses urgentes" },
+        { "value": "transfert_aeroport", "label": "Transfert aéroport" }
+      ]
+    },
+    {
+      "id": "nombrePersonnes",
+      "label": "Nombre de personnes à transporter",
+      "type": "number",
+      "obligatoire": false,
+      "conditionAffichage": { "typeTransport": ["transport_personne", "transfert_aeroport"] },
+      "placeholder": "ex: 2",
+      "min": 1,
+      "max": 8
+    },
+    {
+      "id": "typeVehicule",
+      "label": "Type de véhicule souhaité",
+      "type": "select",
+      "obligatoire": false,
+      "options": [
+        { "value": "voiture", "label": "Voiture standard" },
+        { "value": "berline", "label": "Berline" },
+        { "value": "monospace", "label": "Monospace" },
+        { "value": "utilitaire", "label": "Utilitaire" },
+        { "value": "camion", "label": "Camion" }
+      ]
+    },
+    {
+      "id": "volumeColis",
+      "label": "Volume approximatif (m³)",
+      "type": "number",
+      "obligatoire": false,
+      "conditionAffichage": { "typeTransport": ["livraison_colis", "demenagement"] },
+      "placeholder": "ex: 2.5"
+    },
+    {
+      "id": "urgence",
+      "label": "Niveau d'urgence",
+      "type": "radio",
+      "obligatoire": true,
+      "options": [
+        { "value": "normal", "label": "Normal (sous 24h)" },
+        { "value": "urgent", "label": "Urgent (sous 4h)" },
+        { "value": "immediat", "label": "Immédiat (sous 1h)" }
+      ]
+    }
+  ]
+}

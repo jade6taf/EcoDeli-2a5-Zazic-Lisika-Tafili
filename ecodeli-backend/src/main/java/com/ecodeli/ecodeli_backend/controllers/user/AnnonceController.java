@@ -119,7 +119,6 @@ public class AnnonceController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Code de validation généré et envoyé");
-            response.put("code", code); // Pour debug seulement
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

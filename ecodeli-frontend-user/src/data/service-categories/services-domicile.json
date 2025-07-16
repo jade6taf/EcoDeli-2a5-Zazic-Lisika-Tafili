@@ -1,0 +1,81 @@
+{
+  "id": "SERVICES_DOMICILE",
+  "nom": "Services à Domicile",
+  "icon": "🏠",
+  "description": "Ménage, garde d'enfants/animaux, jardinage, assistance aux personnes âgées",
+  "couleur": "#4CAF50",
+  "champsSpecifiques": [
+    {
+      "id": "typeService",
+      "label": "Type de service",
+      "type": "checkbox-multiple",
+      "obligatoire": true,
+      "options": [
+        { "value": "menage", "label": "Ménage" },
+        { "value": "garde_enfants", "label": "Garde d'enfants" },
+        { "value": "garde_animaux", "label": "Garde d'animaux" },
+        { "value": "jardinage", "label": "Jardinage" },
+        { "value": "assistance_personnes", "label": "Assistance personnes âgées" },
+        { "value": "repassage", "label": "Repassage" }
+      ]
+    },
+    {
+      "id": "surface",
+      "label": "Surface à nettoyer (m²)",
+      "type": "number",
+      "obligatoire": false,
+      "conditionAffichage": { "typeService": ["menage"] },
+      "placeholder": "ex: 75",
+      "min": 10,
+      "max": 500
+    },
+    {
+      "id": "nombreEnfants",
+      "label": "Nombre d'enfants",
+      "type": "number",
+      "obligatoire": false,
+      "conditionAffichage": { "typeService": ["garde_enfants"] },
+      "placeholder": "ex: 2",
+      "min": 1,
+      "max": 6
+    },
+    {
+      "id": "ageEnfants",
+      "label": "Âge des enfants",
+      "type": "text",
+      "obligatoire": false,
+      "conditionAffichage": { "typeService": ["garde_enfants"] },
+      "placeholder": "ex: 3 ans et 6 ans"
+    },
+    {
+      "id": "typeAnimaux",
+      "label": "Type d'animaux",
+      "type": "text",
+      "obligatoire": false,
+      "conditionAffichage": { "typeService": ["garde_animaux"] },
+      "placeholder": "ex: 1 chien (Labrador), 2 chats"
+    },
+    {
+      "id": "frequence",
+      "label": "Fréquence souhaitée",
+      "type": "select",
+      "obligatoire": true,
+      "options": [
+        { "value": "ponctuel", "label": "Ponctuel" },
+        { "value": "hebdomadaire", "label": "Hebdomadaire" },
+        { "value": "bi_hebdomadaire", "label": "2 fois par semaine" },
+        { "value": "bi_mensuel", "label": "Bi-mensuel" },
+        { "value": "mensuel", "label": "Mensuel" }
+      ]
+    },
+    {
+      "id": "dureeIntervention",
+      "label": "Durée d'intervention (heures)",
+      "type": "number",
+      "obligatoire": true,
+      "placeholder": "ex: 3",
+      "min": 1,
+      "max": 12
+    }
+  ]
+}

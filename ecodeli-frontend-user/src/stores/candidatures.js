@@ -173,6 +173,115 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     }
   }
 
+
+  const getCandidaturesByDemandeService = async (demandeId) => {
+    console.log('=== STORE: Récupération candidatures pour demande service', demandeId)
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await axios.get(`http://localhost:8080/api/candidatures/demande/${demandeId}`)
+      console.log('Candidatures reçues:', response.data)
+      
+      if (response.data.success) {
+        return {
+          success: true,
+          candidatures: response.data.candidatures,
+          statistiques: response.data.statistiques
+        }
+      } else {
+        throw new Error(response.data.error || 'Erreur inconnue')
+      }
+    } catch (err) {
+      console.error('Erreur getCandidaturesByDemandeService:', err)
+      error.value = err.response?.data?.error || err.message || 'Erreur lors du chargement des candidatures'
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const accepterCandidatureService = async (candidatureId, commentaire = '') => {
+    console.log('=== STORE: Acceptation candidature service', candidatureId)
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await axios.put(`http://localhost:8080/api/candidatures/${candidatureId}/accepter`, {
+        commentaire
+      })
+      
+      console.log('Réponse acceptation:', response.data)
+      
+      if (response.data.success) {
+        return {
+          success: true,
+          message: response.data.message,
+          prestataireNom: response.data.prestataireNom,
+          nouveauStatutDemande: response.data.nouveauStatutDemande
+        }
+      } else {
+        throw new Error(response.data.error || 'Erreur inconnue')
+      }
+    } catch (err) {
+      console.error('Erreur accepterCandidatureService:', err)
+      error.value = err.response?.data?.error || err.message || 'Erreur lors de l\'acceptation'
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const refuserCandidatureService = async (candidatureId, commentaire = '') => {
+    console.log('=== STORE: Refus candidature service', candidatureId)
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await axios.put(`http://localhost:8080/api/candidatures/${candidatureId}/refuser`, {
+        commentaire
+      })
+      
+      console.log('Réponse refus:', response.data)
+      
+      if (response.data.success) {
+        return {
+          success: true,
+          message: response.data.message
+        }
+      } else {
+        throw new Error(response.data.error || 'Erreur inconnue')
+      }
+    } catch (err) {
+      console.error('Erreur refuserCandidatureService:', err)
+      error.value = err.response?.data?.error || err.message || 'Erreur lors du refus'
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const getStatistiquesCandidaturesService = async (demandeId) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await axios.get(`http://localhost:8080/api/candidatures/demande/${demandeId}/statistiques`)
+      
+      if (response.data.success) {
+        return { success: true, statistiques: response.data.statistiques }
+      } else {
+        throw new Error(response.data.error || 'Erreur inconnue')
+      }
+    } catch (err) {
+      console.error('Erreur getStatistiquesCandidaturesService:', err)
+      error.value = err.response?.data?.error || err.message || 'Erreur lors du chargement des statistiques'
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     candidatures,
     loading,
@@ -187,6 +296,11 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     candidaterPartielle,
     getEntrepotsDisponibles,
     getCandidaturesParSegment,
-    accepterCandidaturePartielle
+    accepterCandidaturePartielle,
+
+    getCandidaturesByDemandeService,
+    accepterCandidatureService,
+    refuserCandidatureService,
+    getStatistiquesCandidaturesService
   }
 })

@@ -1,0 +1,257 @@
+# EcoDeli Production Docker Compose Configuration
+# Single file for easy deployment on Dockge/TrueNAS
+version: '3.8'
+
+services:
+  # Database service - MariaDB with production optimizations
+  database:
+    image: mariadb:11.4
+    container_name: ecodeli-database-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-EcoDeli}
+      MYSQL_USER: ${DB_USERNAME:-ecodeli}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=256M
+      --innodb-log-file-size=64M
+      --max-connections=200
+      --query-cache-size=32M
+      --query-cache-type=1
+      --slow-query-log=1
+      --slow-query-log-file=/var/log/mysql/slow.log
+      --long-query-time=2
+    volumes:
+      - ecodeli-db-data-prod:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+      - ./database/logs:/var/log/mysql
+    networks:
+      - ecodeli-network
+    healthcheck:
+      test: ["CMD", "mariadb", "-h", "localhost", "-u", "root", "-prootpassword123", "-e", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Backend service - Spring Boot with production settings
+  backend:
+    build:
+      context: ./ecodeli-backend
+      dockerfile: Dockerfile
+    container_name: ecodeli-backend-prod
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      # Database configuration
+      DB_URL: jdbc:mariadb://database:3306/${DB_NAME:-EcoDeli}
+      DB_USERNAME: ${DB_USERNAME:-ecodeli}
+      DB_PASSWORD: ${DB_PASSWORD}
+      
+      # Server configuration
+      SERVER_PORT: 8080
+      
+      # Production JPA settings
+      JPA_SHOW_SQL: false
+      JPA_HIBERNATE_DDL_AUTO: update
+      
+      # Mail configuration
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-true}
+      MAIL_SMTP_STARTTLS: ${MAIL_SMTP_STARTTLS:-true}
+      MAIL_FROM: ${MAIL_FROM}
+      
+      # JWT configuration
+      JWT_SECRET: ${JWT_SECRET}
+      
+      # External APIs
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      
+      # Production JVM settings
+      JAVA_OPTS: >
+        -Xms512m
+        -Xmx1024m
+        -XX:+UseG1GC
+        -XX:MaxGCPauseMillis=200
+        -XX:+UseStringDeduplication
+        -Dspring.profiles.active=prod
+      
+      # Logging configuration
+      LOG_LEVEL: INFO
+      LOG_FILE: /app/logs/ecodeli.log
+    volumes:
+      - ecodeli-uploads-prod:/app/uploads
+      - ecodeli-logs:/app/logs
+    networks:
+      - ecodeli-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # User frontend service - Vue.js with Nginx
+  user-frontend:
+    build:
+      context: ./ecodeli-frontend-user
+      dockerfile: Dockerfile
+    container_name: ecodeli-user-frontend-prod
+    restart: unless-stopped
+    networks:
+      - ecodeli-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # Admin frontend service - Vue.js with PrimeVue
+  admin-frontend:
+    build:
+      context: ./ecodeli-frontend-admin
+      dockerfile: Dockerfile
+    container_name: ecodeli-admin-frontend-prod
+    restart: unless-stopped
+    networks:
+      - ecodeli-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # Nginx reverse proxy with SSL support
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: ecodeli-nginx-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - user-frontend
+      - admin-frontend
+    volumes:
+      - ecodeli-uploads-prod:/usr/share/nginx/html/uploads:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+      - ecodeli-logs:/var/log/ecodeli:ro
+    networks:
+      - ecodeli-network
+    environment:
+      - NGINX_WORKER_PROCESSES=auto
+      - NGINX_WORKER_CONNECTIONS=1024
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.2'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Networks
+networks:
+  ecodeli-network:
+    driver: bridge
+    name: ecodeli-network-prod
+
+# Volumes with production labels for backup
+volumes:
+  ecodeli-db-data-prod:
+    name: ecodeli-db-data-prod
+    labels:
+      - "backup=true"
+      - "backup.frequency=daily"
+      - "backup.retention=30d"
+  ecodeli-uploads-prod:
+    name: ecodeli-uploads-prod
+    labels:
+      - "backup=true"
+      - "backup.frequency=weekly"
+      - "backup.retention=90d"
+  ecodeli-logs:
+    name: ecodeli-logs-prod
+    labels:
+      - "backup=false"
+      - "cleanup=weekly"

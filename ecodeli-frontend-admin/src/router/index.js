@@ -56,6 +56,11 @@ const router = createRouter({
           component: () => import('../views/livraisons/LivraisonList.vue')
         },
         {
+          path: 'prestataires',
+          name: 'admin-prestataires',
+          component: () => import('../views/prestataires/PrestatairesList.vue')
+        },
+        {
           path: 'stats',
           name: 'admin-stats',
           component: () => import('../views/dashboard/StatsView.vue')
@@ -64,6 +69,11 @@ const router = createRouter({
           path: 'settings',
           name: 'admin-settings',
           component: () => import('../views/dashboard/SettingsView.vue')
+        },
+        {
+          path: 'contrats',
+          name: 'admin-contrats',
+          component: () => import('../views/contrats/ContratsList.vue')
         }
       ]
     }

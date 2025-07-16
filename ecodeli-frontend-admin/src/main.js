@@ -6,12 +6,10 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
-// PrimeVue imports
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 import 'primeicons/primeicons.css'
 
-// PrimeVue components pour admin
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -48,7 +46,6 @@ app.use(PrimeVue, {
 app.use(ToastService)
 app.use(ConfirmationService)
 
-// Composants globaux PrimeVue
 app.component('Button', Button)
 app.component('InputText', InputText)
 app.component('Password', Password)

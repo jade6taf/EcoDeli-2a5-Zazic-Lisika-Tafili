@@ -1,5 +1,4 @@
 <script setup>
-// Page de statistiques - TODO
 </script>
 
 <template>
@@ -17,7 +16,7 @@
         <div class="text-center p-4">
           <i class="pi pi-chart-line text-4xl text-600 mb-3"></i>
           <h3>Statistiques avancées</h3>
-          <p class="text-600">Les graphiques et analyses détaillées seront bientôt disponibles.</p>
+          <p class="text-600"></p>
           <Button
             label="Retour au Dashboard"
             icon="pi pi-arrow-left"

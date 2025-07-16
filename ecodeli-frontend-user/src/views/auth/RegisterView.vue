@@ -86,12 +86,16 @@ const form = reactive({
   domaineExpertise: ''
 })
 
-// États
 const errors = ref({})
 const registerError = ref('')
 const registerSuccess = ref('')
 
 onMounted(() => {
+  // Déconnexion automatique si l'utilisateur était connecté
+  if (authStore.isAuthenticated) {
+    authStore.logout()
+  }
+  
   if (route.query.type) {
     form.userType = route.query.type
   }
@@ -127,6 +131,16 @@ const validateForm = () => {
   if (form.userType === 'PRESTATAIRE') {
     if (!form.nomEntreprise.trim()) {
       errors.value.nomEntreprise = 'Le nom de l\'entreprise est requis pour les prestataires'
+    }
+
+    if (form.siret && !/^[0-9]{14}$/.test(form.siret)) {
+      errors.value.siret = 'Le SIRET doit contenir exactement 14 chiffres'
+    }
+  }
+
+  if (form.userType === 'COMMERCANT') {
+    if (!form.nomEntreprise.trim()) {
+      errors.value.nomEntreprise = 'Le nom du commerce est requis pour les commerçants'
     }
 
     if (form.siret && !/^[0-9]{14}$/.test(form.siret)) {
@@ -175,10 +189,23 @@ const handleRegister = async () => {
 const goToLogin = () => {
   router.push('/login')
 }
+
+const goToHome = () => {
+  router.push('/')
+}
 </script>
 
 <template>
   <div class="register-container">
+    <div class="back-to-home">
+      <Button
+        icon="pi pi-arrow-left"
+        label="Retour à l'accueil"
+        text
+        @click="goToHome"
+        class="back-button"
+      />
+    </div>
     <div class="register-wrapper">
       <Card class="register-card">
         <template #header>
@@ -359,6 +386,47 @@ const goToLogin = () => {
               </div>
             </div>
 
+            <!-- Champs spécifiques aux commerçants -->
+            <div v-if="form.userType === 'COMMERCANT'" class="commercant-fields">
+              <Divider>
+                <span class="text-sm text-600">Informations commerciales</span>
+              </Divider>
+
+              <!-- Nom du commerce -->
+              <div class="field">
+                <label for="nomCommerce" class="field-label">
+                  <i class="pi pi-shop mr-2"></i>
+                  Nom du commerce *
+                </label>
+                <InputText
+                  id="nomCommerce"
+                  v-model="form.nomEntreprise"
+                  placeholder="Nom de votre commerce"
+                  :class="{ 'p-invalid': errors.nomEntreprise }"
+                  class="w-full"
+                />
+                <small v-if="errors.nomEntreprise" class="p-error">{{ errors.nomEntreprise }}</small>
+              </div>
+
+              <!-- SIRET -->
+              <div class="field">
+                <label for="siretCommercant" class="field-label">
+                  <i class="pi pi-id-card mr-2"></i>
+                  Numéro SIRET (optionnel)
+                </label>
+                <InputText
+                  id="siretCommercant"
+                  v-model="form.siret"
+                  placeholder="14 chiffres"
+                  :class="{ 'p-invalid': errors.siret }"
+                  class="w-full"
+                  maxlength="14"
+                />
+                <small v-if="errors.siret" class="p-error">{{ errors.siret }}</small>
+                <small class="text-xs text-600">Le SIRET doit contenir exactement 14 chiffres</small>
+              </div>
+            </div>
+
             <!-- Message d'erreur global -->
             <InlineMessage
               v-if="registerError"
@@ -519,7 +587,8 @@ const goToLogin = () => {
   font-weight: 500;
 }
 
-.prestataire-fields {
+.prestataire-fields,
+.commercant-fields {
   background: var(--surface-50);
   border-radius: 0.5rem;
   padding: 1rem;
@@ -542,9 +611,26 @@ const goToLogin = () => {
   margin-left: 0.5rem;
 }
 
-.text-xs {
-  font-size: 0.75rem;
-}
+  .text-xs {
+    font-size: 0.75rem;
+  }
+
+  .back-to-home {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    z-index: 10;
+  }
+
+  .back-button {
+    color: var(--ecodeli-green);
+    transition: all 0.3s ease;
+  }
+
+  .back-button:hover {
+    color: var(--ecodeli-green-dark);
+    background: rgba(34, 197, 94, 0.1);
+  }
 
 @media (max-width: 640px) {
   .field-group {
@@ -558,6 +644,17 @@ const goToLogin = () => {
   .prestataire-fields {
     margin: 0.5rem 0;
     padding: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .back-to-home {
+    top: 1rem;
+    left: 1rem;
+  }
+  
+  .back-button .p-button-label {
+    display: none;
   }
 }
 </style>

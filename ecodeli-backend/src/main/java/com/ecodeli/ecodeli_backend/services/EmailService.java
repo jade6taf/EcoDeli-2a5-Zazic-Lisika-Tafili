@@ -244,7 +244,6 @@ public class EmailService {
             );
 
             sendHtmlEmail(destinataireEmail, subject, htmlContent);
-            System.out.println("Email code de validation envoyé avec succès à " + destinataireEmail);
 
         } catch (Exception e) {
             System.err.println("Erreur lors de l'envoi de l'email code de validation : " + e.getMessage());
@@ -272,7 +271,6 @@ public class EmailService {
             );
 
             sendHtmlEmail(destinataireEmail, subject, htmlContent);
-            System.out.println("Email OTP de livraison envoyé avec succès à " + destinataireEmail);
 
         } catch (Exception e) {
             System.err.println("Erreur lors de l'envoi de l'email OTP de livraison : " + e.getMessage());

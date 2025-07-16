@@ -131,7 +131,6 @@ const deleteUser = (user) => {
 }
 
 const exportUsers = () => {
-  // TODO: Implémenter l'export
   toast.add({
     severity: 'info',
     summary: 'Export',

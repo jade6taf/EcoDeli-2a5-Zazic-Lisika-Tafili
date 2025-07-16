@@ -14,9 +14,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 @Entity
 @Table(name = "UTILISATEUR")
 @Inheritance(strategy = InheritanceType.JOINED)
-// La colonne type_utilisateur dans la base de données stocke le type d'utilisateur (CLIENT, LIVREUR, etc.)
 @DiscriminatorColumn(name = "type_utilisateur", discriminatorType = DiscriminatorType.STRING)
-// Le champ "type" dans le JSON est utilisé pour la désérialisation et correspond à la colonne type_utilisateur
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Client.class, name = "CLIENT"),

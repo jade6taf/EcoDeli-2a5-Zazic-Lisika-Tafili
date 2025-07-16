@@ -152,10 +152,8 @@ public class AnnonceService {
                     }
                 }
             }
-            // Distance par défaut si l'API échoue (10 km)
             return new BigDecimal("10.00");
         } catch (Exception e) {
-            // Distance par défaut en cas d'erreur
             return new BigDecimal("10.00");
         }
     }

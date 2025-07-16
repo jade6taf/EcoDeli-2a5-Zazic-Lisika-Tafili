@@ -77,10 +77,6 @@ const loadLivraisons = async () => {
   }
 }
 
-const onFilter = () => {
-  // Les filtres sont appliqués automatiquement via computed
-}
-
 const resetFilters = () => {
   filters.value.search = ''
   filters.value.statut = null
@@ -154,7 +150,6 @@ const annulerLivraison = (livraison) => {
 }
 
 const exportLivraisons = () => {
-  // TODO: Implémenter l'export
   toast.add({
     severity: 'info',
     summary: 'Export',

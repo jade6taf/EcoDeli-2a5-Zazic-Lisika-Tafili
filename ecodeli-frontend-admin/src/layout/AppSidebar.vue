@@ -25,6 +25,16 @@ const menuItems = [
     route: '/admin/users'
   },
   {
+    label: 'Prestataires',
+    icon: 'pi pi-wrench',
+    route: '/admin/prestataires'
+  },
+  {
+    label: 'Contrats',
+    icon: 'pi pi-file',
+    route: '/admin/contrats'
+  },
+  {
     label: 'Livraisons',
     icon: 'pi pi-truck',
     route: '/admin/livraisons'

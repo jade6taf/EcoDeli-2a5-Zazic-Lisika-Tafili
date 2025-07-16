@@ -28,12 +28,30 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
             AuthResponse authResponse = authService.register(registerRequest);
             return ResponseEntity.ok(authResponse);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            System.err.println("Erreur d'inscription: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    public static class ErrorResponse {
+        private String message;
+        
+        public ErrorResponse(String message) {
+            this.message = message;
+        }
+        
+        public String getMessage() {
+            return message;
+        }
+        
+        public void setMessage(String message) {
+            this.message = message;
         }
     }
 }
