@@ -24,7 +24,8 @@ public class TemplateContrat {
     private String nomTemplate;
     
     @NotBlank(message = "Le contenu du template est obligatoire")
-    @Column(name = "contenu_template", columnDefinition = "LONGTEXT")
+    @Lob
+    @Column(name = "contenu_template")
     private String contenuTemplate;
     
     @Column(name = "description", columnDefinition = "TEXT")
