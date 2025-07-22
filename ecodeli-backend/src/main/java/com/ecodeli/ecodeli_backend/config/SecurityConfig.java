@@ -53,12 +53,15 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // URLs de développement
+        // URLs de développement local
         configuration.addAllowedOrigin("http://localhost:5173");
         configuration.addAllowedOrigin("http://localhost:5174");
+        configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("http://127.0.0.1:5173");
+        configuration.addAllowedOrigin("http://127.0.0.1:5174");
         
-        // URLs de production Railway (à adapter avec vos vraies URLs)
-        configuration.addAllowedOrigin("https://*.railway.app");
+        // URLs Railway spécifiques (le wildcard ne fonctionne pas)
+        configuration.addAllowedOrigin("https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app");
         
         // Variables d'environnement pour URLs personnalisées
         String frontendUserUrl = System.getenv("FRONTEND_USER_URL");
@@ -70,6 +73,15 @@ public class SecurityConfig {
         
         if (frontendAdminUrl != null && !frontendAdminUrl.isEmpty()) {
             configuration.addAllowedOrigin(frontendAdminUrl);
+        }
+        
+        // Pour le développement, autoriser tous les patterns Railway
+        String railwayEnv = System.getenv("RAILWAY_ENVIRONMENT");
+        if (railwayEnv != null || System.getenv("NODE_ENV") == null) {
+            // Mode développement - plus permissif
+            configuration.setAllowCredentials(true);
+            configuration.addAllowedOriginPattern("https://*.railway.app");
+            configuration.addAllowedOriginPattern("https://*.up.railway.app");
         }
         
         configuration.addAllowedMethod("*");
