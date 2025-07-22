@@ -7,9 +7,25 @@ healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 
 [variables]
+# Configuration serveur
 SERVER_PORT = "8080"
+
+# Configuration JVM optimisée pour 512MB Railway
+JAVA_TOOL_OPTIONS = "-Xmx400m -Xms200m -XX:MaxMetaspaceSize=100m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+OptimizeStringConcat"
+
+# Configuration Spring Boot allégée
 JPA_SHOW_SQL = "false"
 JPA_HIBERNATE_DDL_AUTO = "update"
+LOGGING_LEVEL_ORG_HIBERNATE_SQL = "WARN"
+LOGGING_LEVEL_ORG_SPRINGFRAMEWORK = "WARN"
+LOGGING_LEVEL_COM_ZAXXER_HIKARI = "WARN"
+
+# Configuration base de données optimisée
+SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE = "5"
+SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE = "2"
+SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT = "20000"
+
+# Configuration mail
 MAIL_HOST = "smtp.gmail.com"
 MAIL_PORT = "587"
 MAIL_SMTP_AUTH = "true"
