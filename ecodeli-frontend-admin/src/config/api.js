@@ -1,6 +1,6 @@
-// Configuration de l'API pour EcoDeli Admin
+// Configuration de l'API pour EcoDeli Admin - avec variables d'environnement Railway
 export const API_CONFIG = {
-  BASE_URL: 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app',
   ENDPOINTS: {
     AUTH: '/api/auth',
     ADMIN: '/api/admin',
