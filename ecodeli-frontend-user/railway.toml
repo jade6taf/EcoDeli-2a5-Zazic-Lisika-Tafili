@@ -1,11 +1,9 @@
 [build]
-builder = "nixpacks"
-nixpacksConfigPath = "nixpacks.toml"
+builder = "dockerfile"
 
 [deploy]
-startCommand = "npm run preview"
 restartPolicyType = "on_failure"
-healthcheckPath = "/"
+healthcheckPath = "/health"
 healthcheckTimeout = 300
 
 [variables]
