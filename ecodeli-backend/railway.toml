@@ -1,0 +1,19 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/actuator/health"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+
+[variables]
+SERVER_PORT = "8080"
+JPA_SHOW_SQL = "false"
+JPA_HIBERNATE_DDL_AUTO = "update"
+MAIL_HOST = "smtp.gmail.com"
+MAIL_PORT = "587"
+MAIL_SMTP_AUTH = "true"
+MAIL_SMTP_STARTTLS = "true"
+
+# Railway injectera automatiquement DATABASE_URL depuis le service PostgreSQL
+# Les autres variables sensibles seront ajoutées via l'interface Railway

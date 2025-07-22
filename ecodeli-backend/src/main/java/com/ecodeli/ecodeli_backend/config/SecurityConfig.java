@@ -51,11 +51,31 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        
+        // URLs de développement
         configuration.addAllowedOrigin("http://localhost:5173");
+        configuration.addAllowedOrigin("http://localhost:5174");
+        
+        // URLs de production Railway (à adapter avec vos vraies URLs)
+        configuration.addAllowedOrigin("https://*.railway.app");
+        
+        // Variables d'environnement pour URLs personnalisées
+        String frontendUserUrl = System.getenv("FRONTEND_USER_URL");
+        String frontendAdminUrl = System.getenv("FRONTEND_ADMIN_URL");
+        
+        if (frontendUserUrl != null && !frontendUserUrl.isEmpty()) {
+            configuration.addAllowedOrigin(frontendUserUrl);
+        }
+        
+        if (frontendAdminUrl != null && !frontendAdminUrl.isEmpty()) {
+            configuration.addAllowedOrigin(frontendAdminUrl);
+        }
+        
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.addExposedHeader("Content-Disposition");
         configuration.setAllowCredentials(true);
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
