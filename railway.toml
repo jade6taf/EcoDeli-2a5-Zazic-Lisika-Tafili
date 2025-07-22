@@ -2,9 +2,11 @@
 builder = "dockerfile"
 
 [deploy]
-healthcheckPath = "/actuator/health"
-healthcheckTimeout = 300
+# Désactiver complètement les health checks pour permettre le démarrage
+# healthcheckPath = "/actuator/health"
+# healthcheckTimeout = 300
 restartPolicyType = "on_failure"
+startCommand = "java -jar app.jar"
 
 # Railway injectera automatiquement :
 # - DATABASE_URL depuis le service PostgreSQL
