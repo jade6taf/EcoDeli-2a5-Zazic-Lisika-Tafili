@@ -1,0 +1,20 @@
+# Forcer Railway à utiliser Nixpacks au lieu du Dockerfile racine
+Dockerfile
+*.dockerfile
+
+# Ignorer les fichiers de développement
+node_modules
+dist
+.env.local
+.env.development
+.env.test
+
+# Ignorer les fichiers temporaires
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignorer les fichiers de cache
+.cache
+.parcel-cache

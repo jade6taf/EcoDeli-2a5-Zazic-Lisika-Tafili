@@ -1,9 +1,12 @@
 [build]
 builder = "nixpacks"
+nixpacksConfigPath = "nixpacks.toml"
 
 [deploy]
 startCommand = "npm run preview"
 restartPolicyType = "on_failure"
+healthcheckPath = "/"
+healthcheckTimeout = 300
 
 [variables]
 # URL de l'API backend déployée sur Railway
