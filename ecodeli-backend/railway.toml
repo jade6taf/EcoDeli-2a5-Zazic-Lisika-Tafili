@@ -10,8 +10,8 @@ restartPolicyType = "on_failure"
 # Configuration serveur
 SERVER_PORT = "8080"
 
-# Configuration JVM optimisée pour 512MB Railway
-JAVA_TOOL_OPTIONS = "-Xmx400m -Xms200m -XX:MaxMetaspaceSize=100m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+OptimizeStringConcat"
+# Configuration JVM optimisée pour partage ressources Railway (Backend + Frontend + DB)
+JAVA_TOOL_OPTIONS = "-Xmx300m -Xms150m -XX:MaxMetaspaceSize=80m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+OptimizeStringConcat"
 
 # Configuration Spring Boot allégée
 JPA_SHOW_SQL = "false"

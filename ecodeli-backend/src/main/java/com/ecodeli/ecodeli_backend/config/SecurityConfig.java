@@ -62,6 +62,7 @@ public class SecurityConfig {
         
         // URLs Railway spécifiques (le wildcard ne fonctionne pas)
         configuration.addAllowedOrigin("https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app");
+        configuration.addAllowedOrigin("https://mindful-reprieve-production.up.railway.app");
         
         // Variables d'environnement pour URLs personnalisées
         String frontendUserUrl = System.getenv("FRONTEND_USER_URL");
