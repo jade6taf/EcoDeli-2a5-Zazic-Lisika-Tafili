@@ -26,8 +26,23 @@ public class JwtUtil {
 
     @PostConstruct
     public void init() {
-        byte[] keyBytes = Base64.getDecoder().decode(secretString);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+        try {
+            // Essayer de décoder en Base64 d'abord
+            byte[] keyBytes = Base64.getDecoder().decode(secretString);
+            this.key = Keys.hmacShaKeyFor(keyBytes);
+        } catch (IllegalArgumentException e) {
+            // Si ce n'est pas du Base64 valide, utiliser la chaîne directement
+            byte[] keyBytes = secretString.getBytes();
+            // S'assurer que la clé fait au moins 256 bits (32 bytes)
+            if (keyBytes.length < 32) {
+                String paddedSecret = secretString;
+                while (paddedSecret.length() < 32) {
+                    paddedSecret += secretString;
+                }
+                keyBytes = paddedSecret.substring(0, 32).getBytes();
+            }
+            this.key = Keys.hmacShaKeyFor(keyBytes);
+        }
     }
 
     private final long validityInMilliseconds = 1 * 60 * 60 * 1000;
