@@ -1,6 +1,7 @@
 // Configuration de l'API pour EcoDeli
 export const API_CONFIG = {
-  BASE_URL: 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app',
+  // Utilise la variable d'environnement Vite en production, sinon fallback sur Railway
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app',
   ENDPOINTS: {
     AUTH: '/api/auth',
     USERS: '/api/users',

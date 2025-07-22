@@ -1,0 +1,18 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "npm run preview"
+restartPolicyType = "on_failure"
+
+[variables]
+# URL de l'API backend déployée sur Railway
+VITE_API_BASE_URL = "https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app"
+
+# Configuration Vite pour la production
+NODE_ENV = "production"
+
+# Configuration serveur de preview Vite
+VITE_PORT = "8080"
+HOST = "0.0.0.0"
+PORT = "8080"

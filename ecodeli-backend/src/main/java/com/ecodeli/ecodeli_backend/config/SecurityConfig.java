@@ -75,13 +75,16 @@ public class SecurityConfig {
             configuration.addAllowedOrigin(frontendAdminUrl);
         }
         
-        // Pour le développement, autoriser tous les patterns Railway
+        // Pour le développement et la production Railway, autoriser tous les patterns Railway
         String railwayEnv = System.getenv("RAILWAY_ENVIRONMENT");
         if (railwayEnv != null || System.getenv("NODE_ENV") == null) {
             // Mode développement - plus permissif
             configuration.setAllowCredentials(true);
             configuration.addAllowedOriginPattern("https://*.railway.app");
             configuration.addAllowedOriginPattern("https://*.up.railway.app");
+            // Patterns spécifiques pour les frontends Railway
+            configuration.addAllowedOriginPattern("https://ecodeli-frontend-user-production-*.up.railway.app");
+            configuration.addAllowedOriginPattern("https://ecodeli-frontend-admin-production-*.up.railway.app");
         }
         
         configuration.addAllowedMethod("*");
