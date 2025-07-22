@@ -22,11 +22,20 @@ Le backend a été adapté pour PostgreSQL et Railway avec les modifications sui
 
 ## 🚀 Étapes de déploiement sur Railway :
 
-### 1. Créer les services sur Railway
+### 1. Commiter les changements
+```bash
+git add .
+git commit -m "feat: add Railway deployment configuration with root Dockerfile"
+git push origin main
+```
+
+### 2. Créer les services sur Railway
 
 1. **Connectez-vous à Railway** : https://railway.app
 2. **New Project** → **Deploy from GitHub repo**
 3. **Sélectionnez votre repository EcoDeli**
+   - Railway détectera automatiquement le `Dockerfile` à la racine
+   - Le `railway.toml` configurera le health check et les variables
 
 ### 2. Ajouter PostgreSQL
 

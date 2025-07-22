@@ -1,0 +1,54 @@
+# Dockerignore pour Railway - EcoDeli Backend
+
+# Ignorer les frontends pour le build backend
+ecodeli-frontend-user/
+ecodeli-frontend-admin/
+ecodeli-analytics/
+nginx/
+scripts/
+
+# Ignorer les fichiers de développement et cache
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignorer les fichiers de base de données locale
+database/
+
+# Ignorer les fichiers Docker
+docker-compose*.yml
+.dockerignore
+
+# Ignorer les fichiers Git
+.git/
+.gitignore
+
+# Ignorer les fichiers IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignorer les fichiers de documentation
+README*.md
+RAILWAY-DEPLOYMENT.md
+
+# Ignorer les fichiers de configuration locale
+.env
+.env.local
+.env.*.local
+
+# Ignorer les targets et builds
+ecodeli-backend/target/
+*/target/
+build/
+dist/
+
+# Ignorer les logs
+*.log
+logs/
+
+# Ignorer les fichiers temporaires
+.tmp/
+temp/
