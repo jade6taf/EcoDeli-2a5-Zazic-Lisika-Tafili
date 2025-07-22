@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-healthcheckPath = "/actuator/health"
+# healthcheckPath = "/actuator/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 
