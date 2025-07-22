@@ -43,19 +43,25 @@ git push origin main
 2. Sélectionnez **Database** → **PostgreSQL**
 3. Railway générera automatiquement `DATABASE_URL`
 
-### 3. Configurer les variables d'environnement
+### 3. Configurer les variables d'environnement (optionnel)
 
-Dans l'interface Railway, ajoutez ces variables pour le service backend :
+✅ **L'application démarrera maintenant avec des valeurs par défaut !**
+
+Pour la production, ajoutez ces variables via l'interface Railway :
 
 ```
-JWT_SECRET=votre_jwt_secret_securise
+JWT_SECRET=votre_jwt_secret_securise_64_caracteres_minimum
 MAIL_USERNAME=votre_email@gmail.com
-MAIL_PASSWORD=votre_mot_de_passe_application
+MAIL_PASSWORD=votre_mot_de_passe_application_gmail
 GOOGLE_MAPS_API_KEY=votre_cle_google_maps
 STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
+
+**Variables automatiques Railway :**
+- ✅ `DATABASE_URL` - URL PostgreSQL (auto-générée)
+- ✅ `PORT` - Port du serveur (auto-assigné)
 
 ### 4. Déploiement automatique
 
