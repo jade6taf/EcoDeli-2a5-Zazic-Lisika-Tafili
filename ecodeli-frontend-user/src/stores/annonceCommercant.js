@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8080/api/annonces-commercant'
+const API_BASE_URL = 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces-commercant'
 
 export const useAnnonceCommercantStore = defineStore('annonceCommercant', () => {
   const annonces = ref([])

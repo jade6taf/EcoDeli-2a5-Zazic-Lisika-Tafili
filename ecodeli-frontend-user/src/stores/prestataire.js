@@ -19,7 +19,7 @@ export const usePrestataireStore = defineStore('prestataire', () => {
     error.value = null
 
     try {
-      const backendUrl = 'http://localhost:8080/api/prestataire/statut-validation'
+      const backendUrl = 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/prestataire/statut-validation'
       const response = await axios.get(backendUrl)
       
       statutValidation.value = response.data
@@ -75,7 +75,7 @@ export const usePrestataireStore = defineStore('prestataire', () => {
     error.value = null
 
     try {
-      const backendUrl = 'http://localhost:8080/api/candidatures/creer'
+      const backendUrl = 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures/creer'
       console.log('URL appelée:', backendUrl)
       
       const response = await axios.post(backendUrl, candidatureData)
@@ -105,7 +105,7 @@ export const usePrestataireStore = defineStore('prestataire', () => {
       formData.append('file', file)
       if (description) formData.append('description', description)
 
-      const backendUrl = 'http://localhost:8080/api/prestataire/upload-justificatif'
+      const backendUrl = 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/prestataire/upload-justificatif'
       const response = await axios.post(backendUrl, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -127,7 +127,7 @@ export const usePrestataireStore = defineStore('prestataire', () => {
     error.value = null
 
     try {
-      const backendUrl = 'http://localhost:8080/api/prestataire/justificatifs'
+      const backendUrl = 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/prestataire/justificatifs'
       const response = await axios.get(backendUrl)
       return { success: true, data: response.data }
     } catch (err) {
@@ -144,7 +144,7 @@ export const usePrestataireStore = defineStore('prestataire', () => {
     error.value = null
 
     try {
-      const backendUrl = `http://localhost:8080/api/prestataire/justificatifs/${justificatifId}`
+      const backendUrl = `https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/prestataire/justificatifs/${justificatifId}`
       const response = await axios.delete(backendUrl)
       return { success: true, data: response.data }
     } catch (err) {
@@ -167,7 +167,7 @@ export const usePrestataireStore = defineStore('prestataire', () => {
         ...filters
       })
 
-      const backendUrl = `http://localhost:8080/api/prestataire/demandes-disponibles/paginated?${params}`
+      const backendUrl = `https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/prestataire/demandes-disponibles/paginated?${params}`
       const response = await axios.get(backendUrl)
       return { success: true, data: response.data }
     } catch (err) {
@@ -188,7 +188,7 @@ export const usePrestataireStore = defineStore('prestataire', () => {
       const { useAuthStore } = await import('./auth')
       const authStore = useAuthStore()
       const prestataireId = authStore.user?.id || authStore.user?.idUtilisateur || 2;
-      const backendUrl = `http://localhost:8080/api/candidatures/prestataire/${prestataireId}`
+      const backendUrl = `https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures/prestataire/${prestataireId}`
       
       console.log('URL appelée:', backendUrl)
       console.log('PrestataireId utilisé:', prestataireId)
@@ -316,7 +316,7 @@ export const usePrestataireStore = defineStore('prestataire', () => {
       const { useAuthStore } = await import('./auth')
       const authStore = useAuthStore()
       const prestataireId = authStore.user?.id || authStore.user?.idUtilisateur || 2;
-      const backendUrl = `http://localhost:8080/api/missions/prestataire/${prestataireId}`
+      const backendUrl = `https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/missions/prestataire/${prestataireId}`
       
       console.log('URL appelée:', backendUrl)
       
@@ -339,7 +339,7 @@ export const usePrestataireStore = defineStore('prestataire', () => {
     error.value = null
 
     try {
-      const backendUrl = `http://localhost:8080/api/missions/${missionId}/start`
+      const backendUrl = `https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/missions/${missionId}/start`
       
       const response = await axios.post(backendUrl)
       console.log('Mission démarrée:', response.data)
@@ -360,7 +360,7 @@ export const usePrestataireStore = defineStore('prestataire', () => {
     error.value = null
 
     try {
-      const backendUrl = `http://localhost:8080/api/missions/${missionId}/complete`
+      const backendUrl = `https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/missions/${missionId}/complete`
       
       const response = await axios.post(backendUrl, {
         noteFinale: completionData.noteFinale || '',

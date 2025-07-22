@@ -41,7 +41,7 @@ export const useServicesStore = defineStore('services', () => {
     
     try {
       console.log('Envoi requête POST vers backend...')
-      const response = await axios.post('http://localhost:8080/api/demandes-service', demande)
+      const response = await axios.post('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/demandes-service', demande)
       
       console.log('Réponse reçue:', response.status, response.data)
       
@@ -71,7 +71,7 @@ export const useServicesStore = defineStore('services', () => {
     error.value = null
     
     try {
-      const response = await axios.get(`http://localhost:8080/api/demandes-service/client/${clientId}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/demandes-service/client/${clientId}`)
       
       if (response.status === 200) {
         demandesServices.value = response.data
@@ -90,7 +90,7 @@ export const useServicesStore = defineStore('services', () => {
     error.value = null
     
     try {
-      const response = await axios.put(`http://localhost:8080/api/demandes-service/${id}`, donnees)
+      const response = await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/demandes-service/${id}`, donnees)
       
       if (response.status === 200) {
         const index = demandesServices.value.findIndex(d => d.idDemande === id)
@@ -112,7 +112,7 @@ export const useServicesStore = defineStore('services', () => {
     error.value = null
     
     try {
-      const response = await axios.delete(`http://localhost:8080/api/demandes-service/${id}`)
+      const response = await axios.delete(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/demandes-service/${id}`)
       
       if (response.status === 200) {
         const index = demandesServices.value.findIndex(d => d.idDemande === id)
@@ -135,7 +135,7 @@ export const useServicesStore = defineStore('services', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/demandes-service/${demandeId}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/demandes-service/${demandeId}`)
       
       console.log('Demande récupérée:', response.data)
       

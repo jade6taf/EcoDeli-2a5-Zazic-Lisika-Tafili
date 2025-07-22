@@ -39,7 +39,7 @@ export const usePrestataireStore = defineStore('prestataires', () => {
     error.value = null
 
     try {
-      const response = await axios.get('http://localhost:8080/api/admin/prestataires')
+      const response = await axios.get('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/prestataires')
       prestataires.value = response.data
       return { success: true, data: response.data }
     } catch (err) {
@@ -56,7 +56,7 @@ export const usePrestataireStore = defineStore('prestataires', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/admin/prestataires/${id}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/prestataires/${id}`)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement du prestataire'
@@ -72,7 +72,7 @@ export const usePrestataireStore = defineStore('prestataires', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/admin/prestataires/${prestataireId}/validations`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/prestataires/${prestataireId}/validations`)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des validations'
@@ -88,7 +88,7 @@ export const usePrestataireStore = defineStore('prestataires', () => {
     error.value = null
 
     try {
-      const response = await axios.post(`http://localhost:8080/api/admin/prestataires/${prestataireId}/validation`, {
+      const response = await axios.post(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/prestataires/${prestataireId}/validation`, {
         categorie: categorie,
         statut: statut,
         commentaire: statut === 'VALIDE' ? 'Catégorie validée par l\'administrateur' : 'Catégorie rejetée par l\'administrateur'
@@ -111,7 +111,7 @@ export const usePrestataireStore = defineStore('prestataires', () => {
     error.value = null
 
     try {
-      const response = await axios.post(`http://localhost:8080/api/admin/prestataires/${prestataireId}/tarif`, {
+      const response = await axios.post(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/prestataires/${prestataireId}/tarif`, {
         categorie: categorie,
         tarifHoraire: tarifHoraire
       })
@@ -136,7 +136,7 @@ export const usePrestataireStore = defineStore('prestataires', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/admin/prestataires/${prestataireId}/justificatifs`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/prestataires/${prestataireId}/justificatifs`)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des justificatifs'
@@ -152,7 +152,7 @@ export const usePrestataireStore = defineStore('prestataires', () => {
     error.value = null
 
     try {
-      const response = await axios.put(`http://localhost:8080/api/admin/justificatifs/${justificatifId}/validation`, {
+      const response = await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/justificatifs/${justificatifId}/validation`, {
         statut: statut,
         commentaire: commentaire
       })
@@ -169,7 +169,7 @@ export const usePrestataireStore = defineStore('prestataires', () => {
 
   const fetchStatsPrestataires = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/admin/prestataires/stats')
+      const response = await axios.get('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/prestataires/stats')
       return { success: true, data: response.data }
     } catch (err) {
       console.error('Erreur fetchStatsPrestataires:', err)
@@ -182,7 +182,7 @@ export const usePrestataireStore = defineStore('prestataires', () => {
     error.value = null
 
     try {
-      const response = await axios.post('http://localhost:8080/api/admin/prestataires/recherche', filtres)
+      const response = await axios.post('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/prestataires/recherche', filtres)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors de la recherche de prestataires'
@@ -198,7 +198,7 @@ export const usePrestataireStore = defineStore('prestataires', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/admin/prestataires/export?format=${format}`, {
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/prestataires/export?format=${format}`, {
         responseType: 'blob'
       })
 

@@ -6,7 +6,7 @@ export const useLivraisonsStore = defineStore('livraisons', () => {
   const loading = ref(false)
   const error = ref(null)
 
-  const API_BASE = 'http://localhost:8080/api/admin/livraisons'
+  const API_BASE = 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/livraisons'
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('admin_token')

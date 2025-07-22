@@ -12,7 +12,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      const response = await axios.post('http://localhost:8080/api/candidatures-livraison', {
+      const response = await axios.post('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures-livraison', {
         annonceId,
         livreurId,
         message
@@ -33,7 +33,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/candidatures-livraison/annonce/${annonceId}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures-livraison/annonce/${annonceId}`)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des candidatures'
@@ -49,7 +49,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/candidatures-livraison/livreur/${livreurId}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures-livraison/livreur/${livreurId}`)
       candidatures.value = response.data
       return { success: true, data: response.data }
     } catch (err) {
@@ -66,7 +66,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      await axios.put(`http://localhost:8080/api/candidatures-livraison/${candidatureId}/accepter`, {
+      await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures-livraison/${candidatureId}/accepter`, {
         commentaire
       })
 
@@ -85,7 +85,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      await axios.put(`http://localhost:8080/api/candidatures-livraison/${candidatureId}/refuser`, {
+      await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures-livraison/${candidatureId}/refuser`, {
         commentaire
       })
 
@@ -104,7 +104,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      const response = await axios.post('http://localhost:8080/api/candidatures-livraison/partielle', {
+      const response = await axios.post('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures-livraison/partielle', {
         annonceId,
         livreurId,
         segment,
@@ -127,7 +127,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      const response = await axios.get('http://localhost:8080/api/candidatures-livraison/entrepots')
+      const response = await axios.get('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures-livraison/entrepots')
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des entrepôts'
@@ -143,7 +143,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/candidatures-livraison/annonce/${annonceId}/segments`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures-livraison/annonce/${annonceId}/segments`)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des candidatures par segment'
@@ -159,7 +159,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      await axios.put(`http://localhost:8080/api/candidatures-livraison/${candidatureId}/accepter-partielle`, {
+      await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures-livraison/${candidatureId}/accepter-partielle`, {
         commentaire
       })
 
@@ -180,7 +180,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/candidatures/demande/${demandeId}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures/demande/${demandeId}`)
       console.log('Candidatures reçues:', response.data)
       
       if (response.data.success) {
@@ -207,7 +207,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      const response = await axios.put(`http://localhost:8080/api/candidatures/${candidatureId}/accepter`, {
+      const response = await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures/${candidatureId}/accepter`, {
         commentaire
       })
       
@@ -238,7 +238,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      const response = await axios.put(`http://localhost:8080/api/candidatures/${candidatureId}/refuser`, {
+      const response = await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures/${candidatureId}/refuser`, {
         commentaire
       })
       
@@ -266,7 +266,7 @@ export const useCandidaturesStore = defineStore('candidatures', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/candidatures/demande/${demandeId}/statistiques`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/candidatures/demande/${demandeId}/statistiques`)
       
       if (response.data.success) {
         return { success: true, statistiques: response.data.statistiques }

@@ -16,7 +16,7 @@ export const useUsersStore = defineStore('users', () => {
         userId: userId
       }
 
-      const response = await axios.put('http://localhost:8080/api/users/profile', payload)
+      const response = await axios.put('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/users/profile', payload)
 
       return {
         success: response.data.success,
@@ -41,7 +41,7 @@ export const useUsersStore = defineStore('users', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/users/profile/${userId}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/users/profile/${userId}`)
 
       return {
         success: response.data.success,

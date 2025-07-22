@@ -14,7 +14,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      const response = await axios.get('http://localhost:8080/api/annonces')
+      const response = await axios.get('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces')
       annonces.value = response.data
       return { success: true, data: response.data }
     } catch (err) {
@@ -31,7 +31,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      const response = await axios.post('http://localhost:8080/api/annonces', annonceData)
+      const response = await axios.post('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces', annonceData)
 
       annonces.value.unshift(response.data)
 
@@ -47,7 +47,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
 
   const calculateDistanceAndPrice = async (adresseDepart, adresseFin) => {
     try {
-      const response = await axios.post('http://localhost:8080/api/annonces/calculate-distance', {
+      const response = await axios.post('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/calculate-distance', {
         adresseDepart,
         adresseFin
       })
@@ -72,7 +72,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/annonces/user/${userId}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/user/${userId}`)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des annonces utilisateur'
@@ -88,7 +88,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      await axios.put(`http://localhost:8080/api/annonces/${annonceId}/cancel`)
+      await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/${annonceId}/cancel`)
 
       const index = annonces.value.findIndex(annonce => annonce.idAnnonce === annonceId)
       if (index !== -1) {
@@ -110,7 +110,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      const response = await axios.get('http://localhost:8080/api/annonces/available')
+      const response = await axios.get('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/available')
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des annonces disponibles'
@@ -126,7 +126,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      await axios.put(`http://localhost:8080/api/annonces/${annonceId}/take`, {
+      await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/${annonceId}/take`, {
         livreurId: livreurId
       })
 
@@ -145,7 +145,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      await axios.put(`http://localhost:8080/api/annonces/${annonceId}/start-delivery`)
+      await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/${annonceId}/start-delivery`)
 
       return { success: true }
     } catch (err) {
@@ -162,7 +162,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      await axios.put(`http://localhost:8080/api/annonces/${annonceId}/complete`)
+      await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/${annonceId}/complete`)
 
       return { success: true }
     } catch (err) {
@@ -179,7 +179,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/annonces/livreur/${livreurId}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/livreur/${livreurId}`)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement des annonces du livreur'
@@ -195,7 +195,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      const response = await axios.post(`http://localhost:8080/api/annonces/${annonceId}/generate-code`)
+      const response = await axios.post(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/${annonceId}/generate-code`)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.error || 'Erreur lors de la génération du code'
@@ -211,7 +211,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      const response = await axios.post(`http://localhost:8080/api/annonces/${annonceId}/validate-code`, { code })
+      const response = await axios.post(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/${annonceId}/validate-code`, { code })
       return { success: response.data.success, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.error || 'Erreur lors de la validation du code'
@@ -227,7 +227,7 @@ export const useAnnoncesStore = defineStore('annonces', () => {
     error.value = null
 
     try {
-      await axios.post(`http://localhost:8080/api/annonces/partielle/${annonceId}/valider-livreurs`)
+      await axios.post(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/annonces/partielle/${annonceId}/valider-livreurs`)
       return { success: true }
     } catch (err) {
       error.value = err.response?.data?.error || 'Erreur lors de la validation des livreurs'

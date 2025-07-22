@@ -12,7 +12,7 @@ export const useLivraisonsStore = defineStore('livraisons', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/livraisons/livreur/${livreurId}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/livraisons/livreur/${livreurId}`)
       livraisons.value = response.data
       return { success: true, data: response.data }
     } catch (err) {
@@ -29,7 +29,7 @@ export const useLivraisonsStore = defineStore('livraisons', () => {
     error.value = null
 
     try {
-      const response = await axios.put(`http://localhost:8080/api/livraisons/${livraisonId}/start`, {
+      const response = await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/livraisons/${livraisonId}/start`, {
         livreurId
       })
       return { success: true, data: response.data }
@@ -47,7 +47,7 @@ export const useLivraisonsStore = defineStore('livraisons', () => {
     error.value = null
 
     try {
-      const response = await axios.put(`http://localhost:8080/api/livraisons/${livraisonId}/complete`, {
+      const response = await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/livraisons/${livraisonId}/complete`, {
         livreurId
       })
       return { success: true, data: response.data }
@@ -65,7 +65,7 @@ export const useLivraisonsStore = defineStore('livraisons', () => {
     error.value = null
 
     try {
-      const response = await axios.post(`http://localhost:8080/api/livraisons/${livraisonId}/validate-otp`, {
+      const response = await axios.post(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/livraisons/${livraisonId}/validate-otp`, {
         otp
       })
       return { success: response.data.success, data: response.data }
@@ -83,7 +83,7 @@ export const useLivraisonsStore = defineStore('livraisons', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/livraisons/${livraisonId}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/livraisons/${livraisonId}`)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.error || 'Erreur lors du chargement des détails'

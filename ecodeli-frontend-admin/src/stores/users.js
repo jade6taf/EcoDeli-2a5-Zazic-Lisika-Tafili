@@ -41,7 +41,7 @@ export const useUsersStore = defineStore('users', () => {
     error.value = null
 
     try {
-      const response = await axios.get('http://localhost:8080/api/admin/users')
+      const response = await axios.get('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/users')
       users.value = response.data
       return { success: true, data: response.data }
     } catch (err) {
@@ -58,7 +58,7 @@ export const useUsersStore = defineStore('users', () => {
     error.value = null
 
     try {
-      const response = await axios.get(`http://localhost:8080/api/admin/users/${id}`)
+      const response = await axios.get(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/users/${id}`)
       return { success: true, data: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Erreur lors du chargement de l\'utilisateur'
@@ -74,7 +74,7 @@ export const useUsersStore = defineStore('users', () => {
     error.value = null
 
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/register', userData)
+      const response = await axios.post('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/auth/register', userData)
 
       await fetchUsers()
 
@@ -93,7 +93,7 @@ export const useUsersStore = defineStore('users', () => {
     error.value = null
 
     try {
-      const response = await axios.put(`http://localhost:8080/api/admin/users/${id}`, userData)
+      const response = await axios.put(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/users/${id}`, userData)
 
       const index = users.value.findIndex(user => user.idUtilisateur === id)
       if (index !== -1) {
@@ -115,7 +115,7 @@ export const useUsersStore = defineStore('users', () => {
     error.value = null
 
     try {
-      await axios.delete(`http://localhost:8080/api/admin/users/${id}`)
+      await axios.delete(`https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/users/${id}`)
 
       users.value = users.value.filter(user => user.idUtilisateur !== id)
 
@@ -131,7 +131,7 @@ export const useUsersStore = defineStore('users', () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/admin/users/stats')
+      const response = await axios.get('https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/users/stats')
       return { success: true, data: response.data }
     } catch (err) {
       console.error('Erreur fetchStats:', err)

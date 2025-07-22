@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8080/api/admin/contrats'
+const API_BASE_URL = 'https://ecodeli-2a5-zazic-lisika-tafili-production.up.railway.app/api/admin/contrats'
 
 export const useContratsAdminStore = defineStore('contratsAdmin', {
   state: () => ({
